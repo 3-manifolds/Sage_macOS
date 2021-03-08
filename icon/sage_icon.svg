@@ -7,8 +7,8 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="1024"
-   height="1024"
+   width="832"
+   height="832"
    id="svg2"
    sodipodi:version="0.32"
    inkscape:version="1.0.2 (e86c8708, 2021-01-15)"
@@ -29,15 +29,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.95800781"
-     inkscape:cx="329.85117"
+     inkscape:cx="324.11009"
      inkscape:cy="512"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1667"
+     inkscape:window-width="1983"
      inkscape:window-height="1147"
-     inkscape:window-x="666"
-     inkscape:window-y="106"
+     inkscape:window-x="499"
+     inkscape:window-y="86"
      showguides="false"
      inkscape:guide-bbox="true"
      inkscape:window-maximized="0"
@@ -66,11 +66,10 @@
   <g
      id="layer1"
      inkscape:groupmode="layer"
-     inkscape:label="Layer 1"
-     transform="translate(-1.0636292e-6,1.4406808e-5)">
+     inkscape:label="Layer 1">
     <g
        id="g2885"
-       transform="matrix(7.0084988,0,0,7.3846151,-778.0502,-1961.1163)">
+       transform="matrix(5.6944053,0,0,5.9999998,-632.16579,-1593.407)">
       <rect
          ry="21.724405"
          rx="17.933598"
@@ -311,7 +310,7 @@
      viewBox="0 0 1 1"
      preserveAspectRatio="none"
      inkscape:version="0.47 r22583"
-     transform="scale(768)" />
+     transform="matrix(768,0,0,768,-7.5950538e-8,-4.7502713e-6)" />
   <svg
      version="1.1"
      baseProfile="full"
@@ -321,5 +320,5 @@
      viewBox="0 0 1 1"
      preserveAspectRatio="none"
      inkscape:version="0.47 r22583"
-     transform="scale(768)" />
+     transform="matrix(768,0,0,768,-7.5950538e-8,-4.7502713e-6)" />
 </svg>
