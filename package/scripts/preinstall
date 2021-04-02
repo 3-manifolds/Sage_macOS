@@ -1,0 +1,13 @@
+#!/bin/bash
+ANSWER=Yes
+if [ -e /usr/local/bin/sage ]; then
+    ANSWER=`osascript \
+-e 'button returned of (display dialog "May we overwrite your current /usr/local/bin/sage file?" buttons {"No", "Yes"})' \
+`
+    if [ $ANSWER == "Yes" ]; then
+        exit 0
+    else
+        osascript -e 'display dialog "Please rename your /usr/local/bin/sage file and rerun the installer." buttons {"OK"}'
+        exit 1
+    fi
+fi
