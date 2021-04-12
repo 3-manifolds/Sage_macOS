@@ -87,7 +87,7 @@ class MachFile:
                 result.append(os.path.join('@rpath', os.path.basename(dylib)))
         return result
 
-    def fix(self):
+    def fix(self, filelist):
         rpaths = self.fixed_rpaths()
         subprocess.run(['macher', 'clear_rpaths', self.path])
         for rpath in rpaths:
@@ -98,7 +98,7 @@ class MachFile:
                 continue
             new_dylib = os.path.join('@rpath', os.path.basename(dylib))
             subprocess.run(['macher', 'edit_libpath', dylib, new_dylib, self.path])
-        print(self.path)
+        filelist.write(self.path + '\n')
 
 def mach_check(path):
     if os.path.islink(path):
@@ -107,13 +107,24 @@ def mach_check(path):
         magic = inputfile.read(4)
     return magic in magics
 
-def fix_mach_files(directory):
+def fix_paths(directory, bad_path, symlink, filelist):
     for dirpath, dirnames, filenames in os.walk(directory):
         for filename in filenames:
             fullpath = os.path.join(dirpath, filename)
             if mach_check(fullpath):
-                MachFile(fullpath).fix()
+                MachFile(fullpath).fix(filelist)
+            elif not os.path.islink(fullpath):
+                result = subprocess.run(['grep', '--silent', bad_path, fullpath])
+                if result.returncode == 0:
+                    print(fullpath)
+                    subprocess.run(['sed', '-i', '-e', 's@%s@%s@g'%(bad_path, symlink), fullpath])
 
 if __name__ == '__main__':
-    fix_mach_files(sys.argv[1])
+    current = 'build/Sage.framework/Versions/Current'
+    version = os.readlink(current)
+    bad_path = os.path.join(os.path.join(os.path.abspath('.'), 'repo', 'sage'))
+    symlink = '/var/tmp/sage-%s-current'%version
+    filelist = open('files_to_sign', 'w')
+    fix_paths(current, bad_path, symlink, filelist)
+    filelist.close()
 
