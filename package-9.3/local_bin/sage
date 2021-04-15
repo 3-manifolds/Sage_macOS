@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-SYMLINK=/var/tmp/sage-jc4b6yulaujayb9sr94ia88eourzeqip0oidmas3
+SYMLINK=/var/tmp/sage-9.3.rc2-current
 if [ ! -e $SYMLINK ]; then
     APP_PATH=`osascript \
 -e 'set appAlias to ""' \
