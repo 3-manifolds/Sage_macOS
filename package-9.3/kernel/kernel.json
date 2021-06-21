@@ -1,1 +1,0 @@
-{"argv": ["/var/tmp/sage-9.3.rc2-current/local/bin/sage", "--python", "-m", "sage.repl.ipython_kernel", "-f", "{connection_file}"], "display_name": "Sage 9.3", "language": "sage"}

@@ -1,0 +1,12 @@
+__pycache__
+*.dmg
+SageMath-9.3
+Sage_framework/dev_id.py
+Sage_framework/repo
+Sage_framework/files_to_sign
+package/IDs.sh
+package/Recommended.pkg
+package/bin.pkg
+package/local
+package/packages
+package/share.pkg
