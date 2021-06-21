@@ -121,7 +121,8 @@ resolvelinks() {
 # New value for SAGE_ROOT: either SAGE_ROOT (if given)
 # or a guessed value based on pwd.
 if [ -n "$SAGE_ROOT" ]; then
-    NEW_SAGE_ROOT="$SAGE_ROOT"
+    SAGE_ROOT=`resolvelinks "$SAGE_ROOT"`
+    NEW_SAGE_ROOT=$SAGE_ROOT
 elif [ -f sage -a -d build ]; then
     NEW_SAGE_ROOT="."
 elif [ -f ../../sage -a -d ../../build ]; then
@@ -509,16 +510,10 @@ if [ -z "$CCACHE_BASEDIR" ]; then
     export CCACHE_BASEDIR="$SAGE_ROOT"
 fi
 
-# On macOS, calling gcc when it is not installed produces a dialog asking
-# whether to intall the command line tools.  We don't want that.
-if ! [ -e /usr/bin/xcode-select ] || /usr/bin/xcode-select -p &>/dev/null ; then
-    CAN_CALL_CC=YES
-fi
-
 # Set AS to assembler used by $CC ("as" by default)
-if [ "$AS" = "" ] && [ "$CAN_CALL_CC" = "YES" ] ; then
-    if command -v $CC_as &> /dev/null ; then
-        CC_as=`$CC -print-prog-name=as 2>/dev/null`
+if [ "$AS" = "" ]; then
+    CC_as=`$CC -print-prog-name=as 2>/dev/null`
+    if command -v $CC_as >/dev/null 2>/dev/null; then
         AS="$CC_as"
     fi
     if [ "$AS" = "" ]; then
@@ -528,9 +523,9 @@ fi
 export AS
 
 # Set LD to linker used by $CC ("ld" by default)
-if [ "$LD" = "" ] && [ "$CAN_CALL_CC" = "YES" ] ; then
-    if command -v $CC_ld &> /dev/null; then
-	CC_ld=`$CC -print-prog-name=ld 2>/dev/null`
+if [ "$LD" = "" ]; then
+    CC_ld=`$CC -print-prog-name=ld 2>/dev/null`
+    if command -v $CC_ld >/dev/null 2>/dev/null; then
         LD="$CC_ld"
     fi
     if [ "$LD" = "" ]; then

@@ -4,6 +4,7 @@ import subprocess
 import re
 
 get_info = re.compile(b'Filetype: (?P<filetype>.*)| *LC_LOAD_DYLIB: (?P<dylib>.*)| *LC_RPATH: (?P<rpath>.*)')
+get_version = re.compile('SageMath version ([^,]*)')
 
 # Bigendian encoding of the magic numbers for mach-O binaries
 feedface_big = b'\xfe\xed\xfa\xce'
@@ -17,6 +18,10 @@ feedfacf = b'\xcf\xfa\xed\xfe'
 cafebabf = b'\xbf\xba\xfe\xca'
 
 magics = (cafebabf, feedfacf,  cafebabe_big, feedface_big, cafebabe, feedface, cafebabf_big, feedfacf_big)
+
+with open('repo/sage/VERSION.txt') as input_file:
+    m = get_version.match(input_file.readline())
+sage_version = m.groups()[0]
 
 class MachFile:
     def __init__(self, path):
@@ -63,19 +68,19 @@ class MachFile:
         try:
             return os.path.join(*(['..']*steps + local_nodes[index:-1]))
         except TypeError:
-            return ('.')
+            return ''
 
     def fixed_rpaths(self):
         result = set(rpath for rpath in self.rpaths if rpath.startswith('@loader_path'))
         for dylib in self.dylibs:
-                relpath = self.relative_path(dylib)
-                if relpath:
-                    if self.filetype == "MH_EXECUTE":
-                        result.add(os.path.join('@executable_path', self.relative_path(dylib)))
-                    elif self.filetype == "MH_DYLIB":
-                        result.add(os.path.join('@loader_path', self.relative_path(dylib)))
-                    elif self.filetype == "MH_BUNDLE":
-                        result.add(os.path.join('@loader_path', self.relative_path(dylib)))
+            relpath = self.relative_path(dylib)
+            if relpath is not None:
+                if self.filetype == "MH_EXECUTE":
+                    result.add(os.path.join('@executable_path', relpath))
+                elif self.filetype == "MH_DYLIB":
+                    result.add(os.path.join('@loader_path', relpath))
+                elif self.filetype == "MH_BUNDLE":
+                    result.add(os.path.join('@loader_path', relpath))
         return result
 
     def fixed_dylibs(self):
@@ -87,18 +92,54 @@ class MachFile:
                 result.append(os.path.join('@rpath', os.path.basename(dylib)))
         return result
 
-    def fix(self, filelist):
+    def fix(self):
         rpaths = self.fixed_rpaths()
-        subprocess.run(['macher', 'clear_rpaths', self.path])
+        subprocess.run(['macher', 'clear_rpaths', self.path], capture_output=True)
         for rpath in rpaths:
-            subprocess.run(['macher', 'add_rpath', rpath, self.path])
+            subprocess.run(['macher', 'add_rpath', rpath, self.path], capture_output=True)
         for dylib in self.dylibs:
             if (dylib.startswith('/usr') or dylib.startswith('/lib') or
                     dylib.startswith('@rpath')):
                 continue
             new_dylib = os.path.join('@rpath', os.path.basename(dylib))
             subprocess.run(['macher', 'edit_libpath', dylib, new_dylib, self.path])
-        filelist.write(self.path + '\n')
+        # Stripping more than this breaks the gcc stub library, but probably most executables
+        # and libraries could be stripped to -u -r without causing problems.
+        subprocess.run(['strip', '-x', self.path], capture_output=True)
+        print(self.path)
+
+class ScriptFile:
+    def __init__(self, path):
+        self.path = path
+        nodes = self.path.split(os.path.sep)
+        self.repo = os.path.abspath('repo/sage').encode('utf-8')
+        self.symlink = b'/var/tmp/sage-%s-current'%sage_version.encode('ascii')
+
+    def fix(self):
+        try:
+            with open(self.path, 'rb') as infile:
+                shebang = infile.readline()
+                rest = infile.read()
+                tail = shebang.split(b'/local/')[1]
+                new_shebang = b'#!' + os.path.join(self.symlink, b'local', tail)
+        except:
+            new_shebang = shebang
+        with open(self.path, 'wb') as outfile:
+            outfile.write(new_shebang + b'\n')
+            outfile.write(rest.replace(self.repo, self.symlink))
+
+class ConfigFile:
+    def __init__(self, path):
+        self.path = path
+        nodes = self.path.split(os.path.sep)
+        self.repo = os.path.abspath('repo/sage').encode('utf-8')
+        self.symlink = b'/var/tmp/sage-%s-current'%sage_version.encode('ascii')
+
+    def fix(self):
+        with open(self.path, 'rb') as infile:
+            contents = infile.read()
+        with open(self.path, 'wb') as outfile:
+            outfile.write(contents.replace(self.repo, self.symlink))
 
 def mach_check(path):
     if os.path.islink(path):
@@ -107,24 +148,48 @@ def mach_check(path):
         magic = inputfile.read(4)
     return magic in magics
 
-def fix_paths(directory, bad_path, symlink, filelist):
+def shebang_check(path):
+    if os.path.islink(path):
+        return False
+    with open(path, 'rb') as inputfile:
+        first = inputfile.read(2)
+    return first == b'#!'
+
+# These two files need to be fixed as ConfigFiles as well.
+MAKEFILE = 'local/lib/python3.9/config-3.9-darwin/Makefile'
+DARWIN_DATA = 'local/lib/python3.9/_sysconfigdata__darwin_darwin.py'
+
+def fix_files(directory):
     for dirpath, dirnames, filenames in os.walk(directory):
         for filename in filenames:
             fullpath = os.path.join(dirpath, filename)
             if mach_check(fullpath):
-                MachFile(fullpath).fix(filelist)
-            elif not os.path.islink(fullpath):
-                result = subprocess.run(['grep', '--silent', bad_path, fullpath])
-                if result.returncode == 0:
-                    print(fullpath)
-                    subprocess.run(['sed', '-i', '-e', 's@%s@%s@g'%(bad_path, symlink), fullpath])
+                MF = MachFile(fullpath)
+                MF.fix()
+                if MF.filetype == "MH_DYLIB":
+                    id_path = os.path.join("@rpath", os.path.split(fullpath)[1])
+                    subprocess.run(['macher', 'set_id', id_path, fullpath])
+            elif shebang_check(fullpath):
+                ScriptFile(fullpath).fix()
+            elif (fullpath.endswith('.pc') or
+                    fullpath.endswith(MAKEFILE) or
+                    fullpath.endswith(DARWIN_DATA)):
+                ConfigFile(fullpath).fix()
+
+# def fix_config_files(directory):
+#     for dirpath, dirnames, filenames in os.walk(directory):
+#         for filename in filenames:
+#             fullpath = os.path.join(dirpath, filename)
+#             ConfigFile(fullpath).fix()
+
+# def fix_scripts(directory):
+#     for dirpath, dirnames, filenames in os.walk(directory):
+#         for filename in filenames:
+#             fullpath = os.path.join(dirpath, filename)
+#             if shebang_check(fullpath):
+#                 ScriptFile(fullpath).fix()
 
 if __name__ == '__main__':
-    current = 'build/Sage.framework/Versions/Current'
-    version = os.readlink(current)
-    bad_path = os.path.join(os.path.join(os.path.abspath('.'), 'repo', 'sage'))
-    symlink = '/var/tmp/sage-%s-current'%version
-    filelist = open('files_to_sign', 'w')
-    fix_paths(current, bad_path, symlink, filelist)
-    filelist.close()
+    fix_files(sys.argv[1])
+    
 

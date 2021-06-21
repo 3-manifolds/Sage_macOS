@@ -1,0 +1,8 @@
+#! /usr/bin/env python3
+import re
+get_version = re.compile('SageMath version ([^,]*)')
+with open('repo/sage/VERSION.txt') as input_file:
+    m = get_version.match(input_file.readline())
+print(m.groups()[0])
+
+    
