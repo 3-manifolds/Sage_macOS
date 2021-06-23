@@ -1,5 +1,7 @@
+build
 __pycache__
 *.dmg
+*.bak
 SageMath-9.3
 Sage_framework/dev_id.py
 Sage_framework/repo
