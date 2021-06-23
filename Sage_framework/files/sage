@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 
+
 # Display the current version of Sage
 # usage: sage_version [-v]
 #   -v    display the full version banner including release date
@@ -209,7 +210,6 @@ fi
 
 OLD_TARGET=`readlink $SAGE_SYMLINK`
 if [ "$TARGET" != "$OLD_TARGET" ] && [ "$TARGET" != "$SAGE_SYMLINK" ]; then
-    echo "This SageMath application has been moved! Reconfiguring ..."
     rm -f $SAGE_SYMLINK 2> /dev/null
     if [ $? -ne 0 ]; then
 	OWNER=$(stat -f '%Su' $SAGE_SYMLINK)
@@ -248,11 +248,15 @@ fi
 #####################################################################
 # Special environment variables used for the macOS app to prevent
 # writing into the application bundle and breaking the signature.
-# and to block warnings about using "if x is 1".
+# and to block warnings about using "if x is 1" and to find the
+# Jupyter kernel.
 #####################################################################
 export PYTHONPYCACHEPREFIX="$DOT_SAGE/pycache"
 export PIP_CONFIG_FILE="$TARGET/Resources/pip.conf"
 export PYTHONWARNINGS=ignore
+if ! [ -e /usr/local/share/jupyter/kernels/SageMath-"$SAGE_VERSION"/kernel.json ]; then
+    export JUPYTER_PATH=$SAGE_SYMLINK/Resources/jupyter
+fi
 #####################################################################
 # Helper functions
 #####################################################################

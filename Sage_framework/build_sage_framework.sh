@@ -7,7 +7,7 @@ BUILD=${BASE_DIR}/build
 VERSION_DIR=${BUILD}/Sage.framework/Versions/$VERSION
 CURRENT_DIR=${BUILD}/Sage.framework/Versions/Current
 RESOURCE_DIR=${VERSION_DIR}/Resources
-KERNEL_DIR="${VERSION_DIR}"/local/share/jupyter/kernels
+KERNEL_DIR="${VERSION_DIR}/Resources/jupyter/kernels/SageMath-${VERSION}"
 # This allows Sage.framework to be a symlink to the framework inside the application.
 if ! [ -d "${BUILD}/Sage.framework" ]; then
     mkdir -p "${BUILD}"/Sage.framework
@@ -53,7 +53,10 @@ ln -s python3.9 ${VERSION_DIR}/local/bin/SageMath
 cp -p ${FILES}/_tkinter.cpython-39-darwin.so ${VERSION_DIR}/local/lib/python3.9/lib-dynload
 cp -p ${FILES}/page.html ${VERSION_DIR}/local/lib/python3.9/site-packages/notebook/templates/page.html
 cp -p ${FILES}/{sage,sage-env} ${VERSION_DIR}/local/bin
+cp -p ${FILES}/kernel.py %{VERSION_DIR}/local/lib/python3.9/site-packages/sage/repl/ipython_kernel/kernel.py
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/sage-env-config > "${VERSION_DIR}"/local/bin/sage-env-config
+rm -rf ${VERSION_DIR}/local/share/jupyter/kernels/sagemath
+mkdir -p ${KERNEL_DIR}
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${KERNEL_DIR}/kernel.json
 cp ${FILES}/_tkinter.cpython-39-darwin.so "${VERSION_DIR}"/local/lib/python3.9/lib-dynload
 cp ${FILES}/sagedoc.py ${VERSION_DIR}/local/lib/python3.9/site-packages/sage/misc/sagedoc.py
