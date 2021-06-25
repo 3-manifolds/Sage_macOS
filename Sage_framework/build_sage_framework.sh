@@ -53,7 +53,7 @@ ln -s python3.9 ${VERSION_DIR}/local/bin/SageMath
 cp -p ${FILES}/_tkinter.cpython-39-darwin.so ${VERSION_DIR}/local/lib/python3.9/lib-dynload
 cp -p ${FILES}/page.html ${VERSION_DIR}/local/lib/python3.9/site-packages/notebook/templates/page.html
 cp -p ${FILES}/{sage,sage-env} ${VERSION_DIR}/local/bin
-cp -p ${FILES}/kernel.py %{VERSION_DIR}/local/lib/python3.9/site-packages/sage/repl/ipython_kernel/kernel.py
+cp -p ${FILES}/kernel.py ${VERSION_DIR}/local/lib/python3.9/site-packages/sage/repl/ipython_kernel/kernel.py
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/sage-env-config > "${VERSION_DIR}"/local/bin/sage-env-config
 rm -rf ${VERSION_DIR}/local/share/jupyter/kernels/sagemath
 mkdir -p ${KERNEL_DIR}
@@ -70,8 +70,6 @@ rm -rf ${VERSION_DIR}/local/share/jupyter/kernels/sagemath/doc
 rm ${VERSION_DIR}/local/share/jupyter/nbextensions/threejs
 #rm ${VERSION_DIR}/local/share/threejs/threejs
 ln -s ../../threejs ${VERSION_DIR}/local/share/jupyter/nbextensions/threejs
-rm ${VERSION_DIR}/local/share/jupyter/kernels/sagemath/logo*
-cp ${FILES}/logo* ${VERSION_DIR}/local/share/jupyter/kernels/sagemath
 
 # Fix up rpaths and shebangs 
 echo "Patching files ..."

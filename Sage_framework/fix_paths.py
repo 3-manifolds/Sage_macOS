@@ -4,7 +4,7 @@ import subprocess
 import re
 
 get_info = re.compile(b'Filetype: (?P<filetype>.*)| *LC_LOAD_DYLIB: (?P<dylib>.*)| *LC_RPATH: (?P<rpath>.*)')
-get_version = re.compile('SageMath version ([^,]*)')
+get_version = re.compile('SageMath version ([0-9]\.[0-9]*)')
 
 # Bigendian encoding of the magic numbers for mach-O binaries
 feedface_big = b'\xfe\xed\xfa\xce'

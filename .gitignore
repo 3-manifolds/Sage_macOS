@@ -1,11 +1,16 @@
+.DS_Store
 build
 __pycache__
 *.dmg
 *.bak
-SageMath-9.3
+SageMath-*.*
 Sage_framework/dev_id.py
 Sage_framework/repo
 Sage_framework/files_to_sign
+TclTk_frameworks/DEV_ID.txt
+TclTk_frameworks/Frameworks/
+TclTk_frameworks/Tcl
+TclTk_frameworks/Tk
 package/IDs.sh
 package/Recommended.pkg
 package/bin.pkg
