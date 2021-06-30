@@ -1,20 +1,19 @@
-#!/usr/bin/env bash
+#! /bin/bash
 SYMLINK=/var/tmp/sage-9.4-current
+APP=SageMath-9-4.app
 if [ ! -e $SYMLINK ]; then
-    APP_PATH=`osascript \
--e 'set appAlias to ""' \
--e 'try' \
--e '  tell application "Finder" to set appAlias to application file id "org.computop.SageMath" as alias' \
--e 'end try' \
--e 'if AppAlias is not "" then' \
--e '  return POSIX path of appAlias' \
--e 'end if' \
-`
-    if [ "X${APP_PATH}X" == "XX" ]; then
-	echo "Could not find the SageMath app!"
-	exit 1
-    else 
-        ln -s $APP_PATH/Contents/Frameworks/Sage.framework/Versions/Current $SYMLINK
-    fi
+    CURRENT=Contents/Frameworks/Sage.framework/Versions/Current
+    LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister
+    DUMP=$($LSREGISTER -apps ul -dump | grep $APP | grep -v Volumes | grep -v Trash)
+    for ITEM in $DUMP; do
+	if [ $(basename $ITEM) == $APP ]; then
+	    ln -s $ITEM/$CURRENT $SYMLINK;
+	    break;
+	fi
+    done
+fi
+if [ ! -e $SYMLINK ]; then
+    echo Could not find $APP
+    exit 1
 fi
 $SYMLINK/local/bin/sage $@
