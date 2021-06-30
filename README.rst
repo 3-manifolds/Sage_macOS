@@ -25,6 +25,4 @@ Apple's specifications for the structure of an application bundle.  Instead, thi
 app provides a separate installer package which creates an executable bash script
 named /usr/local/bin/sage that can be used to run sage from a shell or script.
 
-Eventually this project will include all of the tools that are used to build
-the application starting from a macOS binary distribution of SageMath.
-Currently the project is missing some of those tools, however.
+
