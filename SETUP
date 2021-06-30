@@ -1,0 +1,119 @@
+Several things need to be in place before you can run the scripts which build
+the SageMath frameworks and app.  You may need to install XCode in order to
+have the xcrun notarize-app and xcrun staple commands available.
+
+Macher
+------
+
+Download and install macher from:
+https://github.com/culler/macher/releases/download/v1.3/macher
+
+This is a single file executable which can go anywhere in your path.
+It is used by the fix_paths.py script in Sage_framework.
+
+Sage Source Code
+----------------
+
+The scripts assume that a clone of the SageMath github repository is
+located in Sage_framework/repo/sage and that a successful build has
+been run in that directory.  It is OK for the directory to be a symlink.
+It is important to build Sage with its built-in python spkg and to
+compile with a deployment target of macOS 10.9.
+
+For example:
+
+    % export CFLAGS=-mmacosx-version-min=10.9
+    % ./configure --without-system-python3
+    % make
+
+Tcl and Tk Source Code
+----------------------
+
+The TclTk_framework directory should contain subdirectories Tk and Tcl
+which contain appropriate versions of the corresponding source code.
+If you have fossil repositories, say named Tcl.fossil and Tk.fossil
+somewhere on your system, then you can create the Tcl directories and
+run, for example.
+
+% cd Tcl
+% fossil open /path/to/Tcl.fossil core-8-6-branch
+% cd ../Tk
+% fossil open /path/to/Tk.fossil core-8-6-branch
+
+Alternatively, you may use source tarballs from the latest core-8-6-branch
+release.
+
+Credentials
+-----------
+
+Code signing requires that you have two certificates installed in the Keychain
+Access app.  One is used for signing Applications with codesign and one is
+used for signing Installers with productsign.  If you are a registered Apple
+developer and have received the certificates from Apple then they will be
+identified by your Apple developer id.  If they are self-signed then you will
+choose the id.  Notarization also requires a one-time-password registered
+with Apple.
+
+Currently (this will change soon) there are three different files which are
+sourced or imported by scripts that need to use the credentials.  They are:
+
+Sage_framework/dev_id.py :
+DEV_ID = 'YOURCERTID'
+
+package/IDs.sh :
+export ONE_TIME_PASS=abce-efgh-ijkl-mnop
+export DEV_ID=YOURCERTID
+
+TclTk_frameworks/DEV_ID.txt :
+YOURCERTID
+
+Building the frameworks
+-----------------------
+
+The Sage framework is built (once Sage has been compiled) with:
+% cd Sage_framework
+% bash build_sage_framework.sh
+% cd ..
+
+The Tcl and Tk frameworks are built with:
+% cd TclTk_frameworks
+% make
+% cd ..
+
+The frameworks are signed as part of the build process.
+
+Building the installer
+----------------------
+
+% cd package
+% bash build_package.sh
+% cd ..
+
+Assembling the app
+------------------
+For version X.Y of sage:
+
+% mkdir SageMath-X.Y
+% cp -R app_template SageMath-X.Y/SageMath-X-Y.app
+% mv Sage_framework/build/Sage.framework SageMath-X.Y/SageMath-X-Y.app/Contents/Frameworks
+% mv TclTk_frameworks/Frameworks/*.framework SageMath-X.Y/SageMath-X-Y.app/Contents/Frameworks
+% mv package/Recommended_X_Y.pkg SageMath-X.Y
+
+Signing the app
+---------------
+% codesign -s YOURCERTID -vvvv --timestamp --options runtime --force --entitlements\
+Sage_framework/entitlement.plist SageMath-X.Y/SageMath-X-Y.app
+
+The notarization dance
+----------------------
+Once the app has been signed, notarization requires these steps:
+* Create a disk image from the directory SageMath-X.Y
+* Send the disk image to Apple to be notarized:
+  % xcrun altool --notarize-app --primary-bundle-id "SageMathX.Y" \
+--username "your.apple.email" --password "abcd-efgh-ijkl-mnop" --file SageMath-X.Y.dmg
+* Staple the notarization ticket to the app:
+  % xcrun stapler staple SageMath-X.Y/SageMath-X-Y.app
+* Create a new disk image from the directory SageMath-X.Y
+* Send the new disk image to Apple to be notarized.
+* Staple the notarization ticket to the disk image:
+  % xcrun stapler staple SageMath-X.Y.dmg
