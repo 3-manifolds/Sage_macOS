@@ -1,0 +1,17 @@
+In order for Sage to run on older macOS systems we need to specify a
+minimum target of 10.9 and we need to disable AVX2 instructions.  There
+are Intel CPUs which are new enough to run Big Sur yet do not support
+AVX2.
+
+Setting the minimum OS version target has become trickier now that Apple's
+ld accepts the new -platform_version option.  Just using -mmacosx-version-min=10.9
+is no longer sufficient.  A number of libraries, including libreadline and
+libhistory will be built with the minimum target set to 11.0 instead of
+10.9.  This can be worked around by setting *both* the CFLAGS and LDFLAGS
+environment variables.
+
+Here are the build commands we use:
+
+$ export CFLAGS="-mmacosx-version-min=10.9 -mno-avx2"
+$ export LDFLAGS="-Wl,-platform_version,macos,10.9,11.3"
+$ make
