@@ -67,8 +67,8 @@ rm ${VERSION_DIR}/local/share/gap/{gac,gap}
 ln -s ../../bin/gac ${VERSION_DIR}/local/share/gap/gac
 ln -s ../../bin/gap ${VERSION_DIR}/local/share/gap/gap
 rm -rf ${VERSION_DIR}/local/share/jupyter/kernels/sagemath/doc
-rm ${VERSION_DIR}/local/share/jupyter/nbextensions/threejs
-#rm ${VERSION_DIR}/local/share/threejs/threejs
+rm -f ${VERSION_DIR}/local/share/jupyter/nbextensions/threejs
+rm -f ${VERSION_DIR}/local/share/threejs/threejs
 ln -s ../../threejs ${VERSION_DIR}/local/share/jupyter/nbextensions/threejs
 
 # Fix up rpaths and shebangs 
