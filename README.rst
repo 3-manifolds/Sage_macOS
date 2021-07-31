@@ -26,4 +26,4 @@ app provides a separate installer package which creates an executable bash scrip
 named /usr/local/bin/sage that can be used to run sage from a shell or script.
 
 *  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v1.1/total.svg
-*  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v1.2-beta.1/total.svg
+*  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v1.2-rc.0/total.svg
