@@ -18,12 +18,12 @@ Launchpad.app.  The application icon can be placed in the dock to make it easy t
 launch Sage at any time. 
 
 There is a backwards incompatibility with the former Sage app distributed by
-sagemath.org which is slated for removal from Sage 9.3.  That app included a bash
-script at the top level of the bundle (e.g. /Applications/SageMath.app/sage).  But
+sagemath.org which was removed from Sage 9.3.  That app included a bash script
+at the top level of the bundle (e.g. /Applications/SageMath.app/sage).  But
 placing a script in that location prevents signing the bundle, since it violates
 Apple's specifications for the structure of an application bundle.  Instead, this
 app provides a separate installer package which creates an executable bash script
 named /usr/local/bin/sage that can be used to run sage from a shell or script.
 
 *  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v1.1/total.svg
-*  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v1.2-beta.1/total.svg
+*  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v1.2-rc.0/total.svg
