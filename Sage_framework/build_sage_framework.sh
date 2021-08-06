@@ -86,5 +86,6 @@ ${VERSION_DIR}/local/bin/sage
 
 # Sign the framework.
 echo "Signing files ..."
+#local/share/cmake-3.21/Modules/Internal/CPack/CPack.OSXScriptLauncher.in
 python3 sign_sage.py
 
