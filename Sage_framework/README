@@ -13,7 +13,9 @@ ld accepts the new -platform_version option.  Just using -mmacosx-version-min=10
 is no longer sufficient.  A number of libraries, including libreadline and
 libhistory will be built with the minimum target set to 11.0 instead of
 10.9.  This can be worked around by setting *both* the CFLAGS and LDFLAGS
-environment variables.
+environment variables.  Also, in order to have a working distutils it is necessary
+to provide the same information in the MACOS_DEPLOYMENT_TARGET environment
+variable.
 
 Below are the build commands we use.  We use the "build" make target
 because we do not need to build documentation.  (The app uses the
@@ -23,6 +25,7 @@ $ export GMP_CONFIGURE="--enable-fat"
 $ export SAGE_FAT_BINARY="yes"
 $ export CFLAGS="-mmacosx-version-min=10.9 -mno-avx -mno-avx2 -mno-bmi2"
 $ export LDFLAGS="-Wl,-platform_version,macos,10.9,11.3"
+$ export MACOSX_DEPLOYMENT_TARGET="10.9"
 $ export MAKE="make -j4"
 $ ./configure --without-system-python3
 $ make build
