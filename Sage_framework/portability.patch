@@ -1,0 +1,26 @@
+diff --git a/build/pkgs/givaro/spkg-install.in b/build/pkgs/givaro/spkg-install.in
+index a47034497b..3d4cb6c059 100644
+--- a/build/pkgs/givaro/spkg-install.in
++++ b/build/pkgs/givaro/spkg-install.in
+@@ -6,7 +6,7 @@ cd src
+ 
+ # When SAGE_FAT_BINARY is set, disable processor-specific optimizations
+ if [ "$SAGE_FAT_BINARY" = yes ]; then
+-    GIVARO_CONFIGURE="--disable-sse --disable-sse2 --disable-sse3 --disable-ssse3 --disable-sse41 --disable-sse42 --disable-fma --disable-fma4 --disable-avx --disable-avx2  $GIVARO_CONFIGURE"
++    GIVARO_CONFIGURE="--disable-sse3 --disable-ssse3 --disable-sse41 --disable-sse42 --disable-fma --disable-fma4 --disable-avx --disable-avx2  $GIVARO_CONFIGURE"
+ fi
+ 
+ sdh_configure $SAGE_CONFIGURE_GMP --enable-shared $GIVARO_CONFIGURE
+diff --git a/build/pkgs/openblas/spkg-install.in b/build/pkgs/openblas/spkg-install.in
+index b06a55d313..7ea68b8f9f 100644
+--- a/build/pkgs/openblas/spkg-install.in
++++ b/build/pkgs/openblas/spkg-install.in
+@@ -13,7 +13,7 @@ if [ "x$SAGE_DEBUG" = "xyes" ]; then
+ fi
+ 
+ if [ "x$SAGE_FAT_BINARY" = "xyes" ]; then
+-    OPENBLAS_CONFIGURE="$OPENBLAS_CONFIGURE DYNAMIC_ARCH=1"
++    OPENBLAS_CONFIGURE="$OPENBLAS_CONFIGURE DYNAMIC_ARCH=1 TARGET=CORE2"
+ fi
+ 
+ echo "Building OpenBLAS: $MAKE $OPENBLAS_CONFIGURE"

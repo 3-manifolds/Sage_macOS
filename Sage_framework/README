@@ -17,6 +17,10 @@ environment variables.  Also, in order to have a working distutils it is necessa
 to provide the same information in the MACOS_DEPLOYMENT_TARGET environment
 variable.
 
+In order to avoid illegal instruction crashes, we currently modify the spkg-install.in
+files for the givaro and openblas packages.  The portability.patch should be
+applied in the sage git repository before building.
+
 Below are the build commands we use.  We use the "build" make target
 because we do not need to build documentation.  (The app uses the
 documentation on the web.)
