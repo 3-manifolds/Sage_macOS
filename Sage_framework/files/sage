@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-
-
 # Display the current version of Sage
 # usage: sage_version [-v]
 #   -v    display the full version banner including release date
@@ -196,7 +194,7 @@ fi
 saved_cwd=`pwd`
 cd "`dirname $0`/../.."
 TARGET=`pwd`
-cd $saved_cwd
+cd "$saved_cwd"
 runpath_sh="$TARGET/local/var/lib/sage/runpath.sh"
 if [ -x "$runpath_sh" ]; then
     . "$runpath_sh"

@@ -16,4 +16,4 @@ if [ ! -e $SYMLINK ]; then
     echo Could not find $APP
     exit 1
 fi
-$SYMLINK/local/bin/sage $@
+"$SYMLINK/local/bin/sage" "$@"
