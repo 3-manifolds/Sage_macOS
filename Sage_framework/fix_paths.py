@@ -155,9 +155,10 @@ def shebang_check(path):
         first = inputfile.read(2)
     return first == b'#!'
 
-# These two files need to be fixed as ConfigFiles as well.
+# These files need to be fixed as ConfigFiles as well.
 MAKEFILE = 'local/lib/python3.9/config-3.9-darwin/Makefile'
 DARWIN_DATA = 'local/lib/python3.9/_sysconfigdata__darwin_darwin.py'
+SAGE_CONFIG = 'local/lib/python3.9/site-packages/sage_conf.py'
 
 def fix_files(directory):
     for dirpath, dirnames, filenames in os.walk(directory):
@@ -173,7 +174,8 @@ def fix_files(directory):
                 ScriptFile(fullpath).fix()
             elif (fullpath.endswith('.pc') or
                     fullpath.endswith(MAKEFILE) or
-                    fullpath.endswith(DARWIN_DATA)):
+                    fullpath.endswith(DARWIN_DATA) or
+                    fullpath.endswith(SGE_CONFIG)):
                 ConfigFile(fullpath).fix()
 
 # def fix_config_files(directory):

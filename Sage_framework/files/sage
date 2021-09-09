@@ -191,9 +191,9 @@ if [ "$1" = '-root'  -o "$1" = '--root' ]; then
 fi
 
 # Get the installation-specific symlink
-saved_cwd=`pwd`
+saved_cwd="`pwd`"
 cd "`dirname $0`/../.."
-TARGET=`pwd`
+TARGET="`pwd`"
 cd "$saved_cwd"
 runpath_sh="$TARGET/local/var/lib/sage/runpath.sh"
 if [ -x "$runpath_sh" ]; then
