@@ -113,6 +113,9 @@ if [ "$1" = '-f' ]; then
 fi
 
 if [ "$1" = '-i' ]; then
+    echo "Sorry, this binary distribution does not support installing sage packages."
+    exit 1
+# Original code follows
     shift
     if [ -z "$MAKE" ]; then
         MAKE="make"
