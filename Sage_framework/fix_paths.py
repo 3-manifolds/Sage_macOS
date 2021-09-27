@@ -175,7 +175,7 @@ def fix_files(directory):
             elif (fullpath.endswith('.pc') or
                     fullpath.endswith(MAKEFILE) or
                     fullpath.endswith(DARWIN_DATA) or
-                    fullpath.endswith(SGE_CONFIG)):
+                    fullpath.endswith(SAGE_CONFIG)):
                 ConfigFile(fullpath).fix()
 
 # def fix_config_files(directory):
