@@ -7,14 +7,25 @@
     <choices-outline>
         <line choice="org.computop.SageMath-9-4.bin"/>
         <line choice="org.computop.SageMath-9-4.share"/>
+        <line choice="org.computop.SageMath-9-4.texlive"/>
     </choices-outline>
     <choice id="default"/>
-    <choice id="org.computop.SageMath-9-4.bin" title="Sage Script" description="Creates /usr/local/bin/sage">
+    <choice id="org.computop.SageMath-9-4.bin" title="Sage Script"
+	    description="Creates /usr/local/bin/sage">
         <pkg-ref id="org.computop.SageMath-9-4.bin"/>
     </choice>
-    <choice id="org.computop.SageMath-9-4.share" title="Jupyter" description="Creates /usr/local/share/jupyter/">
+    <choice id="org.computop.SageMath-9-4.share" title="Jupyter"
+	    description="Creates /usr/local/share/jupyter/">
         <pkg-ref id="org.computop.SageMath-9-4.share"/>
     </choice>
-    <pkg-ref id="org.computop.SageMath-9-4.bin" version="9.4" auth="Root" onConclusion="none" installKBytes="0">#SageMath_bin.pkg</pkg-ref>
-    <pkg-ref id="org.computop.SageMath-9-4.share" version="9.4" auth="Root" onConclusion="none" installKBytes="0">#SageMath_share.pkg</pkg-ref>
+    <choice id="org.computop.SageMath-9-4.texlive" title="SageTeX"
+	    description="Creates /usr/local/texlive/texmf-local/tex/latex/local/sagetex.sty">
+        <pkg-ref id="org.computop.SageMath-9-4.texlive"/>
+    </choice>
+    <pkg-ref id="org.computop.SageMath-9-4.bin" version="9.4"
+	     auth="Root" onConclusion="none" installKBytes="0">#SageMath_bin.pkg</pkg-ref>
+    <pkg-ref id="org.computop.SageMath-9-4.share" version="9.4"
+	     auth="Root" onConclusion="none" installKBytes="0">#SageMath_share.pkg</pkg-ref>
+    <pkg-ref id="org.computop.SageMath-9-4.texlive" version="9.4"
+	     auth="Root" onConclusion="none" installKBytes="0">#SageMath_texlive.pkg</pkg-ref>
 </installer-gui-script>

@@ -1,13 +1,22 @@
 #!/bin/bash
 ANSWER=Yes
+
 if [ -e /usr/local/bin/sage ]; then
     ANSWER=`osascript \
 -e 'button returned of (display dialog "May we overwrite your current /usr/local/bin/sage file?" buttons {"No", "Yes"})' \
 `
-    if [ $ANSWER == "Yes" ]; then
-        exit 0
-    else
-        osascript -e 'display dialog "Please rerun the installer, but press \"Customize\" and uncheck \"Sage Script\"" buttons {"OK"}'
+    if [ $ANSWER == "No" ]; then
+        osascript -e 'display dialog "Please rerun the installer, but press \"Customize\" and uncheck \"Sage Script\"." buttons {"OK"}'
+        exit 1
+    fi
+fi
+
+if [ -e /usr/local/texlive/texmf-local/tex/latex/local/sagetex.sty ]; then
+    ANSWER=`osascript \
+-e 'button returned of (display dialog "May we overwrite your current sagetex.sty file?" buttons {"No", "Yes"})' \
+`
+    if [ $ANSWER != "Yes" ]; then
+        osascript -e 'display dialog "Please rerun the installer, but press \"Customize\" and uncheck \"SageTeX\"." buttons {"OK"}'
         exit 1
     fi
 fi
