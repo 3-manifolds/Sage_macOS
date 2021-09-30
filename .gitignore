@@ -12,8 +12,7 @@ TclTk_frameworks/Frameworks/
 TclTk_frameworks/Tcl
 TclTk_frameworks/Tk
 package/IDs.sh
-package/Recommended.pkg
-package/bin.pkg
+package/*.pkg
 package/local
 package/packages
-package/share.pkg
+

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+SAGETEX_DIR=/usr/local/texlive/texmf-local/tex/latex/local
+
+# Run mktexlsr if SAGETEX_DIR changed in the last 10 minutes.
+if [ -e /Library/TeX/texbin/mktexlsr ] && [ `date -j -r $SAGETEX_DIR -v +10M +%s` -ge `date +%s` ]; then
+    /Library/TeX/texbin/mktexlsr;
+fi
+
+# Remove the install scripts.
+rm -rf /usr/local/bin/sage_install
