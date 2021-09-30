@@ -25,5 +25,6 @@ Apple's specifications for the structure of an application bundle.  Instead, thi
 app provides a separate installer package which creates an executable bash script
 named /usr/local/bin/sage that can be used to run sage from a shell or script.
 
+*  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v1.2.1/total.svg
 *  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v1.2/total.svg
 *  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v1.1/total.svg
