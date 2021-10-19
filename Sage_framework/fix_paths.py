@@ -19,10 +19,6 @@ cafebabf = b'\xbf\xba\xfe\xca'
 
 magics = (cafebabf, feedfacf,  cafebabe_big, feedface_big, cafebabe, feedface, cafebabf_big, feedfacf_big)
 
-with open('repo/sage/VERSION.txt') as input_file:
-    m = get_version.match(input_file.readline())
-sage_version = m.groups()[0]
-
 class MachFile:
     def __init__(self, path):
         self.path = path
@@ -109,11 +105,11 @@ class MachFile:
         print(self.path)
 
 class ScriptFile:
-    def __init__(self, path):
+    def __init__(self, repo, symlink, path):
         self.path = path
         nodes = self.path.split(os.path.sep)
-        self.repo = os.path.abspath('repo/sage').encode('utf-8')
-        self.symlink = b'/var/tmp/sage-%s-current'%sage_version.encode('ascii')
+        self.sage_dir = os.path.join(repo, 'sage').encode('utf-8')
+        self.symlink = symlink
 
     def fix(self):
         try:
@@ -126,20 +122,20 @@ class ScriptFile:
             new_shebang = shebang
         with open(self.path, 'wb') as outfile:
             outfile.write(new_shebang + b'\n')
-            outfile.write(rest.replace(self.repo, self.symlink))
+            outfile.write(rest.replace(self.sage_dir, self.symlink))
 
 class ConfigFile:
-    def __init__(self, path):
+    def __init__(self, repo, symlink, path):
         self.path = path
         nodes = self.path.split(os.path.sep)
-        self.repo = os.path.abspath('repo/sage').encode('utf-8')
-        self.symlink = b'/var/tmp/sage-%s-current'%sage_version.encode('ascii')
+        self.sage_dir = os.path.join(repo, 'sage').encode('utf-8')
+        self.symlink = symlink
 
     def fix(self):
         with open(self.path, 'rb') as infile:
             contents = infile.read()
         with open(self.path, 'wb') as outfile:
-            outfile.write(contents.replace(self.repo, self.symlink))
+            outfile.write(contents.replace(self.sage_dir, self.symlink))
 
 def mach_check(path):
     if os.path.islink(path):
@@ -160,7 +156,7 @@ MAKEFILE = 'local/lib/python3.9/config-3.9-darwin/Makefile'
 DARWIN_DATA = 'local/lib/python3.9/_sysconfigdata__darwin_darwin.py'
 SAGE_CONFIG = 'local/lib/python3.9/site-packages/sage_conf.py'
 
-def fix_files(directory):
+def fix_files(repo, symlink, directory):
     for dirpath, dirnames, filenames in os.walk(directory):
         for filename in filenames:
             fullpath = os.path.join(dirpath, filename)
@@ -171,12 +167,12 @@ def fix_files(directory):
                     id_path = os.path.join("@rpath", os.path.split(fullpath)[1])
                     subprocess.run(['macher', 'set_id', id_path, fullpath])
             elif shebang_check(fullpath):
-                ScriptFile(fullpath).fix()
+                ScriptFile(repo, symlink, fullpath).fix()
             elif (fullpath.endswith('.pc') or
                     fullpath.endswith(MAKEFILE) or
                     fullpath.endswith(DARWIN_DATA) or
                     fullpath.endswith(SAGE_CONFIG)):
-                ConfigFile(fullpath).fix()
+                ConfigFile(repo, symlink, fullpath).fix()
 
 # def fix_config_files(directory):
 #     for dirpath, dirnames, filenames in os.walk(directory):
@@ -192,6 +188,13 @@ def fix_files(directory):
 #                 ScriptFile(fullpath).fix()
 
 if __name__ == '__main__':
-    fix_files(sys.argv[1])
-    
-
+    try:
+        repo, directory = sys.argv[1], sys.argv[2]
+    except IndexError:
+        print('Usage python3 fixpaths.py repo|bigrepo <directory>')
+    with open(os.path.join(repo, 'sage', 'VERSION.txt')) as input_file:
+        m = get_version.match(input_file.readline())
+    sage_version = m.groups()[0]
+    symlink = os.path.join(os.path.sep, 'var', 'tmp', 'sage-%s-current'%sage_version)
+    repo = os.path.abspath(repo)
+    fix_files(repo, symlink.encode('ascii'), directory)

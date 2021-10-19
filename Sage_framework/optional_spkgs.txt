@@ -20,8 +20,11 @@ kenzo
 libnauty
 libsemigroups
 lrslib
+meataxe
 mcqd
 mpfrcx
+normaliz
+p_group_cohomology
 pari_elldata
 pari_galpol
 pari_nftables

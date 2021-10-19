@@ -72,9 +72,9 @@ ln -s ../../threejs-sage ${VERSION_DIR}/local/share/jupyter/nbextensions/threejs
 # Fix up rpaths and shebangs 
 echo "Patching files ..."
 mv files_to_sign files_to_sign.bak
-python3 fix_paths.py ${VERSION_DIR}/local/bin > files_to_sign
-python3 fix_paths.py ${VERSION_DIR}/local/lib >> files_to_sign
-python3 fix_paths.py ${VERSION_DIR}/local/libexec >> files_to_sign
+python3 fix_paths.py repo ${VERSION_DIR}/local/bin > files_to_sign
+python3 fix_paths.py repo ${VERSION_DIR}/local/lib >> files_to_sign
+python3 fix_paths.py repo ${VERSION_DIR}/local/libexec >> files_to_sign
 
 # Remove xattrs
 xattr -rc ${BUILD}/Sage.framework

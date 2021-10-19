@@ -72,11 +72,21 @@ ln -s ../../threejs-sage ${VERSION_DIR}/local/share/jupyter/nbextensions/threejs
 # Fix up rpaths and shebangs 
 echo "Patching files ..."
 mv files_to_sign files_to_sign.bak
-python3 fix_paths.py ${VERSION_DIR}/local/bin > files_to_sign
-python3 fix_paths.py ${VERSION_DIR}/local/lib >> files_to_sign
-python3 fix_paths.py ${VERSION_DIR}/local/libexec >> files_to_sign
+python3 fix_paths.py bigrepo ${VERSION_DIR}/local/bin > files_to_sign
+python3 fix_paths.py bigrepo ${VERSION_DIR}/local/lib >> files_to_sign
+python3 fix_paths.py bigrepo ${VERSION_DIR}/local/libexec >> files_to_sign
 
-# Remove xattrs
+# Fix the absolute symlinks for the GAP packages
+pushd ${VERSION_DIR}/local/share/gap/pkg
+for pkg in `ls` ; do
+  if [[ -L $pkg/bin ]]; then
+    rm $pkg/bin ;
+    ln -s ../../../../lib/gap/pkg/$pkg/bin $pkg/bin ; 
+  fi
+done
+popd
+
+# Remove xattrs (must be done before signing!)
 xattr -rc ${BUILD}/Sage.framework
 
 # Start sage to create byte code files that should be included
