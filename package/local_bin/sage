@@ -1,6 +1,6 @@
 #! /bin/bash
-SYMLINK=/var/tmp/sage-9.4-current
-APP=SageMath-9-4.app
+SYMLINK=/var/tmp/sage-9.5-current
+APP=SageMath-9-5.app
 if [ ! -e $SYMLINK ]; then
     CURRENT=Contents/Frameworks/Sage.framework/Versions/Current
     LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister
@@ -16,4 +16,4 @@ if [ ! -e $SYMLINK ]; then
     echo Could not find $APP
     exit 1
 fi
-"$SYMLINK/local/bin/sage" "$@"
+"$SYMLINK/local/var/lib/sage/venv-python3.9.9/bin/sage" "$@"

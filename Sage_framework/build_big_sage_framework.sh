@@ -1,5 +1,5 @@
 BASE_DIR=`pwd`
-VERSION=`./get_sage_version`
+VERSION=`./get_big_sage_version`
 echo Sage Version is ${VERSION}.
 REPO=${BASE_DIR}/bigrepo/sage
 FILES=${BASE_DIR}/files
@@ -8,12 +8,18 @@ VERSION_DIR=${BUILD}/Sage.framework/Versions/$VERSION
 CURRENT_DIR=${BUILD}/Sage.framework/Versions/Current
 RESOURCE_DIR=${VERSION_DIR}/Resources
 KERNEL_DIR="${VERSION_DIR}/Resources/jupyter/kernels/SageMath-${VERSION}"
+VENV=venv-python3.9.9
+VENV_DIR="local/var/lib/sage/${VENV}"
+VENV_PYLIB="${VENV_DIR}/lib/python3.9"
+PYTHON_LINK="../var/lib/sage/${VENV}/bin/python3.9"
+THREEJS_SAGE="${VERSION_DIR}/${VENV_DIR}/share/jupyter/nbextensions/threejs-sage"
 # This allows Sage.framework to be a symlink to the framework inside the application.
 if ! [ -d "${BUILD}/Sage.framework" ]; then
     mkdir -p "${BUILD}"/Sage.framework
 fi
 
 # Clean out everything.
+echo Removing old framework ...
 rm -rf "${BUILD}"/Sage.framework/*
 
 # Create the bundle directories
@@ -34,8 +40,11 @@ cp -R "${REPO}"/local/etc/ ${VERSION_DIR}/local/etc
 cp -R "${REPO}"/local/libexec/ ${VERSION_DIR}/local/libexec
 ln -s lib "${VERSION_DIR}"/local/lib64
 mkdir -p ${VERSION_DIR}/local/var/lib/sage/{installed,scripts}
+mkdir -p ${VERSION_DIR}/${VENV_DIR}
 cp -R "${REPO}"/local/var/lib/sage/installed/ ${VERSION_DIR}/local/var/lib/sage/installed
 cp -R "${REPO}"/local/var/lib/sage/scripts/ ${VERSION_DIR}/local/var/lib/sage/scripts
+cp -R "${REPO}"/${VENV_DIR}/{bin,lib,share} ${VERSION_DIR}/${VENV_DIR}
+rm -rf ${VERSION_DIR}/${VENV_DIR}/share/{doc,man}
 mkdir -p ${VERSION_DIR}/local/share
 for share_dir in `ls "${REPO}"/local/share`; do
     if [ $share_dir != "doc" ]; then
@@ -46,28 +55,30 @@ done
 echo SAGE_SYMLINK=/var/tmp/sage-${VERSION}-current > ${VERSION_DIR}/local/var/lib/sage/runpath.sh
 chmod 755 ${VERSION_DIR}/local/var/lib/sage/runpath.sh
 
-# create the local/bin/SageMath symlink
-ln -s python3.9 ${VERSION_DIR}/local/bin/SageMath
-
 # Copy our modified files into the bundle
-cp -p ${FILES}/_tkinter.cpython-39-darwin.so ${VERSION_DIR}/local/lib/python3.9/lib-dynload
-cp -p ${FILES}/page.html ${VERSION_DIR}/local/lib/python3.9/site-packages/notebook/templates/page.html
-cp -p ${FILES}/{sage,sage-env} ${VERSION_DIR}/local/bin
-cp -p ${FILES}/kernel.py ${VERSION_DIR}/local/lib/python3.9/site-packages/sage/repl/ipython_kernel/kernel.py
+cp -p ${FILES}/_tkinter.cpython-39-darwin.so ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload
+cp -p ${FILES}/page.html ${VERSION_DIR}/${VENV_PYLIB}/site-packages/notebook/templates/page.html
+cp -p ${FILES}/{sage,sage-env} ${VERSION_DIR}/${VENV_DIR}/bin
+cp -p ${FILES}/kernel.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/repl/ipython_kernel/kernel.py
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/sage-env-config > "${VERSION_DIR}"/local/bin/sage-env-config
-rm -rf ${VERSION_DIR}/local/share/jupyter/kernels/sagemath
+cp "${VERSION_DIR}"/local/bin/sage-env-config ${VERSION_DIR}/${VENV_DIR}/bin
+rm -rf ${VERSION_DIR}/${VENV_DIR}/share/jupyter/kernels/sagemath
 mkdir -p ${KERNEL_DIR}
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${KERNEL_DIR}/kernel.json
-cp ${FILES}/_tkinter.cpython-39-darwin.so "${VERSION_DIR}"/local/lib/python3.9/lib-dynload
-cp ${FILES}/sagedoc.py ${VERSION_DIR}/local/lib/python3.9/site-packages/sage/misc/sagedoc.py
+cp ${FILES}/_tkinter.cpython-39-darwin.so "${VERSION_DIR}"/${VENV_PYLIB}/lib-dynload
+cp ${FILES}/sagedoc.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/misc/sagedoc.py
 
 # Fix illegal symlinks that point outside of the bundle
 rm ${VERSION_DIR}/local/share/gap/{gac,gap}
 ln -s ../../bin/gac ${VERSION_DIR}/local/share/gap/gac
 ln -s ../../bin/gap ${VERSION_DIR}/local/share/gap/gap
 rm -rf ${VERSION_DIR}/local/share/jupyter/kernels/sagemath/doc
-rm -f ${VERSION_DIR}/local/share/jupyter/nbextensions/threejs-sage
-ln -s ../../threejs-sage ${VERSION_DIR}/local/share/jupyter/nbextensions/threejs-sage
+rm -f ${VERSION_DIR}/local/share/threejs-sage/threejs-sage
+rm -f ${VERSION_DIR}/${VENV_DIR}/share/jupyter/nbextensions/threejs-sage
+ln -s ../../../../../../../share/threejs-sage ${VERSION_DIR}/${VENV_DIR}/share/jupyter/nbextensions/threejs-sage
+
+# Create the local/bin/SageMath symlink
+ln -s ${PYTHON_LINK} ${VERSION_DIR}/local/bin/SageMath
 
 # Fix up rpaths and shebangs 
 echo "Patching files ..."
@@ -75,6 +86,8 @@ mv files_to_sign files_to_sign.bak
 python3 fix_paths.py bigrepo ${VERSION_DIR}/local/bin > files_to_sign
 python3 fix_paths.py bigrepo ${VERSION_DIR}/local/lib >> files_to_sign
 python3 fix_paths.py bigrepo ${VERSION_DIR}/local/libexec >> files_to_sign
+python3 fix_paths.py bigrepo ${VERSION_DIR}/${VENV_DIR}/bin >> files_to_sign
+python3 fix_paths.py bigrepo ${VERSION_DIR}/${VENV_DIR}/lib >> files_to_sign
 
 # Fix the absolute symlinks for the GAP packages
 pushd ${VERSION_DIR}/local/share/gap/pkg
@@ -91,7 +104,7 @@ xattr -rc ${BUILD}/Sage.framework
 
 # Start sage to create byte code files that should be included
 echo "Starting Sage to create byte code files ..."
-${VERSION_DIR}/local/bin/sage
+${VERSION_DIR}/${VENV_DIR}/bin/sage
 
 # Sign the framework.
 echo "Signing files ..."

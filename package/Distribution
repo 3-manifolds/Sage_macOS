@@ -5,27 +5,27 @@
     <welcome file="Welcome.rtf" mime-type="text/richtext"/>
     <options customize="allow" require-scripts="false" rootVolumeOnly="true"/>
     <choices-outline>
-        <line choice="org.computop.SageMath-9-4.bin"/>
-        <line choice="org.computop.SageMath-9-4.share"/>
-        <line choice="org.computop.SageMath-9-4.texlive"/>
+        <line choice="org.computop.SageMath-9-5.bin"/>
+        <line choice="org.computop.SageMath-9-5.share"/>
+        <line choice="org.computop.SageMath-9-5.texlive"/>
     </choices-outline>
     <choice id="default"/>
-    <choice id="org.computop.SageMath-9-4.bin" title="Sage Script"
+    <choice id="org.computop.SageMath-9-5.bin" title="Sage Script"
 	    description="Creates /usr/local/bin/sage">
-        <pkg-ref id="org.computop.SageMath-9-4.bin"/>
+        <pkg-ref id="org.computop.SageMath-9-5.bin"/>
     </choice>
-    <choice id="org.computop.SageMath-9-4.share" title="Jupyter"
+    <choice id="org.computop.SageMath-9-5.share" title="Jupyter"
 	    description="Creates /usr/local/share/jupyter/">
-        <pkg-ref id="org.computop.SageMath-9-4.share"/>
+        <pkg-ref id="org.computop.SageMath-9-5.share"/>
     </choice>
-    <choice id="org.computop.SageMath-9-4.texlive" title="SageTeX"
+    <choice id="org.computop.SageMath-9-5.texlive" title="SageTeX"
 	    description="Creates /usr/local/texlive/texmf-local/tex/latex/local/sagetex.sty">
-        <pkg-ref id="org.computop.SageMath-9-4.texlive"/>
+        <pkg-ref id="org.computop.SageMath-9-5.texlive"/>
     </choice>
-    <pkg-ref id="org.computop.SageMath-9-4.bin" version="9.4"
+    <pkg-ref id="org.computop.SageMath-9-5.bin" version="9.5"
 	     auth="Root" onConclusion="none" installKBytes="0">#SageMath_bin.pkg</pkg-ref>
-    <pkg-ref id="org.computop.SageMath-9-4.share" version="9.4"
+    <pkg-ref id="org.computop.SageMath-9-5.share" version="9.5"
 	     auth="Root" onConclusion="none" installKBytes="0">#SageMath_share.pkg</pkg-ref>
-    <pkg-ref id="org.computop.SageMath-9-4.texlive" version="9.4"
+    <pkg-ref id="org.computop.SageMath-9-5.texlive" version="9.5"
 	     auth="Root" onConclusion="none" installKBytes="0">#SageMath_texlive.pkg</pkg-ref>
 </installer-gui-script>

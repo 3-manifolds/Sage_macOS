@@ -152,9 +152,9 @@ def shebang_check(path):
     return first == b'#!'
 
 # These files need to be fixed as ConfigFiles as well.
-MAKEFILE = 'local/lib/python3.9/config-3.9-darwin/Makefile'
-DARWIN_DATA = 'local/lib/python3.9/_sysconfigdata__darwin_darwin.py'
-SAGE_CONFIG = 'local/lib/python3.9/site-packages/sage_conf.py'
+MAKEFILE = 'python3.9/config-3.9-darwin/Makefile'
+DARWIN_DATA = 'python3.9/_sysconfigdata__darwin_darwin.py'
+SAGE_CONFIG = 'python3.9/site-packages/sage_conf.py'
 
 def fix_files(repo, symlink, directory):
     for dirpath, dirnames, filenames in os.walk(directory):

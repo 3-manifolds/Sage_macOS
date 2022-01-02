@@ -30,10 +30,10 @@ pari_galpol
 pari_nftables
 plantri
 primecount
-pycosat
-qhull
 saclib
 sage_numerical_backends_coin
+pynormaliz
+pycosat
 pysingular
 sirocco
 symengine

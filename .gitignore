@@ -13,6 +13,5 @@ TclTk_frameworks/Tcl
 TclTk_frameworks/Tk
 package/IDs.sh
 package/*.pkg
-package/local
 package/packages
 
