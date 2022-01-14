@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 
+
 # WARNING: this function is copy/pasted from both src/bin/sage-env and
 # the top-level "sage" script. Please keep them synchronized.
 resolvelinks() {
@@ -81,7 +82,46 @@ resolvelinks() {
 # a symlink (Trac #30888).
 SELF=$(resolvelinks "${0}")
 
+#####################################################################
+# Get the installation-specific symlink
+#####################################################################
+
+saved_cwd="`pwd`"
+cd "`dirname $0`/../../../../../.."
+VERSION_DIR="`pwd`"
+cd "$saved_cwd"
+runpath_sh=$VERSION_DIR/local/var/lib/sage/runpath.sh
+if [ -x "$runpath_sh" ]; then
+    . "$runpath_sh"
+fi
+
+# Check that the installation specific symlink points to this sage
+# root directory.  If not, try to reset it.  Strangely, this script
+# can get called a second time and when that happens we will have
+# $TARGET == $SAGE_SYMLINK.  We had better not set the symlink to
+# point to itself!
+
+OLD_VERSION_DIR=`readlink $SAGE_SYMLINK`
+if [ "$VERSION_DIR" != "$OLD_VERSION_DIR" ] && [ "$VERSION_DIR" != "$SAGE_SYMLINK" ]; then
+    rm -f $SAGE_SYMLINK 2> /dev/null
+    if [ $? -ne 0 ]; then
+        OWNER=$(stat -f '%Su' $SAGE_SYMLINK)
+        echo
+        echo "Oh no!"
+        echo "You do not have permission to reconfigure this SageMath."
+        echo "Please ask $OWNER to open the app."
+        echo
+        read -p "The app will exit when you press a key."
+        exit
+    fi
+    if [ "$VERSION_DIR" != "$SAGE_SYMLINK" ]; then 
+        ln -s "$VERSION_DIR" "$SAGE_SYMLINK"
+    fi
+fi
+
+#####################################################################
 # Display the current version of Sage
+#####################################################################
 # usage: sage_version [-v]
 #   -v    display the full version banner including release date
 sage_version() {
@@ -285,43 +325,6 @@ if [ "$1" = '-root'  -o "$1" = '--root' ]; then
 fi
 
 #####################################################################
-# Get the installation-specific symlink
-#####################################################################
-
-saved_cwd="`pwd`"
-cd "`dirname $0`/../../../../../.."
-VERSION_DIR="`pwd`"
-cd "$saved_cwd"
-runpath_sh=$VERSION_DIR/local/var/lib/sage/runpath.sh
-if [ -x "$runpath_sh" ]; then
-    . "$runpath_sh"
-fi
-
-# Check that the installation specific symlink points to this sage
-# root directory.  If not, try to reset it.  Strangely, this script
-# can get called a second time and when that happens we will have
-# $TARGET == $SAGE_SYMLINK.  We had better not set the symlink to
-# point to itself!
-
-OLD_VERSION_DIR=`readlink $SAGE_SYMLINK`
-if [ "$VERSION_DIR" != "$OLD_VERSION_DIR" ] && [ "$VERSION_DIR" != "$SAGE_SYMLINK" ]; then
-    rm -f $SAGE_SYMLINK 2> /dev/null
-    if [ $? -ne 0 ]; then
-        OWNER=$(stat -f '%Su' $SAGE_SYMLINK)
-        echo
-        echo "Oh no!"
-        echo "You do not have permission to reconfigure this SageMath."
-        echo "Please ask $OWNER to open the app."
-        echo
-        read -p "The app will exit when you press a key."
-        exit
-    fi
-    if [ "$VERSION_DIR" != "$SAGE_SYMLINK" ]; then 
-        ln -s "$VERSION_DIR" "$SAGE_SYMLINK"
-    fi
-fi
-
-#####################################################################
 # Source sage-env ($SELF is the name of this "sage" script, so we can just
 # append -env to that). We redirect stdout to stderr, which is safer
 # for scripts.
@@ -405,7 +408,7 @@ maybe_sage_location()
 # Start an interactive Sage session, this function never returns.
 interactive_sage() {
     sage_setup
-    exec sage-ipython "$@" -i
+    exec "$SAGE_VENV/bin/sage-ipython" "$@" -i
 }
 
 #####################################################################

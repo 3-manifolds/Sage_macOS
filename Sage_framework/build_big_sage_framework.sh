@@ -4,7 +4,7 @@ echo Sage Version is ${VERSION}.
 REPO=${BASE_DIR}/bigrepo/sage
 FILES=${BASE_DIR}/files
 BUILD=${BASE_DIR}/build
-VERSION_DIR=${BUILD}/Sage.framework/Versions/$VERSION
+VERSION_DIR=${BUILD}/Sage.framework/Versions/${VERSION}
 CURRENT_DIR=${BUILD}/Sage.framework/Versions/Current
 RESOURCE_DIR=${VERSION_DIR}/Resources
 KERNEL_DIR="${VERSION_DIR}/Resources/jupyter/kernels/SageMath-${VERSION}"
@@ -43,7 +43,7 @@ mkdir -p ${VERSION_DIR}/local/var/lib/sage/{installed,scripts}
 mkdir -p ${VERSION_DIR}/${VENV_DIR}
 cp -R "${REPO}"/local/var/lib/sage/installed/ ${VERSION_DIR}/local/var/lib/sage/installed
 cp -R "${REPO}"/local/var/lib/sage/scripts/ ${VERSION_DIR}/local/var/lib/sage/scripts
-cp -R "${REPO}"/${VENV_DIR}/{bin,lib,share} ${VERSION_DIR}/${VENV_DIR}
+cp -R "${REPO}"/${VENV_DIR}/{bin,lib,include,share} ${VERSION_DIR}/${VENV_DIR}
 rm -rf ${VERSION_DIR}/${VENV_DIR}/share/{doc,man}
 mkdir -p ${VERSION_DIR}/local/share
 for share_dir in `ls "${REPO}"/local/share`; do
@@ -56,7 +56,11 @@ echo SAGE_SYMLINK=/var/tmp/sage-${VERSION}-current > ${VERSION_DIR}/local/var/li
 chmod 755 ${VERSION_DIR}/local/var/lib/sage/runpath.sh
 
 # Copy our modified files into the bundle
-cp -p ${FILES}/_tkinter.cpython-39-darwin.so ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload
+if [ $(uname -m) == "arm64" ]; then
+    TKINTER=_tkinter.cpython-39-darwin-arm64.so
+else
+    TKINTER=_tkinter.cpython-39-darwin-x86_64.so
+fi
 cp -p ${FILES}/page.html ${VERSION_DIR}/${VENV_PYLIB}/site-packages/notebook/templates/page.html
 cp -p ${FILES}/{sage,sage-env} ${VERSION_DIR}/${VENV_DIR}/bin
 cp -p ${FILES}/kernel.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/repl/ipython_kernel/kernel.py
@@ -65,7 +69,7 @@ cp "${VERSION_DIR}"/local/bin/sage-env-config ${VERSION_DIR}/${VENV_DIR}/bin
 rm -rf ${VERSION_DIR}/${VENV_DIR}/share/jupyter/kernels/sagemath
 mkdir -p ${KERNEL_DIR}
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${KERNEL_DIR}/kernel.json
-cp ${FILES}/_tkinter.cpython-39-darwin.so "${VERSION_DIR}"/${VENV_PYLIB}/lib-dynload
+cp -p ${FILES}/${TKINTER} ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload/_tkinter.cpython-39-darwin.so
 cp ${FILES}/sagedoc.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/misc/sagedoc.py
 cp ${FILES}/tk.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/IPython/terminal/pt_inputhooks/tk.py
 
@@ -103,12 +107,13 @@ popd
 # Remove xattrs (must be done before signing!)
 xattr -rc ${BUILD}/Sage.framework
 
-# Start sage to create byte code files that should be included
-echo "Starting Sage to create byte code files ..."
-${VERSION_DIR}/${VENV_DIR}/bin/sage
-
+# Remove byte code
+find ${BUILD}/Sage.framework -name '*.pyc' -delete
 # Sign the framework.
 echo "Signing files ..."
-#local/share/cmake-3.21/Modules/Internal/CPack/CPack.OSXScriptLauncher.in
 python3 sign_sage.py
-
+# Start sage to create a minimal set of bytecode files.
+echo "Starting Sage to create byte code files ..."
+${VERSION_DIR}/${VENV_DIR}/bin/sage
+echo Signing the framework again
+python3 sign_sage.py framework

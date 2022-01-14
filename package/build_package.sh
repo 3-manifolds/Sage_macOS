@@ -3,6 +3,8 @@ source IDs.sh
 PKG_ID=9_5
 VERSION=1.0
 
+mkdir -p packages
+
 pkgbuild --root local_bin --scripts local_bin/sage_install/scripts --identifier org.computop.SageMath.$PKG_ID.bin --version $VERSION --install-location /usr/local/bin bin.pkg
 productsign --sign $DEV_ID bin.pkg packages/SageMath_bin.pkg
 
