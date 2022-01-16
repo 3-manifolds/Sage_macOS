@@ -11,7 +11,6 @@ KERNEL_DIR="${VERSION_DIR}/Resources/jupyter/kernels/SageMath-${VERSION}"
 VENV=venv-python3.9.9
 VENV_DIR="local/var/lib/sage/${VENV}"
 VENV_PYLIB="${VENV_DIR}/lib/python3.9"
-PYTHON_LINK="../var/lib/sage/${VENV}/bin/python3.9"
 THREEJS_SAGE="${VERSION_DIR}/${VENV_DIR}/share/jupyter/nbextensions/threejs-sage"
 # This allows Sage.framework to be a symlink to the framework inside the application.
 if ! [ -d "${BUILD}/Sage.framework" ]; then
@@ -26,6 +25,7 @@ rm -rf "${BUILD}"/Sage.framework/*
 mkdir -p "${RESOURCE_DIR}"
 ln -s ${VERSION} "${CURRENT_DIR}"
 ln -s Versions/Current/Resources "${BUILD}"/Sage.framework/Resources
+ln -s ${VENV_DIR} ${VERSION_DIR}/venv
 
 # Create the resource files
 cp "${REPO}"/{COPYING.txt,README.md,VERSION.txt} "${RESOURCE_DIR}"
@@ -82,9 +82,6 @@ rm -f ${VERSION_DIR}/local/share/threejs-sage/threejs-sage
 rm -f ${VERSION_DIR}/${VENV_DIR}/share/jupyter/nbextensions/threejs-sage
 ln -s ../../../../../../../share/threejs-sage ${VERSION_DIR}/${VENV_DIR}/share/jupyter/nbextensions/threejs-sage
 
-# Create the local/bin/SageMath symlink
-ln -s ${PYTHON_LINK} ${VERSION_DIR}/local/bin/SageMath
-
 # Fix up rpaths and shebangs 
 echo "Patching files ..."
 mv files_to_sign files_to_sign.bak
@@ -114,6 +111,6 @@ echo "Signing files ..."
 python3 sign_sage.py
 # Start sage to create a minimal set of bytecode files.
 echo "Starting Sage to create byte code files ..."
-${VERSION_DIR}/${VENV_DIR}/bin/sage
+${VERSION_DIR}/venv/bin/sage
 echo Signing the framework again
 python3 sign_sage.py framework

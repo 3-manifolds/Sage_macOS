@@ -156,7 +156,8 @@ MAKEFILE = 'python3.9/config-3.9-darwin/Makefile'
 DARWIN_DATA = 'python3.9/_sysconfigdata__darwin_darwin.py'
 SAGE_CONFIG = 'python3.9/site-packages/sage_conf.py'
 
-def fix_files(repo, symlink, directory):
+#def fix_files(repo, symlink, directory):
+def fix_files(repo, directory):
     for dirpath, dirnames, filenames in os.walk(directory):
         for filename in filenames:
             fullpath = os.path.join(dirpath, filename)
@@ -166,13 +167,13 @@ def fix_files(repo, symlink, directory):
                 if MF.filetype == "MH_DYLIB":
                     id_path = os.path.join("@rpath", os.path.split(fullpath)[1])
                     subprocess.run(['macher', 'set_id', id_path, fullpath])
-            elif shebang_check(fullpath):
-                ScriptFile(repo, symlink, fullpath).fix()
-            elif (fullpath.endswith('.pc') or
-                    fullpath.endswith(MAKEFILE) or
-                    fullpath.endswith(DARWIN_DATA) or
-                    fullpath.endswith(SAGE_CONFIG)):
-                ConfigFile(repo, symlink, fullpath).fix()
+            # elif shebang_check(fullpath):
+            #     ScriptFile(repo, symlink, fullpath).fix()
+            # elif (fullpath.endswith('.pc') or
+            #         fullpath.endswith(MAKEFILE) or
+            #         fullpath.endswith(DARWIN_DATA) or
+            #         fullpath.endswith(SAGE_CONFIG)):
+            #     ConfigFile(repo, symlink, fullpath).fix()
 
 # def fix_config_files(directory):
 #     for dirpath, dirnames, filenames in os.walk(directory):
@@ -195,6 +196,7 @@ if __name__ == '__main__':
     with open(os.path.join(repo, 'sage', 'VERSION.txt')) as input_file:
         m = get_version.match(input_file.readline())
     sage_version = m.groups()[0]
-    symlink = os.path.join(os.path.sep, 'var', 'tmp', 'sage-%s-current'%sage_version)
+    #symlink = os.path.join(os.path.sep, 'var', 'tmp', 'sage-%s-current'%sage_version)
     repo = os.path.abspath(repo)
-    fix_files(repo, symlink.encode('ascii'), directory)
+#    fix_files(repo, symlink.encode('ascii'), directory)
+    fix_files(repo, directory)

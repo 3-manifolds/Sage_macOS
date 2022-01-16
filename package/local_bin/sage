@@ -16,4 +16,4 @@ if [ ! -e $SYMLINK ]; then
     echo Could not find $APP
     exit 1
 fi
-"$SYMLINK/local/var/lib/sage/venv-python3.9.9/bin/sage" "$@"
+"$SYMLINK/venv/bin/sage" "$@"

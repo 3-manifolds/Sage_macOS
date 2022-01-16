@@ -1,4 +1,6 @@
-cd bigrepo/sage
+rm -f sage-9.5-current
+mv bigrepo/sage /var/tmp/sage-9.5-current
+pushd /var/tmp/sage-9.5-current
 if [ $(uname -m) == "arm64" ]; then
     export CFLAGS="-O2 -mmacosx-version-min=11.0"
     export CXXFLAGS="$CFLAGS -std=c++11 -stdlib=libc++"
@@ -58,3 +60,5 @@ CONFIG_OPTIONS="--with-system-python3=no \
 --enable-tides"
 ./configure $CONFIG_OPTIONS > /tmp/configure.out
 make build
+popd
+mv /var/tmp/sage-9.5-current bigrepo/sage
