@@ -15,18 +15,16 @@ Sage Source Code
 ----------------
 
 The scripts assume that a clone of the SageMath github repository is
-located in Sage_framework/repo/sage and that a successful build has
-been run in that directory.  It is OK for the directory to be a symlink.
-It is important to build Sage with its built-in python spkg and to
-compile with a deployment target of macOS 10.9.
+located in Sage_framework/repo/sage or Sage_framework/bigrepo/sage
+where the bigrepo is used to build an expanded version of SageMath
+that includes as mony optional packages as possible. The scripts
+build_sage.sh and build_big_sage.sh handle the configuration and build.
 
-For example:
-
-    % export CFLAGS=-mmacosx-version-min=10.9
-    % ./configure --without-system-python3
-    % make
-
-Tcl and Tk Source Code
+Note that currently the gfortran spkg does not build on arm64 systems.
+The build script assumes that gfortran is installed in /usr/local.
+A binary package for gfortran which installs in /usr/local is available
+at:
+https://github.com/fxcoudert/gfortran-for-macOS/releases/download/11-arm-alpha2/gfortran-ARM-11.0-BigSur.pkg
 ----------------------
 
 The TclTk_framework directory should contain subdirectories Tk and Tcl
