@@ -86,13 +86,16 @@ SELF=$(resolvelinks "${0}")
 # Get the installation-specific symlink
 #####################################################################
 
-saved_cwd="`pwd`"
-cd "`dirname $0`/../.."
+SAVED_CWD="`pwd`"
+CURDIR=$(resolvelinks "`dirname $0`")
+cd "$CURDIR/../../../../../../"
 VERSION_DIR="`pwd`"
-cd "$saved_cwd"
+cd "$SAVED_CWD"
 runpath_sh=$VERSION_DIR/local/var/lib/sage/runpath.sh
 if [ -x "$runpath_sh" ]; then
     . "$runpath_sh"
+else
+    echo could not find $VERSION_DIR/local/var/lib/sage/runpath.sh
 fi
 
 # Check that the installation specific symlink points to this sage
