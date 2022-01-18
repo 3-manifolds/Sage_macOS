@@ -3,6 +3,7 @@ import os
 import subprocess
 import re
 
+LOCAL_LIB = '/private/var/tmp/sage-9.5-current/local/lib'
 get_info = re.compile(b'Filetype: (?P<filetype>.*)| *LC_LOAD_DYLIB: (?P<dylib>.*)| *LC_RPATH: (?P<rpath>.*)')
 get_version = re.compile('SageMath version ([0-9]\.[0-9]*)')
 
@@ -69,7 +70,11 @@ class MachFile:
     def fixed_rpaths(self):
         result = set(rpath for rpath in self.rpaths if rpath.startswith('@loader_path'))
         for dylib in self.dylibs:
-            relpath = self.relative_path(dylib)
+            if dylib.startswith('/opt'):
+                installed_path = os.path.join(LOCAL_LIB, os.path.basename(dylib))
+                relpath = self.relative_path(installed_path)
+            else:
+                relpath = self.relative_path(dylib)
             if relpath is not None:
                 if self.filetype == "MH_EXECUTE":
                     result.add(os.path.join('@executable_path', relpath))

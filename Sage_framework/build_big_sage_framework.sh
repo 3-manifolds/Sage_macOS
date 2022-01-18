@@ -38,6 +38,9 @@ cp -R "${REPO}"/local/include/ ${VERSION_DIR}/local/include
 cp -R "${REPO}"/local/lib/ ${VERSION_DIR}/local/lib
 cp -R "${REPO}"/local/etc/ ${VERSION_DIR}/local/etc
 cp -R "${REPO}"/local/libexec/ ${VERSION_DIR}/local/libexec
+if [ `uname -m` == arm64 ]; then
+    cp -R gfortran/lib ${VERSION_DIR}/local
+fi
 ln -s lib "${VERSION_DIR}"/local/lib64
 mkdir -p ${VERSION_DIR}/local/var/lib/sage/{installed,scripts}
 mkdir -p ${VERSION_DIR}/${VENV_DIR}

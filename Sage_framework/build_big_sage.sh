@@ -8,7 +8,7 @@ if [ $(uname -m) == "arm64" ]; then
     export MACOSX_DEPLOYMENT_TARGET="11.0"
     export CC=/usr/bin/gcc
     export CXX=/usr/bin/clang++
-    export FC=/usr/local/bin/gfortran
+    export FC=/opt/homebrew/bin/gfortran-11
 else
     export GMP_CONFIGURE="--enable-fat"
     export SAGE_FAT_BINARY="yes"

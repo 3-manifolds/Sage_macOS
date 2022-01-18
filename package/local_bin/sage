@@ -1,6 +1,7 @@
 #! /bin/bash
 SYMLINK=/var/tmp/sage-9.5-current
 APP=SageMath-9-5.app
+MIN_ENV="USER=$USER LOGNAME=$LOGNAME SHELL=$SHELL HOME=$HOME TERM=$TERM LANG=$LANG"
 if [ ! -e $SYMLINK ]; then
     CURRENT=Contents/Frameworks/Sage.framework/Versions/Current
     LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister
@@ -16,4 +17,4 @@ if [ ! -e $SYMLINK ]; then
     echo Could not find $APP
     exit 1
 fi
-"$SYMLINK/venv/bin/sage" "$@"
+/usr/bin/env - PATH="$PATH" $MIN_ENV "$SYMLINK"/venv/bin/sage "$@"
