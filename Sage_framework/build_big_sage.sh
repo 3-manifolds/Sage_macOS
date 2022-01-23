@@ -58,7 +58,9 @@ CONFIG_OPTIONS="--with-system-python3=no \
 --enable-symengine_py \
 --enable-tdlib \
 --enable-tides"
-./configure $CONFIG_OPTIONS > /tmp/configure.out
+if [ "$1" != "noconfig" ]; then
+    ./configure $CONFIG_OPTIONS > /tmp/configure.out
+fi
 make build
 popd
 mv /var/tmp/sage-9.5-current bigrepo/sage
