@@ -248,6 +248,18 @@ if [ "$1" = '-f' ]; then
     # -f is an alias for -i -f
     set -- -i "$@"
 fi
+if [ "$1" = '-i' ]; then
+    if [ -z "$2" ]; then
+        PACKAGE="the package"
+    else
+        PACKAGE=$2 
+    fi
+    echo "Sorry, this binary distribution does not support installing sage packages."
+    echo "If $PACKAGE is available from pypi you may install it by running"
+    echo "    %pip install $PACKAGE"
+    echo "from the sage prompt."
+    exit 1
+fi
 
 if [ "$1" = '-i' ]; then
     shift
