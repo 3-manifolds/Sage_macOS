@@ -1,9 +1,3 @@
-#!/bin/sh
-# Call the shell's exec command to run this script with python3. We
-# actually call a symlink to Python3.9 named SageMath.  This is done
-# so that the app name will be SageMath rather than python.
-"exec" "`dirname $0`/../Frameworks/Sage.framework/Versions/Current/local/bin/SageMath" "$0" "$@"
-
 import sys
 import re
 import os
@@ -25,7 +19,7 @@ contents_dir = abspath(path_join(sys.argv[0], pardir, pardir))
 framework_dir = path_join(contents_dir, 'Frameworks')
 info_plist = path_join(contents_dir, 'Info.plist')
 current = path_join(framework_dir, 'Sage.framework', 'Versions', 'Current')
-sage_executable =  path_join(current, 'local', 'bin', 'sage')
+sage_executable =  path_join(current, 'venv', 'bin', 'sage')
 
 def get_version():
     with open(info_plist, 'rb') as plist_file:
