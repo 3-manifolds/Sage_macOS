@@ -28,10 +28,10 @@ export SAGE_ENV_CONFIG_SOURCED=1
 
 # SAGE_LOCAL is the installation prefix and can be customized by using
 # ./configure --prefix
-export SAGE_LOCAL="/var/tmp/sage-__VERSION__-current/local"
+export SAGE_LOCAL="/var/tmp/sage-9.5-current/local"
 
 # SAGE_ROOT is the location of the Sage source/build tree.
-export SAGE_ROOT="/var/tmp/sage-__VERSION__-current/local"
+export SAGE_ROOT="/var/tmp/sage-9.5-current"
 
 #######################################
 # Compilers set at configuration time.
