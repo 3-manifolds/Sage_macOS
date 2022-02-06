@@ -9,7 +9,7 @@ is accessable from the right hand side of this page.
 
 The structure of the application bundle is that the main executable is a small C
 program which execs the sage python interpreter to run a small tkinter application.
-The Framworks section of the bundle contains frameworks for Tcl, Tk and Sage.  The
+The Frameworks section of the bundle contains frameworks for Tcl, Tk and Sage.  The
 Sage framework contains the result of a standard build of Sage with inessential
 components removed.  Executables and libraries in the framework have modified load
 paths and rpaths designed to make the framework fully relocatable and self-contained
