@@ -3,7 +3,8 @@ build
 __pycache__
 *.dmg
 *.bak
-SageMath-*.*
+SageMath-*.*/SageMath*
+SageMath-*.*/Recommended*
 Sage_framework/dev_id.py
 Sage_framework/repo
 Sage_framework/files_to_sign

@@ -1,5 +1,7 @@
 BASE_DIR=`pwd`
 VERSION=`./get_big_sage_version`
+PYTHON_VERSION=3.10
+PYTHON_LONG_VERSION=3.10.3
 echo Sage Version is ${VERSION}.
 REPO=${BASE_DIR}/bigrepo/sage
 FILES=${BASE_DIR}/files
@@ -8,9 +10,8 @@ VERSION_DIR=${BUILD}/Sage.framework/Versions/${VERSION}
 CURRENT_DIR=${BUILD}/Sage.framework/Versions/Current
 RESOURCE_DIR=${VERSION_DIR}/Resources
 KERNEL_DIR="${VERSION_DIR}/Resources/jupyter/kernels/SageMath-${VERSION}"
-VENV=venv-python3.9.9
-VENV_DIR="local/var/lib/sage/${VENV}"
-VENV_PYLIB="${VENV_DIR}/lib/python3.9"
+VENV_DIR="local/var/lib/sage/venv-python${PYTHON_LONG_VERSION}"
+VENV_PYLIB="${VENV_DIR}/lib/python${PYTHON_VERSION}"
 THREEJS_SAGE="${VERSION_DIR}/${VENV_DIR}/share/jupyter/nbextensions/threejs-sage"
 # This allows Sage.framework to be a symlink to the framework inside the application.
 if ! [ -d "${BUILD}/Sage.framework" ]; then
@@ -60,9 +61,9 @@ chmod 755 ${VERSION_DIR}/local/var/lib/sage/runpath.sh
 
 # Copy our modified files into the bundle
 if [ $(uname -m) == "arm64" ]; then
-    TKINTER=_tkinter.cpython-39-darwin-arm64.so
+    TKINTER=_tkinter.cpython-310-darwin-arm64.so
 else
-    TKINTER=_tkinter.cpython-39-darwin-x86_64.so
+    TKINTER=_tkinter.cpython-310-darwin-x86_64.so
 fi
 cp -p ${FILES}/page.html ${VERSION_DIR}/${VENV_PYLIB}/site-packages/notebook/templates/page.html
 cp -p ${FILES}/{sage,sage-env} ${VERSION_DIR}/${VENV_DIR}/bin

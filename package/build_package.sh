@@ -1,6 +1,6 @@
 #!/bin/bash
 source IDs.sh
-PKG_ID=9_5
+PKG_ID=9_6
 VERSION=1.0
 
 mkdir -p packages

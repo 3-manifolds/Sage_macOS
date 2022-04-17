@@ -30,7 +30,8 @@ def get_version():
 
 def clean_jupyters():
     home_dir = os.getenv('HOME')
-    jupyter_dir = os.path.join(home_dir, 'Library', 'Application Support', 'SageMath', '9.5', 'Jupyter')
+    jupyter_dir = os.path.join(home_dir, 'Library', 'Application Support', 'SageMath',
+                                   get_version(), 'Jupyter')
     for filename in os.listdir(jupyter_dir):
         match = pid_re.match(filename)
         if match:
