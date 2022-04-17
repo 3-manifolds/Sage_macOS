@@ -1,5 +1,5 @@
 VERSION=9.6
-rm -f sage-$VERSION-current
+rm -f /var/tmp/sage-$VERSION-current
 mv bigrepo/sage /var/tmp/sage-$VERSION-current
 pushd /var/tmp/sage-$VERSION-current
 if [ $(uname -m) == "arm64" ]; then
