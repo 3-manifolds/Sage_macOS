@@ -73,7 +73,7 @@ cp "${VERSION_DIR}"/local/bin/sage-env-config ${VERSION_DIR}/${VENV_DIR}/bin
 rm -rf ${VERSION_DIR}/${VENV_DIR}/share/jupyter/kernels/sagemath
 mkdir -p ${KERNEL_DIR}
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${KERNEL_DIR}/kernel.json
-cp -p ${FILES}/${TKINTER} ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload/_tkinter.cpython-39-darwin.so
+cp -p ${FILES}/${TKINTER} ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload/_tkinter.cpython-310-darwin.so
 cp ${FILES}/sagedoc.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/misc/sagedoc.py
 
 # Fix illegal symlinks that point outside of the bundle

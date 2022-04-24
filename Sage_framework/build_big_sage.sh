@@ -1,5 +1,9 @@
 VERSION=9.6
-rm -f /var/tmp/sage-$VERSION-current
+if [ -L /var/tmp/sage-$VERSION-current ]; then
+    rm /var/tmp/sage-$VERSION-current
+elif [ -e /var/tmp/sage-$VERSION-current ]; then
+    echo /var/tmp/sage-$VERSION-current is not a symlink !!!
+fi
 mv bigrepo/sage /var/tmp/sage-$VERSION-current
 pushd /var/tmp/sage-$VERSION-current
 if [ $(uname -m) == "arm64" ]; then
