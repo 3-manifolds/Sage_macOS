@@ -12,7 +12,8 @@ RESOURCE_DIR=${VERSION_DIR}/Resources
 KERNEL_DIR="${VERSION_DIR}/Resources/jupyter/kernels/SageMath-${VERSION}"
 VENV_DIR="local/var/lib/sage/venv-python${PYTHON_LONG_VERSION}"
 VENV_PYLIB="${VENV_DIR}/lib/python${PYTHON_VERSION}"
-THREEJS_SAGE="${VERSION_DIR}/${VENV_DIR}/share/jupyter/nbextensions/threejs-sage"
+NBEXTENSIONS="${VERSION_DIR}/${VENV_DIR}/share/jupyter/nbextensions"
+THREEJS_SAGE="${NBEXTENSIONS}/threejs-sage"
 # This allows Sage.framework to be a symlink to the framework inside the application.
 if ! [ -d "${BUILD}/Sage.framework" ]; then
     mkdir -p "${BUILD}"/Sage.framework
@@ -82,8 +83,12 @@ ln -s ../../bin/gac ${VERSION_DIR}/local/share/gap/gac
 ln -s ../../bin/gap ${VERSION_DIR}/local/share/gap/gap
 rm -rf ${VERSION_DIR}/local/share/jupyter/kernels/sagemath/doc
 rm -f ${VERSION_DIR}/local/share/threejs-sage/threejs-sage
-rm -f ${VERSION_DIR}/${VENV_DIR}/share/jupyter/nbextensions/threejs-sage
-ln -s ../../../../../../../share/threejs-sage ${VERSION_DIR}/${VENV_DIR}/share/jupyter/nbextensions/threejs-sage
+rm -rf {$THREEJS_SAGE}
+ln -s ../../../../../../../share/threejs-sage ${THREEJS_SAGE}
+
+# Make @interact work
+mkdir -p ${NBEXTENSIONS}/widgets/notebook
+ln -s ../../jupyter-js-widgets ${NBEXTENSIONS}/widgets/notebook/js
 
 # Fix up rpaths and shebangs 
 echo "Patching files ..."
