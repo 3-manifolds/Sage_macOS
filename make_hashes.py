@@ -6,7 +6,7 @@ import re
 
 cpu = platform.machine()
 output_file = 'hashes_%s.json'%cpu
-version_file = 'Sage_framework/bigrepo/sage/VERSION.txt'
+version_file = 'Sage_framework/repo/sage/VERSION.txt'
 version_re = re.compile('SageMath version ([0-9]\.[0-9]*)')
 with open(version_file) as input_file:
     m = version_re.match(input_file.readline())
