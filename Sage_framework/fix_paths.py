@@ -2,8 +2,7 @@ import sys
 import os
 import subprocess
 import re
-
-LOCAL_LIB = '/private/var/tmp/sage-9.5-current/local/lib'
+LOCAL_LIB = '/private/var/tmp/sage-X.X-current/local/lib'
 get_info = re.compile(b'Filetype: (?P<filetype>.*)| *LC_LOAD_DYLIB: (?P<dylib>.*)| *LC_RPATH: (?P<rpath>.*)')
 get_version = re.compile('SageMath version ([0-9]\.[0-9]*)')
 
@@ -19,6 +18,9 @@ feedfacf = b'\xcf\xfa\xed\xfe'
 cafebabf = b'\xbf\xba\xfe\xca'
 
 magics = (cafebabf, feedfacf,  cafebabe_big, feedface_big, cafebabe, feedface, cafebabf_big, feedfacf_big)
+
+def unique(some_list):
+    return list(dict((x, None) for x in some_list).keys())
 
 class MachFile:
     def __init__(self, path):
@@ -68,30 +70,45 @@ class MachFile:
             return ''
 
     def fixed_rpaths(self):
-        result = set(rpath for rpath in self.rpaths if rpath.startswith('@loader_path'))
-        for dylib in self.dylibs:
-            if dylib.startswith('/opt'):
-                installed_path = os.path.join(LOCAL_LIB, os.path.basename(dylib))
-                relpath = self.relative_path(installed_path)
+        """
+        Return the list of rpaths to be installed in this file.  These
+        should all be relative paths, prefixed with @loader_path or
+        @executable_path, depending on the file type.
+        """
+        rpaths = unique(self.rpaths)
+        relpaths = []
+        def build_rpath(relpath):
+            if self.filetype == "MH_EXECUTE":
+                prefix = '@executable_path'
+            elif self.filetype in ("MH_DYLIB", "MH_BUNDLE"):
+                prefix = '@loader_path'
             else:
-                relpath = self.relative_path(dylib)
-            if relpath is not None:
-                if self.filetype == "MH_EXECUTE":
-                    result.add(os.path.join('@executable_path', relpath))
-                elif self.filetype == "MH_DYLIB":
-                    result.add(os.path.join('@loader_path', relpath))
-                elif self.filetype == "MH_BUNDLE":
-                    result.add(os.path.join('@loader_path', relpath))
-        return result
-
-    def fixed_dylibs(self):
-        result = []
+                prefix = ''
+            if relpath:
+                return os.path.join(prefix, relpath)
+            else:
+                return prefix
         for dylib in self.dylibs:
-            if (not dylib.startswith('/usr') and
-                not dylib.startswith('/lib') and
-                not dylib.startswith('/System')):
-                result.append(os.path.join('@rpath', os.path.basename(dylib)))
-        return result
+            if dylib.startswith('/'):
+                 relpaths.append(self.relative_path(dylib))
+            elif dylib.startswith('@rpath'):
+                for rpath in rpaths:
+                    if rpath.startswith('@loader_path'):
+                        # Already fixed, e.g. _tkinter
+                        continue
+                    expanded_dylib = dylib.replace('@rpath', rpath)
+                    relpaths.append(self.relative_path(expanded_dylib))
+            elif dylib.startswith('@'):
+                continue
+            # Special case for libgfortan on arm64.  Simulate the library being
+            # installed in our bundle.
+            elif dylib.startswith('/opt'):
+                installed_path = os.path.join(LOCAL_LIB, os.path.basename(dylib))
+                relpaths.append(self.relative_path(installed_path))
+            else:
+                raise RuntimeError('Unrecognized load path %s'%dylib)
+        fixed = [rpath for rpath in self.rpaths if rpath.startswith('@loader_path')]
+        return fixed + unique([build_rpath(relpath) for relpath in relpaths])
 
     def fix(self):
         rpaths = self.fixed_rpaths()
@@ -169,9 +186,9 @@ def fix_files(repo, directory):
             if mach_check(fullpath):
                 MF = MachFile(fullpath)
                 MF.fix()
-                if MF.filetype == "MH_DYLIB":
-                    id_path = os.path.join("@rpath", os.path.split(fullpath)[1])
-                    subprocess.run(['macher', 'set_id', id_path, fullpath])
+                #if MF.filetype == "MH_DYLIB":
+                #    id_path = os.path.join("@rpath", os.path.split(fullpath)[1])
+                #    subprocess.run(['macher', 'set_id', id_path, fullpath])
             # elif shebang_check(fullpath):
             #     ScriptFile(repo, symlink, fullpath).fix()
             # elif (fullpath.endswith('.pc') or
@@ -197,7 +214,7 @@ if __name__ == '__main__':
     try:
         repo, directory = sys.argv[1], sys.argv[2]
     except IndexError:
-        print('Usage python3 fixpaths.py repo|bigrepo <directory>')
+        print('Usage python3 fixpaths.py repo <directory>')
     with open(os.path.join(repo, 'sage', 'VERSION.txt')) as input_file:
         m = get_version.match(input_file.readline())
     sage_version = m.groups()[0]

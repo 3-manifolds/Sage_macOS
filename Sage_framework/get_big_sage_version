@@ -1,9 +1,0 @@
-#! /usr/bin/env python3
-import re
-from fix_paths import get_version
-#get_version = re.compile('SageMath version ([0-9]\.[0-9]*)')
-with open('bigrepo/sage/VERSION.txt') as input_file:
-    m = get_version.match(input_file.readline())
-print(m.groups()[0])
-
-    

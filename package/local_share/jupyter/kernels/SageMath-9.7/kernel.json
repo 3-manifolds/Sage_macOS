@@ -1,0 +1,1 @@
+{"argv": ["/var/tmp/sage-9.7-current/venv/bin/sage", "--python", "-m", "sage.repl.ipython_kernel", "-f", "{connection_file}"], "display_name": "SageMath 9.7", "language": "sage"}

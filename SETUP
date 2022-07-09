@@ -14,17 +14,16 @@ It is used by the fix_paths.py script in Sage_framework.
 Sage Source Code
 ----------------
 
-The scripts assume that a clone of the SageMath github repository is
-located in Sage_framework/repo/sage or Sage_framework/bigrepo/sage
-where the bigrepo is used to build an expanded version of SageMath
-that includes as mony optional packages as possible. The scripts
+The scripts assume that a clone of the SageMath github repository is located in
+Sage_framework/repo/sage where the bigrepo is used to build an expanded version
+of SageMath that includes as mony optional packages as possible. The scripts
 build_sage.sh and build_big_sage.sh handle the configuration and build.
 
 Note that currently the gfortran spkg does not build on arm64 systems.
-The build script assumes that gfortran is installed in /usr/local.
-A binary package for gfortran which installs in /usr/local is available
-at:
-https://github.com/fxcoudert/gfortran-for-macOS/releases/download/11-arm-alpha2/gfortran-ARM-11.0-BigSur.pkg
+Instead, the build script assumes that the Homebrew gfortran is installed on the
+system and it copies the gfortran libraries into the bundle and adjusts their
+load paths.
+
 ----------------------
 
 The TclTk_framework directory should contain subdirectories Tk and Tcl
@@ -104,11 +103,12 @@ Sage_framework/entitlement.plist SageMath-X.Y/SageMath-X-Y.app
 
 The notarization dance
 ----------------------
-Once the app has been signed, notarization requires these steps:
+Once the app has been signed, notarization requires these steps, which assume
+that you have created a notarization profile with the command
+% xcrun notarytool store-credentials --apple-id XXXX --password YYYY --team-id ZZZZ
 * Create a disk image from the directory SageMath-X.Y
 * Send the disk image to Apple to be notarized:
-  % xcrun altool --notarize-app --primary-bundle-id "SageMathX.Y" \
---username "your.apple.email" --password "abcd-efgh-ijkl-mnop" --file SageMath-X.Y.dmg
+  % xcrun notarytool submit SageMath-9.6.dmg --keychain-profile your_profile --wait
 * Staple the notarization ticket to the app:
   % xcrun stapler staple SageMath-X.Y/SageMath-X-Y.app
 * Create a new disk image from the directory SageMath-X.Y

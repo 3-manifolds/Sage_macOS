@@ -1,6 +1,6 @@
 #!/bin/bash
 source IDs.sh
-PKG_ID=9_6
+PKG_ID=9_7
 VERSION=1.0
 
 mkdir -p packages
@@ -18,9 +18,7 @@ productbuild --distribution Distribution --package-path packages --resources res
 
 productsign --sign $DEV_ID recommended.pkg Recommended_$PKG_ID.pkg
 
-xcrun altool --notarize-app --primary-bundle-id "SageMath-$VERSION" --username "marc.culler@gmail.com" --password $ONE_TIME_PASS --file Recommended_$PKG_ID.pkg
-
-echo Waiting 90 seconds ...
-sleep 90
+xcrun notarytool submit Recommended_$PKG_ID.pkg --keychain-profile culler --wait
+#xcrun altool --notarize-app --primary-bundle-id "SageMath-$VERSION" --username "marc.culler@gmail.com" --password $ONE_TIME_PASS --file Recommended_$PKG_ID.pkg
 
 xcrun stapler staple Recommended_$PKG_ID.pkg

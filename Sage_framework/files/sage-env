@@ -332,7 +332,7 @@ if [ -n "$SAGE_LOCAL" ]; then
 fi
 
 if [ -z "$SAGE_REPO_ANONYMOUS" ]; then
-    SAGE_REPO_ANONYMOUS="https://gitlab.com/sagemath/dev/sagetrac-mirror.git"
+    SAGE_REPO_ANONYMOUS="https://gitlab.com/sagemath/sagetrac-mirror.git"
     export SAGE_REPO_ANONYMOUS
 fi
 if [ -z "$SAGE_REPO_AUTHENTICATED" ]; then
@@ -492,7 +492,7 @@ export __sage__=""
 if [ -n "$SAGE_LOCAL" -a -d "$SAGE_LOCAL/libexec/ccache" ]; then
     PATH="$SAGE_LOCAL/libexec/ccache:$PATH"
 fi
-if [ -n "$SAGE_ROOT" -a -z "$CCACHE_BASEDIR" ]; then
+if [ -d "$SAGE_ROOT" -a -z "$CCACHE_BASEDIR" ]; then
     export CCACHE_BASEDIR="$SAGE_ROOT"
 fi
 
