@@ -63,7 +63,11 @@ CONFIG_OPTIONS="--with-system-python3=no \
 --enable-tdlib \
 --enable-tides"
 if [ "$1" != "noconfig" ]; then
+    ./bootstrap
     make configure
+    if [ -e configure.patch ]; then
+	patch -p0 < configure.patch
+    fi
     ./configure $CONFIG_OPTIONS > /tmp/configure.out
 fi
 make build
