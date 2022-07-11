@@ -62,14 +62,12 @@ CONFIG_OPTIONS="--with-system-python3=no \
 --enable-symengine_py \
 --enable-tdlib \
 --enable-tides"
-if [ "$1" != "noconfig" ]; then
-    ./bootstrap
-    make configure
-    if [ -e configure.patch ]; then
-	patch -p0 < configure.patch
-    fi
-    ./configure $CONFIG_OPTIONS > /tmp/configure.out
+./bootstrap
+make configure
+if [ -e configure.patch ]; then
+    patch -p0 < configure.patch
 fi
+./configure $CONFIG_OPTIONS > /tmp/configure.out
 make build
 popd
 mv /var/tmp/sage-$VERSION-current repo/sage
