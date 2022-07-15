@@ -1,8 +1,8 @@
 BASE_DIR=`pwd`
 VERSION=`./get_sage_version`
-PYTHON_VERSION=3.10
-PYTHON_LONG_VERSION=3.10.3
-echo Sage Version is ${VERSION}.
+PYTHON_LONG_VERSION=`readlink repo/sage/venv | cut -f2 -d '-' | sed s/python//`
+PYTHON_VERSION=`echo ${PYTHON_LONG_VERSION} | cut -f 1,2 -d'.'`
+echo Building framework for SageMath ${VERSION} using Python ${PYTHON_LONG_VERSION}
 REPO=${BASE_DIR}/repo/sage
 FILES=${BASE_DIR}/files
 BUILD=${BASE_DIR}/build

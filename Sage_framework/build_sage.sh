@@ -64,10 +64,10 @@ CONFIG_OPTIONS="--with-system-python3=no \
 --enable-tides"
 ./bootstrap
 make configure
-if [ -e configure.patch ]; then
-    patch -p0 < configure.patch
-fi
 ./configure $CONFIG_OPTIONS > /tmp/configure.out
 make build
 popd
 mv /var/tmp/sage-$VERSION-current repo/sage
+# Fix the broken p_group_cohomology spkg
+cp -R repo/p_group_cohomology-3.3.2/gap_helper repo/sage/local/share/gap/pkg/p_group_cohomology_helper
+cp repo/p_group_cohomology-3.3.2/singular_helper/dickson.lib repo/sage/local/share/singular/LIB
