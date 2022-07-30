@@ -4,7 +4,7 @@ Sage_MacOS
 The Sage_MacOS project aims to provide a simple, streamlined macOS application which
 runs SageMath and can be installed by the usual process of dragging the application
 bundle to the /Applications directory.  There is currently a signed and notarized
-release of such an app for SageMath 9.5 available in the Releases section, which
+release of such an app for SageMath 9.6 available in the Releases section, which
 is accessable from the right hand side of this page.
 
 The structure of the application bundle is that the main executable is a small C
