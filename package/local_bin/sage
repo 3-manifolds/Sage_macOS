@@ -1,7 +1,8 @@
 #! /bin/bash
 VERSION=9.7
+DASH_VERSION=9-7
 SYMLINK=/var/tmp/sage-$VERSION-current
-APP=SageMath-$VERSION.app
+APP=SageMath-$DASH_VERSION.app
 MIN_ENV="USER=$USER LOGNAME=$LOGNAME SHELL=$SHELL HOME=$HOME TERM=$TERM LANG=$LANG"
 if [ ! -e $SYMLINK ]; then
     CURRENT=Contents/Frameworks/Sage.framework/Versions/Current
