@@ -24,6 +24,7 @@ else
 fi
 export MAKE="make -j4"
 CONFIG_OPTIONS="--with-system-python3=no \
+--disable-editable \
 --enable-isl \
 --enable-4ti2 \
 --enable-benzene \
