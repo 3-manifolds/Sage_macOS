@@ -26,12 +26,12 @@
 %% 
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{sagetex}
-  [2020/08/12 v3.5 embedding Sage into LaTeX documents]
-\newcommand{\ST@ver}{2020/08/12 v3.5}
+  [2021/10/16 v3.6 embedding Sage into LaTeX documents]
+\newcommand{\ST@ver}{2021/10/16 v3.6}
 \RequirePackage{verbatim}
 \RequirePackage{fancyvrb}
 \RequirePackage{listings}
-\RequirePackage{color}
+\RequirePackage{xcolor}
 \lstdefinelanguage{Sage}[]{Python}
   {morekeywords={False,sage,True},sensitive=true}
 \lstdefinelanguage{SageOutput}[]{}
@@ -70,9 +70,9 @@
 \lstdefinestyle{SageOutput}{
   style=DefaultSageOutput,
 }
-\definecolor{dbluecolor}{rgb}{0.01,0.02,0.7}
-\definecolor{dgreencolor}{rgb}{0.2,0.4,0.0}
-\definecolor{dgraycolor}{rgb}{0.30,0.3,0.30}
+\providecolor{dbluecolor}{rgb}{0.01,0.02,0.7}
+\providecolor{dgreencolor}{rgb}{0.2,0.4,0.0}
+\providecolor{dgraycolor}{rgb}{0.30,0.3,0.30}
 \RequirePackage{graphicx}
 \RequirePackage{makecmds}
 \RequirePackage{ifpdf}

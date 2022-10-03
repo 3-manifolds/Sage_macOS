@@ -6,6 +6,14 @@ VERSION=1.0
 mkdir -p packages
 
 pkgbuild --root local_bin --scripts local_bin/sage_install/scripts --identifier org.computop.SageMath.$PKG_ID.bin --version $VERSION --install-location /usr/local/bin bin.pkg
+REPO_SAGETEX="../Sage_framework/repo/sage/venv/share/texmf/tex/latex/sagetex/sagetex.sty"
+PKG_SAGETEX="local_texlive/texmf-local/tex/latex/local/sagetex.sty"
+if [ `cmp $REPO_SAGETEX $PKG_SAGETEX` ]; then
+    echo Updating sagetex.sty
+    cp $REPO_SAGETEX $PKG_SAGETEX
+fi
+cp $REPO_SAGETEX $PKG_SAGETEX
+
 productsign --sign $DEV_ID bin.pkg packages/SageMath_bin.pkg
 
 pkgbuild --root local_share --identifier org.computop.SageMath.$PKG_ID.share --version $VERSION --install-location /usr/local/share share.pkg
