@@ -53,6 +53,10 @@ class MachFile:
                 self.rpaths.append(rpath.decode('ascii'))
 
     def relative_path(self, path):
+        """
+        Return a relative path from the directory containing this file to
+        the directory containing the file wiht the give path.
+        """
         nodes = path.split(os.path.sep)
         try:
             local_nodes = nodes[nodes.index('local'):]
@@ -89,7 +93,12 @@ class MachFile:
             else:
                 return prefix
         for dylib in self.dylibs:
-            if dylib.startswith('/'):
+            if dylib.startswith('/opt'):
+                # Special case for libgfortan on arm64.  Simulate the library being
+                # installed in our bundle.
+                installed_path = os.path.join(LOCAL_LIB, os.path.basename(dylib))
+                relpaths.append(self.relative_path(installed_path))
+            elif dylib.startswith('/'):
                  relpaths.append(self.relative_path(dylib))
             elif dylib.startswith('@rpath'):
                 for rpath in rpaths:
@@ -100,11 +109,6 @@ class MachFile:
                     relpaths.append(self.relative_path(expanded_dylib))
             elif dylib.startswith('@'):
                 continue
-            # Special case for libgfortan on arm64.  Simulate the library being
-            # installed in our bundle.
-            elif dylib.startswith('/opt'):
-                installed_path = os.path.join(LOCAL_LIB, os.path.basename(dylib))
-                relpaths.append(self.relative_path(installed_path))
             else:
                 raise RuntimeError('Unrecognized load path %s'%dylib)
         fixed = [rpath for rpath in self.rpaths if rpath.startswith('@loader_path')]
@@ -218,7 +222,6 @@ if __name__ == '__main__':
     with open(os.path.join(repo, 'sage', 'VERSION.txt')) as input_file:
         m = get_version.match(input_file.readline())
     sage_version = m.groups()[0]
-    #symlink = os.path.join(os.path.sep, 'var', 'tmp', 'sage-%s-current'%sage_version)
+    LOCAL_LIB = LOCAL_LIB.replace('X.X', sage_version)
     repo = os.path.abspath(repo)
-#    fix_files(repo, symlink.encode('ascii'), directory)
     fix_files(repo, directory)
