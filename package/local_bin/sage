@@ -3,7 +3,15 @@ VERSION=9.7
 DASH_VERSION=9-7
 SYMLINK=/var/tmp/sage-$VERSION-current
 APP=SageMath-$DASH_VERSION.app
-MIN_ENV="USER=$USER LOGNAME=$LOGNAME SHELL=$SHELL HOME=$HOME TERM=$TERM LANG=$LANG"
+USE_MINIMAL_ENV=no
+for arg do
+  shift
+  if [ "$arg" = "--minenv" ]; then
+      USE_MINIMAL_ENV="yes"
+      continue;
+  fi
+  set -- "$@" "$arg"
+done
 if [ ! -e $SYMLINK ]; then
     CURRENT=Contents/Frameworks/Sage.framework/Versions/Current
     LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister
@@ -19,4 +27,9 @@ if [ ! -e $SYMLINK ]; then
     echo Could not find $APP
     exit 1
 fi
-/usr/bin/env - PATH="$PATH" $MIN_ENV "$SYMLINK"/venv/bin/sage "$@"
+if [ "$USE_MINIMAL_ENV" == "yes" ]; then
+    MIN_ENV="USER=$USER LOGNAME=$LOGNAME SHELL=$SHELL HOME=$HOME TERM=$TERM LANG=$LANG"
+    /usr/bin/env - PATH="$PATH" $MIN_ENV "$SYMLINK"/venv/bin/sage "$@"
+else
+    "$SYMLINK"/venv/bin/sage "$@"
+fi
