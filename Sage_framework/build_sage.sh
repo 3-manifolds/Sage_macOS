@@ -8,17 +8,17 @@ mv repo/sage /var/tmp/sage-$VERSION-current
 pushd /var/tmp/sage-$VERSION-current
 if [ $(uname -m) == "arm64" ]; then
     export CFLAGS="-O2 -mmacosx-version-min=11.0"
-    export CXXFLAGS="$CFLAGS -std=c++11 -stdlib=libc++"
+    export CXXFLAGS="$CFLAGS -stdlib=libc++"
     export LDFLAGS="-Wl,-platform_version,macos,11.0,11.1 -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
     export MACOSX_DEPLOYMENT_TARGET="11.0"
-    export CC=/usr/bin/gcc
-    export CXX=/usr/bin/clang++
-    export FC=/opt/homebrew/bin/gfortran-11
+#    export CC=/usr/bin/gcc
+#    export CXX=/usr/bin/clang++
+#    export FC=/opt/homebrew/bin/gfortran-11
 else
     export GMP_CONFIGURE="--enable-fat"
     export SAGE_FAT_BINARY="yes"
     export CFLAGS="-O2 -mmacosx-version-min=10.9 -mno-avx -mno-avx2 -mno-bmi2"
-    export CXXFLAGS="$CFLAGS -std=c++11 -stdlib=libc++"
+    export CXXFLAGS="$CFLAGS -std=c++14 -stdlib=libc++"
     export LDFLAGS="-Wl,-platform_version,macos,10.9,11.3"
     export MACOSX_DEPLOYMENT_TARGET="10.9"
 fi

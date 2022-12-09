@@ -40,9 +40,6 @@ cp -R "${REPO}"/local/include/ ${VERSION_DIR}/local/include
 cp -R "${REPO}"/local/lib/ ${VERSION_DIR}/local/lib
 cp -R "${REPO}"/local/etc/ ${VERSION_DIR}/local/etc
 cp -R "${REPO}"/local/libexec/ ${VERSION_DIR}/local/libexec
-if [ `uname -m` == arm64 ]; then
-    cp -R gfortran/lib ${VERSION_DIR}/local
-fi
 ln -s lib "${VERSION_DIR}"/local/lib64
 mkdir -p ${VERSION_DIR}/local/var/lib/sage/{installed,scripts}
 mkdir -p ${VERSION_DIR}/${VENV_DIR}
@@ -69,7 +66,7 @@ fi
 cp -p ${FILES}/page.html ${VERSION_DIR}/${VENV_PYLIB}/site-packages/notebook/templates/page.html
 cp -p ${FILES}/{sage,sage-env} ${VERSION_DIR}/${VENV_DIR}/bin
 cp -p ${FILES}/kernel.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/repl/ipython_kernel/kernel.py
-sed "s/__VERSION__/${VERSION}/g" "${FILES}"/sage-env-config > "${VERSION_DIR}"/local/bin/sage-env-config
+cp "${FILES}"/sage-env-config "${VERSION_DIR}"/local/bin/sage-env-config
 cp "${VERSION_DIR}"/local/bin/sage-env-config ${VERSION_DIR}/${VENV_DIR}/bin
 rm -rf ${VERSION_DIR}/${VENV_DIR}/share/jupyter/kernels/sagemath
 mkdir -p ${KERNEL_DIR}

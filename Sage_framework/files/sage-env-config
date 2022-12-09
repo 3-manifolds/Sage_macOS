@@ -20,7 +20,7 @@
 #    or build/bin/sage-build-env instead.
 #  - Configuration variables that are only needed by the Sage runtime,
 #    but not as environment variables, should instead be set in
-#    pkgs/sage_conf/sage_conf.py
+#    pkgs/sage-conf/_sage_conf/_conf.py
 #
 ##########################################################################
 
@@ -28,17 +28,17 @@ export SAGE_ENV_CONFIG_SOURCED=1
 
 # SAGE_LOCAL is the installation prefix and can be customized by using
 # ./configure --prefix
-export SAGE_LOCAL="/var/tmp/sage-9.7-current/local"
+export SAGE_LOCAL="/var/tmp/sage-9.8-current/local"
 
 # SAGE_ROOT is the location of the Sage source/build tree.
-export SAGE_ROOT="/var/tmp/sage-9.7-current"
+export SAGE_ROOT="/var/tmp/sage-9.8-current"
 
 #######################################
 # Compilers set at configuration time.
 # We do not export these variables; sage-env sets CC etc. based on them.
 #######################################
 CONFIGURED_CC="gcc"
-CONFIGURED_CXX="g++ -std=gnu++11"
+CONFIGURED_CXX="g++ -std=gnu++11 -std=gnu++11"
 CONFIGURED_FC=""
 CONFIGURED_OBJC="gcc"
 CONFIGURED_OBJCXX="g++"

@@ -4,8 +4,6 @@ import sys
 from dev_id import DEV_ID
 entitlement_file = 'entitlement.plist'
 framework_path = os.path.abspath('build/Sage.framework/Versions/Current')
-extra_files = ['local/share/cmake-3.21/Modules/Internal/CPack/CPack.OSXScriptLauncher.in']
-
 file_args = ['codesign', '-v', '-s', DEV_ID, '--timestamp', '--options', 'runtime', '--force',
                  '--entitlements', entitlement_file]
 if len(sys.argv) == 1 or sys.argv[1] != 'framework':
