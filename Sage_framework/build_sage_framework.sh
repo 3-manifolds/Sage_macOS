@@ -59,9 +59,9 @@ chmod 755 ${VERSION_DIR}/local/var/lib/sage/runpath.sh
 
 # Copy our modified files into the bundle
 if [ $(uname -m) == "arm64" ]; then
-    TKINTER=_tkinter.cpython-310-darwin-arm64.so
+    TKINTER=_tkinter.cpython-311-darwin-arm64.so
 else
-    TKINTER=_tkinter.cpython-310-darwin-x86_64.so
+    TKINTER=_tkinter.cpython-311-darwin-x86_64.so
 fi
 cp -p ${FILES}/page.html ${VERSION_DIR}/${VENV_PYLIB}/site-packages/notebook/templates/page.html
 cp -p ${FILES}/{sage,sage-env} ${VERSION_DIR}/${VENV_DIR}/bin

@@ -3,7 +3,6 @@ build
 __pycache__
 *.dmg
 *.bak
-*.json
 *.pkg
 backup
 repo

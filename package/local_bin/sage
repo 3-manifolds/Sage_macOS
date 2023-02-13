@@ -1,6 +1,6 @@
 #! /bin/bash
-VERSION=9.7
-DASH_VERSION=9-7
+VERSION=9.8
+DASH_VERSION=9-8
 SYMLINK=/var/tmp/sage-$VERSION-current
 APP=SageMath-$DASH_VERSION.app
 USE_MINIMAL_ENV=no

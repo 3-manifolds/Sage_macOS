@@ -8,14 +8,16 @@ import json
 import time
 import plistlib
 import tkinter
-from configparser import ConfigParser
+#### from configparser import ConfigParser
 from tkinter import ttk
 from tkinter.font import Font
-from tkinter.simpledialog import Dialog
+from tkinter.simpledialog import Dialog, askstring
 from tkinter.filedialog import askdirectory
-from tkinter.messagebox import showerror, showwarning, askyesno
+from tkinter.messagebox import showerror, showwarning, askyesno, askokcancel
+from tkinter.scrolledtext import ScrolledText
+import os
+import plistlib
 
-pid_re = re.compile('nbserver-([0-9]*)\.json')
 jupyter_id = re.compile('nbserver-([0-9]+)-open.html')
 contents_dir = abspath(path_join(sys.argv[0], pardir, pardir))
 framework_dir = path_join(contents_dir, 'Frameworks')
@@ -28,30 +30,14 @@ def get_version():
         info = plistlib.load(plist_file)
     return info['CFBundleShortVersionString']
 
-def clean_jupyters():
-    home_dir = os.getenv('HOME')
-    jupyter_dir = os.path.join(home_dir, 'Library', 'Application Support', 'SageMath',
-                                   get_version(), 'Jupyter')
-    for filename in os.listdir(jupyter_dir):
-        match = pid_re.match(filename)
-        if match:
-            pid = int(match[1])
-            try:
-                # Killing a process with signal 0 does not send a signal but raises an exception
-                # if the process does not exist.  See man 2 kill.
-                os.kill(int(pid), 0)
-            except ProcessLookupError:
-                try:
-                    os.unlink(os.path.join(jupyter_dir, 'nbserver-%d.json'%pid))
-                    os.unlink(os.path.join(jupyter_dir, 'nbserver-%d-open.html'%pid))
-                except FileNotFoundError:
-                    pass
-
 sagemath_version = get_version()
 app_support_dir = path_join(os.environ['HOME'], 'Library', 'Application Support',
-                                    'SageMath', sagemath_version)
+                                    'SageMath')
+# This must match what is used in ipython_extension.py
+settings_path = path_join(app_support_dir, 'Settings.plist')
+
 jupyter_runtime_dir = path_join(app_support_dir, 'Jupyter')
-config_file = path_join(app_support_dir, 'config')
+###config_file = path_join(app_support_dir, 'config')
 
 class PopupMenu(ttk.Menubutton):
     def __init__(self, parent, variable, values):
@@ -114,7 +100,7 @@ class Launcher:
     def launch_terminal(self, app):
         if app == 'Terminal.app':
             subprocess.run(['osascript', '-'], input=self.terminal_script, text=True,
-                               capture_output=True)
+                               capture_output=True, env=os.environ)
         elif app == 'iTerm.app':
             subprocess.run(['open', '-a', 'iTerm'], capture_output=True)
             subprocess.run(['osascript', '-'], input=self.iterm_script, text=True,
@@ -145,7 +131,7 @@ class Launcher:
 class LaunchWindow(tkinter.Toplevel, Launcher):
     def __init__(self, root):
         Launcher.__init__(self)
-        self.get_state()
+        self.get_settings()
         self.root = root
         tkinter.Toplevel.__init__(self)
         self.tk.call('::tk::unsupported::MacWindowStyle', 'style', self._w,
@@ -168,12 +154,12 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
 	# Interfaces
         checks = ttk.Labelframe(frame, text="Available User Interfaces", padding=10)
         self.radio_var = radio_var = tkinter.Variable(checks,
-                                         self.config['state']['interface_type'])
+                                         self.settings['state']['interface_type'])
         self.use_cli = ttk.Radiobutton(checks, text="Command line", variable=radio_var,
             value='cli', command=self.update_radio_buttons)
         self.terminals = ['Terminal.app']
         if self.find_app('com.googlecode.iterm2'):
-            if self.config['state']['terminal_app'] == 'iTerm.app':
+            if self.settings['state']['terminal_app'] == 'iTerm.app':
                 self.terminals.insert(0, 'iTerm.app')
             else:
                 self.terminals.append('iTerm.app')
@@ -183,7 +169,7 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
             variable=radio_var, value='nb',  command=self.update_radio_buttons)
         notebook_frame = ttk.Frame(checks)
         self.notebooks = ttk.Entry(notebook_frame, width=24)
-        self.notebooks.insert(tkinter.END, self.config['state']['notebook_dir'])
+        self.notebooks.insert(tkinter.END, self.settings['state']['notebook_dir'])
         self.notebooks.config(state='readonly')
         self.browse = ttk.Button(notebook_frame, text='Select ...', padding=(-8, 0),
             command=self.browse_notebook_dir, state=tkinter.DISABLED)
@@ -207,27 +193,27 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
         self.destroy()
         self.root.destroy()
 
-    def get_state(self):
-        self.config = ConfigParser()
-        if os.path.exists(config_file):
-            self.config.read(config_file)
-        else:
-            self.config['state'] = {
+    def get_settings(self):
+        try:
+            with open(settings_path, 'rb') as settings_file:
+                self.settings = plistlib.load(settings_file)
+        except:
+            self.settings = {}
+        if 'state' not in self.settings:
+            self.settings['state'] = {
                 'interface_type': 'cli',
                 'terminal_app': 'Terminal.app',
                 'notebook_dir': '',
                 }
 
-    def save_state(self):
-        try:
-            config = self.config
-            config['state']['interface_type'] = self.radio_var.get()
-            config['state']['terminal_app'] = self.terminal_var.get()
-            config['state']['notebook_dir'] = self.notebooks.get()
-            with open(config_file, 'w') as outfile:
-                config.write(outfile)
-        except:
-            pass
+    def save_settings(self):
+        self.settings['state'] = {
+            'interface_type': self.radio_var.get(),
+            'terminal_app': self.terminal_var.get(),
+            'notebook_dir': self.notebooks.get(),
+            }
+        with open(settings_path, 'wb') as settings_file:
+            plistlib.dump(self.settings, settings_file)
             
     def update_radio_buttons(self):
         radio = self.radio_var.get()
@@ -241,6 +227,10 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
             self.terminal_option.config(state=tkinter.DISABLED)
         
     def launch_sage(self):
+        # The settings may have changed!
+        self.get_settings()
+        environment = self.settings.get('environment', {})
+        os.environ.update(environment)
         interface = self.radio_var.get()
         if interface == 'cli':
             launched = self.launch_terminal(app=self.terminal_var.get())
@@ -253,7 +243,7 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
                 html_file = path_join(jupyter_runtime_dir, jupyter_openers[0]) 
                 launched = self.launch_notebook(html_file)
         if launched:
-            self.save_state()
+            self.save_settings()
             self.quit()
 
     def check_notebook_dir(self):
@@ -335,6 +325,119 @@ class AboutDialog(Dialog):
         self.bind("<Escape>", self.ok)
         frame.pack()
 
+class EnvironmentEditor(tkinter.Toplevel):
+    def __init__(self, parent):
+        tkinter.Toplevel.__init__(self, parent)
+        self.parent = parent
+        self.wm_protocol('WM_DELETE_WINDOW', self.close)
+        self.title('Sage Environment')
+        home = os.environ['HOME']
+        self.load_settings()
+        self.environment = self.settings.get('environment', {})
+        self.varlist = list(self.environment.keys())
+        self.add = tkinter.Image('nsimage', name='add', source='NSAddTemplate',
+                        width=20, height=20)
+        self.remove = tkinter.Image('nsimage', name='remove', source='NSRemoveTemplate',
+                        width=20, height=4)
+        self.left = ttk.Frame(self, padding=0)
+        ttk.Label(self, text = 'Variable').grid(row=0, column=0, padx=10, sticky='W')
+        ttk.Label(self, text = 'Value').grid(row=0, column=1, sticky='W')
+        self.varnames = tkinter.StringVar(self)
+        if self.varlist:
+            self.varnames.set(self.varlist)
+        self.listbox = tkinter.Listbox(self.left, selectmode='browse',
+                          listvariable=self.varnames, height=19)
+        self.listbox.grid(row=1, column=0, columnspan=2, sticky='NSEW')
+        button_frame = ttk.Frame(self.left, padding=(0, 4, 0, 10))
+        ttk.Button(button_frame, style="GradientButton", image='add',
+            command=self.add_var).grid(row=0, column=0, sticky='NW')
+        ttk.Button(button_frame, style="GradientButton", image='remove',
+            padding=(0,8), command=self.remove_var).grid(row=0, column=1, sticky='NW')
+        button_frame.grid(row=2, column=0, sticky='NW')
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(1, weight=1)
+        self.left.grid(row=1, rowspan=2, column=0, sticky='NSW', padx=10, pady=10)
+        self.text = ScrolledText(self)
+        self.text.frame.grid(row=1, column=1, pady=10, sticky='NSEW')
+        ttk.Button(self, text='Done', command = self.done).grid(
+            row=2, column=1, pady=20, padx=20, sticky='ES')
+        self.listbox.bind("<<ListboxSelect>>",
+            lambda e: self.update())
+        self.selected = None
+        if self.varlist:
+            self.listbox.selection_set(0)
+            self.update()
+
+    def update(self):
+        if self.selected is not None:
+            current_value = self.text.get('0.0', 'end').strip()
+            self.environment[self.listbox.get(self.selected)] = current_value
+        selection = self.listbox.curselection()
+        if not selection:
+            return
+        selection = selection[0]
+        self.selected = selection
+        self.text.delete('0.0', 'end')
+        var = self.listbox.get(selection).strip()
+        value = self.environment.get(var, '')
+        if value:
+            self.text.insert('0.0', value)
+
+    def add_var(self):
+        self.update()
+        new_var = askstring('New Variable', 'Variable Name:')
+        self.environment[new_var] = ''
+        self.text.delete('0.0', 'end')
+        self.selected = len(self.varlist)
+        self.varlist.append(new_var)
+        self.listbox.insert('end', new_var)
+        self.listbox.selection_clear(0, 'end')
+        self.listbox.selection_set(self.selected)
+        self.listbox.see(self.selected)
+        self.text.focus_set()
+
+    def remove_var(self):
+        selection = self.listbox.curselection()
+        if not selection:
+            return
+        var = self.listbox.get(selection[0])
+        self.varlist.remove(var)
+        self.environment.pop(var)
+        self.text.delete('0.0', 'end')
+        self.varnames.set(self.varlist)
+        if '' in self.environment:
+            self.environment.pop('')
+
+    def go(self):
+        self.transient(self.parent)
+        self.grab_set()
+        self.wait_window(self)
+
+    def load_settings(self):
+        if os.path.exists(settings_path):
+            try:
+                with open(settings_path, 'rb') as settings_file:
+                    self.settings = plistlib.load(settings_file)
+            except plistlib.InvalidFileException:
+                os.unlink(settings_path)
+                self.settings = {}
+        else:
+            self.settings = {}
+
+    def done(self):
+        self.update()
+        if '' in self.environment:
+            self.environment.pop('')
+        self.settings['environment'] = self.environment
+        with open(settings_path, 'wb') as settings_file:
+            plistlib.dump(self.settings, settings_file)
+        self.destroy()
+
+    def close(self):
+        if askokcancel(message=''
+            'Closing the window will cause your changes to be lost.'):
+            self.destroy()
+
 class SageApp(Launcher):
     resource_dir = abspath(path_join(sys.argv[0], pardir, pardir, 'Resources'))
     icon_file = abspath(path_join(resource_dir, 'sage_icon_1024.png'))
@@ -355,6 +458,7 @@ The app is copyright © 2021 by Marc Culler, Nathan Dunfield, Matthias Gӧrner a
         self.icon = tkinter.Image("photo", file=self.icon_file)
         root.tk.call('wm','iconphoto', root._w, self.icon)
         self.menubar = menubar = tkinter.Menu(root)
+        root.createcommand('::tk::mac::ShowPreferences', self.edit_env)
         apple_menu = tkinter.Menu(menubar, name="apple")
         apple_menu.add_command(label='About SageMath ...', command=self.about_sagemath)
         menubar.add_cascade(menu=apple_menu)
@@ -364,8 +468,11 @@ The app is copyright © 2021 by Marc Culler, Nathan Dunfield, Matthias Gӧrner a
     def about_sagemath(self):
         AboutDialog(self.root_window, 'SageMath', self.about)
 
+    def edit_env(self):
+        editor = EnvironmentEditor(self.launcher)
+        editor.go()
+
     def run(self):
-        clean_jupyters()
         symlink = path_join(os.path.sep, 'var', 'tmp', 'sage-%s-current'%sagemath_version)
         self.launcher = LaunchWindow(root=self.root_window)
         if not os.path.islink(symlink):
