@@ -227,10 +227,6 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
             self.terminal_option.config(state=tkinter.DISABLED)
         
     def launch_sage(self):
-        # The settings may have changed!
-        self.get_settings()
-        environment = self.settings.get('environment', {})
-        os.environ.update(environment)
         interface = self.radio_var.get()
         if interface == 'cli':
             launched = self.launch_terminal(app=self.terminal_var.get())

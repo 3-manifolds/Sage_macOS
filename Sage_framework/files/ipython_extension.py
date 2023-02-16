@@ -483,6 +483,14 @@ class SageCustomizations():
         """
         Run Sage's initial startup file.
         """
+        required_paths = [
+        '/var/tmp/sage-9.8-current/local/bin',
+        '/var/tmp/sage-9.8-current/venv/bin',
+        '/bin',
+        '/usr/bin',
+        '/usr/local/bin',
+        '/Library/TeX/texbin'
+        ]
         # For the SageMath app, load the environment preferences.
         home = os.environ['HOME']
         # This must match what is used in the SageMath app!
@@ -494,6 +502,11 @@ class SageCustomizations():
                 environment = settings.get('environment', {})
         except:
             environment = {}
+        # Try to prevent users from crippling Sage with a weird PATH.
+        user_PATH = environment.get('PATH', '')
+        paths = user_PATH.split(':') + required_paths
+        unique_paths = list(dict.fromkeys(paths))
+        environment['PATH'] = ':'.join(unique_paths)
         os.environ.update(environment)
         try:
             with open(SAGE_STARTUP_FILE, 'r') as f:
