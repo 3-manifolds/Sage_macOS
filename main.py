@@ -207,6 +207,7 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
                 }
 
     def save_settings(self):
+        self.get_settings()
         self.settings['state'] = {
             'interface_type': self.radio_var.get(),
             'terminal_app': self.terminal_var.get(),
