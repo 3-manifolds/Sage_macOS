@@ -74,6 +74,7 @@ mkdir -p ${KERNEL_DIR}
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${KERNEL_DIR}/kernel.json
 cp -p ${FILES}/${TKINTER} ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload/_tkinter.cpython-310-darwin.so
 cp ${FILES}/sagedoc.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/misc/sagedoc.py
+cp -p ${FILES}/tkinter/__init__.py ${VERSION_DIR}/${VENV_PYLIB}/tkinter/__init__.py
 
 # Fix illegal symlinks that point outside of the bundle
 rm ${VERSION_DIR}/local/share/gap/{gac,gap}
