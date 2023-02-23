@@ -33,7 +33,6 @@ def get_version():
 sagemath_version = get_version()
 app_support_dir = path_join(os.environ['HOME'], 'Library', 'Application Support',
                                     'SageMath')
-# This must match what is used in ipython_extension.py
 settings_path = path_join(app_support_dir, 'Settings.plist')
 
 jupyter_runtime_dir = path_join(app_support_dir, 'Jupyter')
@@ -226,8 +225,35 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
             self.notebooks.config(state='readonly')
             self.browse.config(state=tkinter.NORMAL)
             self.terminal_option.config(state=tkinter.DISABLED)
-        
+
+    def update_environment(self):
+        required_paths = [
+        '/var/tmp/sage-9.8-current/local/bin',
+        '/var/tmp/sage-9.8-current/venv/bin',
+        '/bin',
+        '/usr/bin',
+        '/usr/local/bin',
+        '/Library/TeX/texbin'
+        ]
+        try:
+            with open(settings_path, 'rb') as settings_file:
+                settings = plistlib.load(settings_file)
+                environment = settings.get('environment', {})
+        except:
+            environment = {}
+        # Try to prevent users from crippling Sage with a weird PATH.
+        user_paths = environment.get('PATH', '').split(':')
+        # Avoid including the empty path.
+        paths = [path for path in user_paths if path] + required_paths
+        unique_paths = list(dict.fromkeys(paths))
+        environment['PATH'] = ':'.join(unique_paths)
+        os.environ.update(environment)
+            
     def launch_sage(self):
+        self.update_environment()
+        with open('/tmp/sagemath.log', 'a') as logfile:
+            print('Running launch_sage', file=logfile)
+            print(os.environ['PATH'], file=logfile)
         interface = self.radio_var.get()
         if interface == 'cli':
             launched = self.launch_terminal(app=self.terminal_var.get())

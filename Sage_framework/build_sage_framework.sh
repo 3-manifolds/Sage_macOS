@@ -66,7 +66,6 @@ fi
 cp -p ${FILES}/page.html ${VERSION_DIR}/${VENV_PYLIB}/site-packages/notebook/templates/page.html
 cp -p ${FILES}/{sage,sage-env} ${VERSION_DIR}/${VENV_DIR}/bin
 cp -p ${FILES}/kernel.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/repl/ipython_kernel/kernel.py
-cp -p ${FILES}/ipython_extension.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/repl/ipython_extension.py
 cp "${FILES}"/sage-env-config "${VERSION_DIR}"/local/bin/sage-env-config
 cp "${VERSION_DIR}"/local/bin/sage-env-config ${VERSION_DIR}/${VENV_DIR}/bin
 rm -rf ${VERSION_DIR}/${VENV_DIR}/share/jupyter/kernels/sagemath
