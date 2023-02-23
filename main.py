@@ -251,9 +251,6 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
             
     def launch_sage(self):
         self.update_environment()
-        with open('/tmp/sagemath.log', 'a') as logfile:
-            print('Running launch_sage', file=logfile)
-            print(os.environ['PATH'], file=logfile)
         interface = self.radio_var.get()
         if interface == 'cli':
             launched = self.launch_terminal(app=self.terminal_var.get())

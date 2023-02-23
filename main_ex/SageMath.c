@@ -24,7 +24,7 @@ int main(int argc, char **argv, char **envp) {
     CFBundleRef bundle = CFBundleGetMainBundle();
     CFURLRef URL;
     CFStringRef string;
-    debugMessage("Starting SageMath");
+    /* debugMessage("Starting SageMath"); */
     URL = CFBundleCopyExecutableURL(bundle);
     string = CFURLCopyFileSystemPath(URL, kCFURLPOSIXPathStyle);
     CFRelease(URL);
