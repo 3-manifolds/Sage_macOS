@@ -66,8 +66,6 @@ fi
 cp -p ${FILES}/page.html ${VERSION_DIR}/${VENV_PYLIB}/site-packages/notebook/templates/page.html
 cp -p ${FILES}/{sage,sage-env} ${VERSION_DIR}/${VENV_DIR}/bin
 cp -p ${FILES}/kernel.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/repl/ipython_kernel/kernel.py
-cp "${FILES}"/sage-env-config "${VERSION_DIR}"/local/bin/sage-env-config
-cp "${VERSION_DIR}"/local/bin/sage-env-config ${VERSION_DIR}/${VENV_DIR}/bin
 rm -rf ${VERSION_DIR}/${VENV_DIR}/share/jupyter/kernels/sagemath
 mkdir -p ${KERNEL_DIR}
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${KERNEL_DIR}/kernel.json
@@ -76,9 +74,9 @@ cp ${FILES}/sagedoc.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/misc/sage
 cp -p ${FILES}/tkinter/__init__.py ${VERSION_DIR}/${VENV_PYLIB}/tkinter/__init__.py
 
 # Fix illegal symlinks that point outside of the bundle
-rm ${VERSION_DIR}/local/share/gap/{gac,gap}
-ln -s ../../bin/gac ${VERSION_DIR}/local/share/gap/gac
-ln -s ../../bin/gap ${VERSION_DIR}/local/share/gap/gap
+# rm ${VERSION_DIR}/local/share/gap/{gac,gap}
+# ln -s ../../bin/gac ${VERSION_DIR}/local/share/gap/gac
+# ln -s ../../bin/gap ${VERSION_DIR}/local/share/gap/gap
 rm -rf ${VERSION_DIR}/local/share/jupyter/kernels/sagemath/doc
 rm -f ${VERSION_DIR}/local/share/threejs-sage/threejs-sage
 rm -rf ${THREEJS_SAGE}

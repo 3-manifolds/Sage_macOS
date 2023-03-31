@@ -18,7 +18,7 @@ else
     export GMP_CONFIGURE="--enable-fat"
     export SAGE_FAT_BINARY="yes"
     export CFLAGS="-O2 -mmacosx-version-min=10.9 -mno-avx -mno-avx2 -mno-bmi2"
-    export CXXFLAGS="$CFLAGS -std=c++14 -stdlib=libc++"
+    export CXXFLAGS="$CFLAGS -stdlib=libc++"
     export LDFLAGS="-Wl,-platform_version,macos,10.9,11.3"
     export MACOSX_DEPLOYMENT_TARGET="10.9"
 fi
@@ -53,11 +53,11 @@ CONFIG_OPTIONS="--with-system-python3=no \
 --enable-pari_galpol \
 --enable-pari_nftables \
 --enable-plantri \
---enable-saclib \
 --enable-sage_numerical_backends_coin \
 --enable-pynormaliz \
 --enable-pycosat \
 --enable-pysingular \
+--enable-qepcad \
 --enable-sirocco \
 --enable-symengine \
 --enable-symengine_py \

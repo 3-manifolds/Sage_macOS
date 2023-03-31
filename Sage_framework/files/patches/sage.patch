@@ -1,0 +1,136 @@
+--- ../repo/sage/local/var/lib/sage/venv-python3.11.1/bin/sage	2023-03-30 15:47:17
++++ sage	2022-12-09 14:04:52
+@@ -77,9 +77,49 @@
+ }
+ 
+ # Resolve the links in $0 so that local/bin/sage can be executed from
+-# a symlink (Issue #30888).
++# a symlink (Trac #30888).
+ SELF=$(resolvelinks "${0}")
+ 
++#####################################################################
++# Get the installation-specific symlink
++#####################################################################
++
++SAVED_CWD="`pwd`"
++CURDIR=$(resolvelinks "`dirname $0`")
++cd "$CURDIR/../../../../../../"
++VERSION_DIR="`pwd`"
++cd "$SAVED_CWD"
++runpath_sh=$VERSION_DIR/local/var/lib/sage/runpath.sh
++if [ -x "$runpath_sh" ]; then
++    . "$runpath_sh"
++else
++    echo could not find $VERSION_DIR/local/var/lib/sage/runpath.sh
++fi
++
++# Check that the installation specific symlink points to this sage
++# root directory.  If not, try to reset it.  Strangely, this script
++# can get called a second time and when that happens we will have
++# $TARGET == $SAGE_SYMLINK.  We had better not set the symlink to
++# point to itself!
++
++OLD_VERSION_DIR=`readlink $SAGE_SYMLINK`
++if [ "$VERSION_DIR" != "$OLD_VERSION_DIR" ] && [ "$VERSION_DIR" != "$SAGE_SYMLINK" ]; then
++    rm -f $SAGE_SYMLINK 2> /dev/null
++    if [ $? -ne 0 ]; then
++        OWNER=$(stat -f '%Su' $SAGE_SYMLINK)
++        echo
++        echo "Oh no!"
++        echo "You do not have permission to reconfigure this SageMath."
++        echo "Please ask $OWNER to open the app."
++        echo
++        read -p "The app will exit when you press a key."
++        exit
++    fi
++    if [ "$VERSION_DIR" != "$SAGE_SYMLINK" ]; then 
++        ln -s "$VERSION_DIR" "$SAGE_SYMLINK"
++    fi
++fi
++
+ # Display the current version of Sage
+ # usage: sage_version [-v]
+ #   -v    display the full version banner including release date
+@@ -216,20 +238,24 @@
+     exit 127
+ fi
+ 
+-# Check for '-i' etc. before sourcing sage-env: running "make"
++# Check for '-i' before sourcing sage-env: running "make"
+ # should be run outside of the Sage shell.
+-case "$1" in
+-    -i|-f|-p)
+-        # Delegate further option handling to the non-installed sage-site script.
+-        # (These options become unavailable if the directory $SAGE_ROOT is removed.)
+-        if [ -d "$SAGE_ROOT" ]; then
+-            exec "$SAGE_ROOT/build/bin/sage-site" "$@"
+-            # fallthrough if there is no sage-site script
+-        fi
+-        echo >&2 "Error: unknown option: $1"
+-        exit 1
+-        ;;
+-esac
++if [ "$1" = '-f' ]; then
++    # -f is an alias for -i -f
++    set -- -i "$@"
++fi
++if [ "$1" = '-i' ]; then
++    if [ -z "$2" ]; then
++        PACKAGE="the package"
++    else
++        PACKAGE=$2 
++    fi
++    echo "Sorry, this binary distribution does not support installing sage packages."
++    echo "If $PACKAGE is available from pypi you may install it by running"
++    echo "    %pip install $PACKAGE"
++    echo "from the sage prompt."
++    exit 1
++fi
+ 
+ #####################################################################
+ # Report information about the Sage environment
+@@ -275,6 +301,18 @@
+     export DOT_SAGE="$HOME/.sage"
+ fi
+ 
++#####################################################################
++# Special environment variables used for the macOS app to prevent
++# writing into the application bundle and breaking the signature.
++# and to block warnings about using "if x is 1" and to find the
++# Jupyter kernel.
++#####################################################################
++export PYTHONPYCACHEPREFIX="$DOT_SAGE/pycache"
++export PIP_CONFIG_FILE="$SAGE_SYMLINK/Resources/pip.conf"
++export PYTHONWARNINGS=ignore
++if ! [ -e /usr/local/share/jupyter/kernels/SageMath-"$SAGE_VERSION"/kernel.json ]; then
++    export JUPYTER_PATH=$SAGE_SYMLINK/Resources/jupyter
++fi
+ 
+ #####################################################################
+ # Helper functions
+@@ -479,13 +517,6 @@
+         echo "                         Sage documentation for \"string\"."
+         echo "  --search_src ...    -- same as --grep"
+         echo "  --search_doc ...    -- same as --grepdoc"
+-        echo "  --fixdoctests file.py"
+-        echo "                      -- Run doctests and replace output of failing doctests"
+-        echo "                         with actual output."
+-        echo "  --fiximports <files|dir>"
+-        echo "                      -- Replace imports from sage.PAC.KAGE.all by specific"
+-        echo "                         imports when sage.PAC.KAGE is an implicit namespace"
+-        echo "                         package"
+     fi
+     echo "  --sh [...]         -- run a shell with Sage environment variables"
+     echo "                        as they are set in the runtime of Sage"
+@@ -981,11 +1012,6 @@
+     exec sage-startuptime.py "$@"
+ fi
+ 
+-if [ "$1" = '-fiximports' -o "$1" = '--fiximports' ]; then
+-    shift
+-    exec sage-python -m sage.misc.replace_dot_all "$@"
+-fi
+-
+ if [ "$1" = '-tox' -o "$1" = '--tox' ]; then
+     shift
+     if [ -n "$SAGE_SRC" -a -f "$SAGE_SRC/tox.ini" ]; then

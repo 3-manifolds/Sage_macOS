@@ -142,34 +142,52 @@ usage() {
     ####  1.......................26..................................................78
     ####  |.....................--.|...................................................|
     echo
-    echo "Optional arguments:"
-    echo "  file.[sage|py|spyx] -- run given .sage, .py or .spyx file"
-    echo "  --advanced          -- list all command line options"
-    echo "  -c <cmd>            -- Evaluates cmd as sage code"
+    echo "Running Sage:"
+    if command -v sage-ipython &>/dev/null; then
+        echo
+        echo "  file.[sage|py|spyx] -- run given .sage, .py or .spyx file"
+        echo "  -c <cmd>            -- evaluate cmd as sage code"
+        echo "  --notebook=[...]    -- start the Sage notebook (valid options are"
+        echo "                         'default', 'jupyter', 'jupyterlab', and 'export')"
+        echo "                         Current default is 'jupyter'"
+        echo "  -n, --notebook      -- shortcut for --notebook=default"
+        echo "  --nodotsage         -- run Sage without using the user's .sage directory:"
+        echo "                         create and use a temporary .sage directory instead"
+        echo "  -t [options] <--all|files|dir>"
+        echo "                      -- test examples in .py, .pyx, .sage, .tex or .rst files"
+        echo "                         selected options:"
+        echo "                           --long - include lines with the phrase 'long time'"
+        echo "                           --verbose - print debugging output during the test"
+        echo "                           --optional - controls which optional tests are run"
+        echo "                           --help - show all testing options"
+    else
+        echo "                         (not installed currently, "
+        echo "                          to install, run sage --pip install sagemath-repl)"
+    fi
+    echo
+    echo "Running external programs:"
+    echo
+    command -v gap &>/dev/null && \
     echo "  --gap [...]         -- run Sage's Gap with given arguments"
+    command -v gp &>/dev/null && \
     echo "  --gp [...]          -- run Sage's PARI/GP calculator with given arguments"
-    echo "  -h                  -- print this help message"
     echo "  --pip [...]         -- invoke pip, the Python package manager"
+    command -v maxima &>/dev/null && \
     echo "  --maxima [...]      -- run Sage's Maxima with given arguments"
+    command -v mwrank &>/dev/null && \
     echo "  --mwrank [...]      -- run Sage's mwrank with given arguments"
-    echo "  --notebook=[...]    -- start the Sage notebook (valid options are"
-    echo "                         'default', 'jupyter', 'jupyterlab', and 'export')"
-    echo "                         Current default is 'jupyter'"
-    echo "  -n, --notebook      -- shortcut for --notebook=default"
     echo "  --python [...], --python3 [...] -- run the Python 3 interpreter"
+    command -v R &>/dev/null && \
     echo "  -R [...]            -- run Sage's R with given arguments"
+    command -v singular &>/dev/null && \
     echo "  --singular [...]    -- run Sage's singular with given arguments"
-    echo "  --nodotsage         -- run Sage without using the user's .sage directory:"
-    echo "                         create and use a temporary .sage directory instead"
-    echo "  -t [options] <--all|files|dir>"
-    echo "                      -- test examples in .py, .pyx, .sage, .tex or .rst files"
-    echo "                         selected options:"
-    echo "                           --long - include lines with the phrase 'long time'"
-    echo "                           --verbose - print debugging output during the test"
-    echo "                           --optional - controls which optional tests are run"
-    echo "                           --help - show all testing options"
+    echo
+    echo "Getting help:"
+    echo
     echo "  -v, --version       -- display Sage version information"
-    if [ -n "$SAGE_ROOT" ]; then
+    echo "  -h, -?, --help      -- print this help message"
+    echo "  --advanced          -- list all command line options"
+    if [ -d "$SAGE_ROOT" ]; then
         exec "$SAGE_ROOT/build/bin/sage-site" "-h"
     fi
     exit 0
@@ -195,7 +213,7 @@ if [ -z "$SAGE_VENV" -a -x "${SELF}-venv-config" ]; then
     export SAGE_VENV=$("${SELF}-venv-config" SAGE_VENV)
 fi
 if [ -f "${SELF}-env-config" ]; then
-    # As of Trac #22731, sage-env-config is optional.
+    # As of Issue #22731, sage-env-config is optional.
     . "${SELF}-env-config" >&2
 fi
 
@@ -608,7 +626,7 @@ fi
 if [ "$1" = '-c' ]; then
     shift
     sage_setup
-    unset TERM  # See Trac #12263
+    unset TERM  # See Issue #12263
     exec sage-eval "$@"
 fi
 
@@ -1054,7 +1072,7 @@ fi
 if [ "$1" = "-docbuild" -o "$1" = "--docbuild" ]; then
     shift
 
-    # Trac #30002: ensure an English locale so that it is possible to
+    # Issue #30002: ensure an English locale so that it is possible to
     # scrape out warnings by pattern matching.
     export LANG=C
     export LANGUAGE=C
@@ -1065,7 +1083,7 @@ if [ "$1" = "-docbuild" -o "$1" = "--docbuild" ]; then
         export OMP_NUM_THREADS=1
     fi
 
-    # Trac #33650: Make sure that user configuration of Jupyter does not
+    # Issue #33650: Make sure that user configuration of Jupyter does not
     # shadow our sagemath kernel when jupyter-sphinx is invoked
     export JUPYTER_CONFIG_DIR=/doesnotexist
     export JUPYTER_CONFIG_PATH=/doesnotexist
@@ -1179,7 +1197,7 @@ if [ $# -ge 1 ]; then
         exit 1
     fi
     sage_setup
-    unset TERM  # See Trac #12263
+    unset TERM  # See Issue #12263
     # sage-run rejects all command line options as the first argument.
     exec sage-run "$@"
 fi

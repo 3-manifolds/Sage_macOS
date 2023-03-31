@@ -1,0 +1,21 @@
+--- ../repo/sage/src/sage/misc/sagedoc.py	2023-03-30 15:47:17
++++ sagedoc.py	2022-12-09 14:04:52
+@@ -1577,14 +1576,14 @@
+         """
+         url = self._base_url + os.path.join(name, "index.html")
+         path = os.path.join(self._base_path, name, "index.html")
+-        if not os.path.exists(path):
+-            raise OSError("""The document '{0}' does not exist.  Please build it
+-with 'sage -docbuild {0} html' and try again.""".format(name))
+ 
+         if testing:
+             return (url, path)
+ 
+-        os.system(browser() + " " + path)
++        if os.path.exists(path):
++            os.system(browser() + " " + path)
++        else:
++            os.system(browser() + " " + "https://doc.sagemath.org/html/en/%s/index.html"%name)
+ 
+     def tutorial(self):
+         """
