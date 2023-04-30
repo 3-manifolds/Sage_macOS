@@ -1,7 +1,7 @@
 import subprocess
 import os
 import sys
-from dev_id import DEV_ID
+DEV_ID = os.environ['DEV_ID']
 entitlement_file = 'entitlement.plist'
 framework_path = os.path.abspath('build/Sage.framework/Versions/Current')
 extra_files = []

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en" encoding="utf-8">
+<head>
+<style>
+h1 {font: 14pt Helvetica; font-weight: bold;}
+h2 {font: 12pt Helvetica; font-weight: bold;}
+body {font: 11pt Helvetica;} 
+span.code {font: 11pt Menlo;}
+li {margin-bottom: 6pt}
+</style>
+</head>
+<body>
+<h1>The SageMath-{{ sage_version }} App</h1>
+<h2>Recommended Extras</h2>
+<p>This installer adds three optional additional features to
+your SageMath-{{ sage_version }} app.&nbsp; Press <i>Customize</i> on
+the <i>Installation Type</i> screen to disable features individually.&nbsp;</p>
+<ul>
+  <li>A script <span class="code">/usr/local/bin/sage</span> which
+  starts Sage from any terminal window or from a script.&nbsp;
+  This requires that you add <span class="code">/usr/local/bin</span> to your path.&nbsp;
+  </li>
+  <li>A directory <span class="code">/usr/local/share/jupyter/</span> which enables
+  JupyterLab to detect the SageMath kernel.&nbsp;
+  </li>
+  <li>A copy of the file <span class="code">sagetex.sty </span>in a subdirectory of
+  <span class="code">usr/local/texlive/texmf-local/</span> where it will be
+  available to TeX Live.&nbsp;
+  </li>
+</ul>
+</body>
+</html>

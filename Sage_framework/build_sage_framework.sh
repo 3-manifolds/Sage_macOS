@@ -1,5 +1,5 @@
 BASE_DIR=`pwd`
-VERSION=`./get_sage_version`
+VERSION=`../bin/get_sage_version`
 PYTHON_LONG_VERSION=`readlink repo/sage/venv | cut -f2 -d '-' | sed s/python//`
 PYTHON_VERSION=`echo ${PYTHON_LONG_VERSION} | cut -f 1,2 -d'.'`
 echo Building framework for SageMath ${VERSION} using Python ${PYTHON_LONG_VERSION}
@@ -63,13 +63,14 @@ if [ $(uname -m) == "arm64" ]; then
 else
     TKINTER=_tkinter.cpython-311-darwin-x86_64.so
 fi
+TKINTER_TARGET=_tkinter.cpython-311-darwin.so
 cp -p ${FILES}/page.html ${VERSION_DIR}/${VENV_PYLIB}/site-packages/notebook/templates/page.html
 cp -p ${FILES}/{sage,sage-env} ${VERSION_DIR}/${VENV_DIR}/bin
 cp -p ${FILES}/kernel.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/repl/ipython_kernel/kernel.py
 rm -rf ${VERSION_DIR}/${VENV_DIR}/share/jupyter/kernels/sagemath
 mkdir -p ${KERNEL_DIR}
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${KERNEL_DIR}/kernel.json
-cp -p ${FILES}/${TKINTER} ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload/_tkinter.cpython-310-darwin.so
+cp -p ${FILES}/${TKINTER} ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload/${TKINTER_TARGET}
 cp ${FILES}/sagedoc.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/misc/sagedoc.py
 cp -p ${FILES}/tkinter/__init__.py ${VERSION_DIR}/${VENV_PYLIB}/tkinter/__init__.py
 
@@ -88,6 +89,7 @@ ln -s ../../jupyter-js-widgets ${NBEXTENSIONS}/widgets/notebook/js
 
 # Fix up rpaths and shebangs 
 echo "Patching files ..."
+source ../IDs.sh
 mv files_to_sign files_to_sign.bak
 python3 fix_paths.py repo ${VERSION_DIR}/local/bin > files_to_sign
 python3 fix_paths.py repo ${VERSION_DIR}/local/lib >> files_to_sign

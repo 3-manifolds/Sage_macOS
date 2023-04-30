@@ -1,4 +1,4 @@
-VERSION=`./get_sage_version`
+VERSION=`../bin/get_sage_version`
 if [ -L /var/tmp/sage-$VERSION-current ]; then
     rm /var/tmp/sage-$VERSION-current
 elif [ -e /var/tmp/sage-$VERSION-current ]; then

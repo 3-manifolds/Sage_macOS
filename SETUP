@@ -51,18 +51,13 @@ identified by your Apple developer id.  If they are self-signed then you will
 choose the id.  Notarization also requires a one-time-password registered
 with Apple.
 
-Currently (this will change soon) there are three different files which are
-sourced or imported by scripts that need to use the credentials.  They are:
-
-Sage_framework/dev_id.py :
-DEV_ID = 'YOURCERTID'
+Your Apple developer id and one-time-password should be assigned to
+environment variables in a script named IDs.sh in this directory.  That
+script will be sourced when credentials are needed.
 
 package/IDs.sh :
 export ONE_TIME_PASS=abce-efgh-ijkl-mnop
 export DEV_ID=YOURCERTID
-
-TclTk_frameworks/DEV_ID.txt :
-YOURCERTID
 
 Building the frameworks
 -----------------------

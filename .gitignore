@@ -1,7 +1,9 @@
 .DS_Store
 build
+ARCHIVE
 __pycache__
 *.dmg
+IDs.sh
 *.bak
 *.pkg
 backup
@@ -11,10 +13,13 @@ files_to_sign*
 SageMath-*.*/SageMath*
 SageMath-*.*/Recommended*
 Sage_framework/dev_id.py
-TclTk_frameworks/DEV_ID.txt
 TclTk_frameworks/Frameworks/
 TclTk_frameworks/Tcl
 TclTk_frameworks/Tk
-package/IDs.sh
 package/packages
+package/local_share
+package/local_bin/sage
+package/local_texlive
+package/Distribution
 main_ex/SageMath
+jinja/output

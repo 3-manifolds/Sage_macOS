@@ -1,8 +1,20 @@
 #!/bin/bash
-source IDs.sh
-PKG_ID=9_8
+source ../IDs.sh
+PKG_ID=`../bin/get_sage_version | sed s/\\\\./_/g`
 VERSION=1.0
-
+SAGE_VERSION=`../bin/get_sage_version`
+SAGETEX="../Sage_framework/repo/sage/venv/share/texmf/tex/latex/sagetex"
+KERNEL_DIR="local_share/jupyter/kernels/SageMath-$SAGE_VERSION"
+JINJA_OUTPUT="../jinja/output"
+../bin/render_templates
+cp -p $JINJA_OUTPUT/sage local_bin
+rm -rf local_share/jupyter/kernels/
+mkdir -p $KERNEL_DIR
+cp ../logos/* $KERNEL_DIR
+cp ../jinja/output/kernel.json $KERNEL_DIR
+cp ../jinja/output/Distribution .
+cp ../jinja/output/Welcome.rtf resources
+cp -rp $SAGETEX local_texlive/texmf-local/tex/latex/local
 mkdir -p packages
 
 pkgbuild --root local_bin --scripts local_bin/sage_install/scripts --identifier org.computop.SageMath.$PKG_ID.bin --version $VERSION --install-location /usr/local/bin bin.pkg
