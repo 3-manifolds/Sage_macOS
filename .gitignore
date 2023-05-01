@@ -21,5 +21,6 @@ package/local_share
 package/local_bin/sage
 package/local_texlive
 package/Distribution
+package/resources
 main_ex/SageMath
 jinja/output

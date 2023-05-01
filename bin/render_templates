@@ -1,0 +1,8 @@
+#! /usr/bin/env python3
+import sys, os
+bin = os.path.dirname(os.path.abspath(sys.argv[0]))
+jinja_dir = os.path.join(bin, '..', 'jinja')
+sys.path.insert(0, jinja_dir)
+os.chdir(jinja_dir)
+import render
+render.main()
