@@ -53,7 +53,7 @@ def main():
         'sage_version': '10.0',
         'sage_dash_version': '10-0',
         'sage_long_version': '10.0.0',
-        'year': str(datetime.datetime.year),
+        'year': str(datetime.datetime.now().year),
         }
     JM = JinjaMaster('templates', params)
     JM.make_rtf('Welcome')

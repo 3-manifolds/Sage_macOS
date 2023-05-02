@@ -124,6 +124,6 @@ echo "Signing files ..."
 python3 sign_sage.py
 # Start sage to create a minimal set of bytecode files.
 echo "Starting Sage to create byte code files ..."
-${VERSION_DIR}/venv/bin/sage
+${VERSION_DIR}/venv/bin/sage -c "print(2+2) ; exit"
 echo Signing the framework again
 python3 sign_sage.py framework
