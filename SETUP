@@ -56,7 +56,8 @@ environment variables in a script named IDs.sh in this directory.  That
 script will be sourced when credentials are needed.
 
 package/IDs.sh :
-export ONE_TIME_PASS=abce-efgh-ijkl-mnop
+export APPLE_ID=user@example.com
+export ONE_TIME_PASS=abcd-efgh-ijkl-mnop
 export DEV_ID=YOURCERTID
 
 Building the frameworks
