@@ -1,0 +1,6 @@
+#! /usr/bin/env python3
+import sys, os
+bin = os.path.dirname(os.path.abspath(sys.argv[0]))
+sage_python = os.path.join(bin, '..', 'Sage_framework', 'repo', 'sage',
+    'venv', 'bin', 'python3')
+

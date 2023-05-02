@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+source IDs.sh
+SAGE_VERSION=`bin/get_sage_version`
+SAGE_DASH_VERSION=$(echo $SAGE_VERSION | sed s/\\\./\\\-/g)
+DIST=SageMath-$SAGE_VERSION.dmg
+APP=$DIST/SageMath-$SAGE_DASH_VERSION.app
+DMG=SageMath-$SAGE_VERSION.dmg
+OPTIONS="--wait --no-progress --apple-id $APPLE_ID \
+--team-id $DEV_ID --password $ONE_TIME_PASS --wait"
+xcrun notarytool submit $DMG $OPTIONS
+xcrun stapler staple $APP

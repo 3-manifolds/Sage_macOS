@@ -1,0 +1,19 @@
+#!/bin/bash
+SAGE_VERSION=`bin/get_sage_version`
+SAGE_DASH_VERSION=$(echo $SAGE_VERSION | sed s/\\\./\\\-/g)
+SAGE_SCORE_VERSION=$(echo $SAGE_VERSION | sed s/\\\./\\_/g)
+SOURCE=SageMath-$SAGE_VERSION
+DMG_NAME=$SOURCE.dmg
+APP=SageMath-$SAGE_DASH_VERSION.app
+rm -f $DMG_NAME
+create-dmg \
+  --volname $SOURCE \
+  --volicon icon/Sage.icns \
+  --background sage_background.png \
+  --window-size 600 540 \
+  --icon-size 96 \
+  --icon $APP 10 220 \
+  --app-drop-link 380 220 \
+  --icon "Recommended_10_0.pkg" 160 380 \
+  --format ULFO \
+  $DMG_NAME $SOURCE
