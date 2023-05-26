@@ -87,16 +87,22 @@ ln -s ../../../../../../../share/threejs-sage ${THREEJS_SAGE}
 mkdir -p ${NBEXTENSIONS}/widgets/notebook
 ln -s ../../jupyter-js-widgets ${NBEXTENSIONS}/widgets/notebook/js
 
+# Remove useless stuff
+rm -rf ${VERSION_DIR}/local/lib/saclib
+rm -rf ${VERSION_DIR}/local/share/man
+
 # Fix up rpaths and shebangs 
 echo "Patching files ..."
 source ../IDs.sh
 mv files_to_sign files_to_sign.bak
-python3 fix_paths.py repo ${VERSION_DIR}/local/bin > files_to_sign
+##mv ${VERSION_DIR}/${VENV_DIR}/lib/python${PYTHON_VERSION} ${RESOURCE_DIR}
+##python3 fix_paths.py repo ${RESOURCE_DIR}/python${PYTHON_VERSION} > files_to_sign
+python3 fix_paths.py repo ${VERSION_DIR}/local/bin >> files_to_sign
 python3 fix_paths.py repo ${VERSION_DIR}/local/lib >> files_to_sign
 python3 fix_paths.py repo ${VERSION_DIR}/local/libexec >> files_to_sign
 python3 fix_paths.py repo ${VERSION_DIR}/${VENV_DIR}/bin >> files_to_sign
 python3 fix_paths.py repo ${VERSION_DIR}/${VENV_DIR}/lib >> files_to_sign
-
+##ln -s ../../../../../../Resources/python${PYTHON_VERSION} ${VERSION_DIR}/${VENV_DIR}/lib
 # Fix the absolute symlinks for the GAP packages
 pushd ${VERSION_DIR}/local/share/gap/pkg > /dev/null
 for pkg in `ls` ; do

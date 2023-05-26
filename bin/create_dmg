@@ -16,4 +16,5 @@ create-dmg \
   --app-drop-link 380 220 \
   --icon "Recommended_10_0.pkg" 160 380 \
   --format ULFO \
+  --no-internet-enable \
   $DMG_NAME $SOURCE

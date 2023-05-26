@@ -3,7 +3,7 @@ set -e
 source IDs.sh
 SAGE_VERSION=`bin/get_sage_version`
 SAGE_DASH_VERSION=$(echo $SAGE_VERSION | sed s/\\\./\\\-/g)
-DIST=SageMath-$SAGE_VERSION.dmg
+DIST=SageMath-$SAGE_VERSION
 APP=$DIST/SageMath-$SAGE_DASH_VERSION.app
 DMG=SageMath-$SAGE_VERSION.dmg
 OPTIONS="--wait --no-progress --apple-id $APPLE_ID \

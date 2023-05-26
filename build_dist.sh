@@ -11,7 +11,7 @@ APP=$DIST/SageMath-$SAGE_DASH_VERSION.app
 PKG=Recommended_$SAGE_SCORE_VERSION.pkg
 PYTHON3=../Frameworks/Sage.framework/Versions/Current/venv/bin/python3
 mkdir $DIST
-# Render templates and nstall the package
+# Render templates and install the package
 cd package
 . build_package.sh
 cd ..
@@ -30,10 +30,12 @@ cp jinja/output/Info.plist $APP/Contents
 cp icon/{Sage.icns,sage_icon_1024.png} $APP/Contents/Resources
 cp logos/{sage_logo_512.png,sage_logo_256.png} $APP/Contents/Resources
 cp main.py $APP/Contents/Resources
+# Build Tcl and Tk frameworks
 cd TclTk_frameworks
 make
 cd ..
 mv TclTk_frameworks/Frameworks/{Tcl,Tk}.framework $APP/Contents/Frameworks
+# Build Sage framework
 cd Sage_framework
 bash build_sage_framework.sh
 cd ..
