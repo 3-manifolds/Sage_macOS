@@ -26,4 +26,4 @@ named /usr/local/bin/sage that can be used to run sage from a shell or script.  
 also installs Jupyter kernel descriptions in a standard location in /usr/local to
 enable Jupyter applications to run Sage.
 
-*  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v1.6.1/total.svg
+*  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v2.0.0/total.svg
