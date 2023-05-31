@@ -14,6 +14,7 @@ cp ../logos/* $KERNEL_DIR
 cp ../jinja/output/kernel.json $KERNEL_DIR
 cp ../jinja/output/Distribution .
 cp ../jinja/output/Welcome.rtf resources
+mkdir -p local_texlive/texmf-local/tex/latex/local
 cp -rp $SAGETEX local_texlive/texmf-local/tex/latex/local
 mkdir -p packages
 
