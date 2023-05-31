@@ -14,6 +14,7 @@ VENV_DIR="local/var/lib/sage/venv-python${PYTHON_LONG_VERSION}"
 VENV_PYLIB="${VENV_DIR}/lib/python${PYTHON_VERSION}"
 NBEXTENSIONS="${VERSION_DIR}/${VENV_DIR}/share/jupyter/nbextensions"
 THREEJS_SAGE="${NBEXTENSIONS}/threejs-sage"
+INPUT_HOOKS=${VENV_PYLIB}/site-packages/IPython/terminal/pt_inputhooks
 # This allows Sage.framework to be a symlink to the framework inside the application.
 if ! [ -d "${BUILD}/Sage.framework" ]; then
     mkdir -p "${BUILD}"/Sage.framework
@@ -73,6 +74,7 @@ sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${KERNEL_DIR}/kernel.j
 cp -p ${FILES}/${TKINTER} ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload/${TKINTER_TARGET}
 cp ${FILES}/sagedoc.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/misc/sagedoc.py
 cp -p ${FILES}/tkinter/__init__.py ${VERSION_DIR}/${VENV_PYLIB}/tkinter/__init__.py
+cp ${FILES}/osx.py ${INPUTHOOKS}
 
 # Fix illegal symlinks that point outside of the bundle
 # rm ${VERSION_DIR}/local/share/gap/{gac,gap}
