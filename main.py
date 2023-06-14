@@ -241,18 +241,18 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
         self.root.destroy()
 
     def get_settings(self):
+        self.settings = {}
+        self.settings['state'] = {
+            'interface_type': 'cli',
+            'terminal_app': 'Terminal.app',
+            'notebook_type': 'Classic Jupyter',
+            'notebook_dir': '',
+        }
         try:
             with open(settings_path, 'rb') as settings_file:
-                self.settings = plistlib.load(settings_file)
+                self.settings.update(plistlib.load(settings_file))
         except:
-            self.settings = {}
-        if 'state' not in self.settings:
-            self.settings['state'] = {
-                'interface_type': 'cli',
-                'terminal_app': 'Terminal.app',
-                'notebook_type': 'Classic Jupyter',
-                'notebook_dir': '',
-                }
+            pass
 
     def save_settings(self):
         self.get_settings()
