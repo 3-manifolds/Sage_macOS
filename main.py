@@ -147,8 +147,9 @@ class Launcher:
         notebook_dir = self.notebook_dir.get()
         if not notebook_dir:
             notebook_dir = os.environ['HOME']
-        subprocess.Popen([jupyter_lab_exe, '--app-dir=%s'%jupyter_lab_dir,
-                     '--notebook-dir=%s'%notebook_dir], env=environ)
+        subprocess.Popen([sys.executable, jupyter_lab_exe,
+                          '--app-dir=%s'%jupyter_lab_dir,
+                          '--notebook-dir=%s'%notebook_dir], env=environ)
         return True
 
     def find_app(self, bundle_id):
@@ -205,7 +206,7 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
         self.use_jupyter = ttk.Radiobutton(checks, text="Notebook",
             variable=radio_var, value='nb',  command=self.update_radio_buttons)
         self.notebook_types = ['Classic Jupyter']
-        if self.settings['state']['notebook_type'] == 'Jupyter Lab':
+        if self.settings['state'].get('notebook_type', None) == 'Jupyter Lab':
             self.notebook_types.insert(0, 'Jupyter Lab')
         else:
             self.notebook_types.append('Jupyter Lab')
@@ -250,7 +251,8 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
         }
         try:
             with open(settings_path, 'rb') as settings_file:
-                self.settings.update(plistlib.load(settings_file))
+                settings = self.settings.update(plistlib.load(settings_file))
+                self.settings['state'].update(settings['state'])
         except:
             pass
 
