@@ -48,11 +48,12 @@ class JinjaMaster:
         with open('output/%s'%name, 'w') as output:
             output.write(template.render(self.params))
 
-def main():
+def main(sage_version='10.1'):
+    dashed = sage_version.replace('.', '-')
     params={
-        'sage_version': '10.0',
-        'sage_dash_version': '10-0',
-        'sage_long_version': '10.0.0',
+        'sage_version': sage_version,
+        'sage_dash_version': dashed,
+        'sage_long_version': sage_version + '.0',
         'year': str(datetime.datetime.now().year),
         }
     JM = JinjaMaster('templates', params)

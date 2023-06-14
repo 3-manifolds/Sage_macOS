@@ -1,8 +1,14 @@
 #! /usr/bin/env python3
-import sys, os
+import sys, os, re
 bin = os.path.dirname(os.path.abspath(sys.argv[0]))
+version_file = os.path.join(bin, '..', 'Sage_framework', 'repo', 'sage',
+    'VERSION.txt')
+get_version_re = re.compile('SageMath version ([0-9]*\.[0-9]*)')
+with open(version_file) as input_file:
+    m = get_version_re.match(input_file.readline())
+sage_version = m.groups()[0]
 jinja_dir = os.path.join(bin, '..', 'jinja')
 sys.path.insert(0, jinja_dir)
 os.chdir(jinja_dir)
 import render
-render.main()
+render.main(sage_version)

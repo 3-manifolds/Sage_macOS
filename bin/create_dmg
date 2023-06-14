@@ -4,7 +4,8 @@ SAGE_DASH_VERSION=$(echo $SAGE_VERSION | sed s/\\\./\\\-/g)
 SAGE_SCORE_VERSION=$(echo $SAGE_VERSION | sed s/\\\./\\_/g)
 SOURCE=SageMath-$SAGE_VERSION
 DMG_NAME=$SOURCE.dmg
-APP=SageMath-$SAGE_DASH_VERSION.app
+APP=`ls $SOURCE | grep SageMath`
+PKG=`ls $SOURCE | grep Recommended`
 rm -f $DMG_NAME
 create-dmg \
   --volname $SOURCE \
@@ -14,7 +15,7 @@ create-dmg \
   --icon-size 96 \
   --icon $APP 10 220 \
   --app-drop-link 380 220 \
-  --icon "Recommended_10_0.pkg" 160 380 \
+  --icon $PKG 160 380 \
   --format ULFO \
   --no-internet-enable \
   $DMG_NAME $SOURCE
