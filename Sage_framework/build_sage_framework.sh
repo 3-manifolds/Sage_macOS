@@ -76,6 +76,7 @@ cp ${FILES}/sagedoc.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/misc/sage
 cp -p ${FILES}/tkinter/__init__.py ${VERSION_DIR}/${VENV_PYLIB}/tkinter/__init__.py
 echo cp ${FILES}/osx.py ${INPUT_HOOKS}
 cp ${FILES}/osx.py ${INPUT_HOOKS}
+cp -p ${FILES}/BuildPackages.sh ${VERSION_DIR}/local/lib/gap/bin
 
 # Fix illegal symlinks that point outside of the bundle
 # rm ${VERSION_DIR}/local/share/gap/{gac,gap}
@@ -118,13 +119,6 @@ popd > /dev/null
 
 # Remove xattrs (must be done before signing!)
 xattr -rc ${BUILD}/Sage.framework
-
-# Replace primecount binaries with working versions
-# I have no idea why we need to do this.
-#echo "Fixing primecount ..."
-#cp primecount/bin/primecount ${VERSION_DIR}/local/bin
-#cp primecount/lib/libprimecount.7.4.dylib ${VERSION_DIR}/local/lib
-#cp primecount/lib/libprimesieve.10.0.0.dylib ${VERSION_DIR}/local/lib
 
 # Remove byte code
 find ${BUILD}/Sage.framework -name '*.pyc' -delete
