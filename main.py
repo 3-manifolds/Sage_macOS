@@ -8,7 +8,6 @@ import json
 import time
 import plistlib
 import tkinter
-#### from configparser import ConfigParser
 from tkinter import ttk
 from tkinter.font import Font
 from tkinter.simpledialog import Dialog, askstring
@@ -203,9 +202,13 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
                 self.terminals.append('iTerm.app')
         self.terminal_var = tkinter.Variable(self, self.terminals[0])
         self.terminal_option = PopupMenu(checks, self.terminal_var, self.terminals)
-        self.notebook_types = ['Classic Jupyter', 'Jupyter Lab']
         self.use_jupyter = ttk.Radiobutton(checks, text="Notebook",
             variable=radio_var, value='nb',  command=self.update_radio_buttons)
+        self.notebook_types = ['Classic Jupyter']
+        if self.settings['state']['notebook_type'] == 'Jupyter Lab':
+            self.notebook_types.insert(0, 'Jupyter Lab')
+        else:
+            self.notebook_types.append('Jupyter Lab')
         self.nb_var = tkinter.Variable(self, self.notebook_types[0])
         self.notebook_option = PopupMenu(checks, self.nb_var, self.notebook_types)
         notebook_dir_frame = ttk.Frame(checks)
