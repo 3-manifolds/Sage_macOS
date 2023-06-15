@@ -206,7 +206,7 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
         self.use_jupyter = ttk.Radiobutton(checks, text="Notebook",
             variable=radio_var, value='nb',  command=self.update_radio_buttons)
         self.notebook_types = ['Classic Jupyter']
-        if self.settings['state'].get('notebook_type', None) == 'Jupyter Lab':
+        if self.settings['state']['notebook_type'] == 'Jupyter Lab':
             self.notebook_types.insert(0, 'Jupyter Lab')
         else:
             self.notebook_types.append('Jupyter Lab')
@@ -241,32 +241,47 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
         self.destroy()
         self.root.destroy()
 
-    def get_settings(self):
-        self.settings = {}
-        self.settings['state'] = {
+    default_settings = {
+        'environment': {
+        },
+        'state': {
             'interface_type': 'cli',
             'terminal_app': 'Terminal.app',
             'notebook_type': 'Classic Jupyter',
             'notebook_dir': '',
-        }
+        },
+    }
+
+    def get_settings(self):
+        # The settings are described by a dict with dict values.
+        settings = self.default_settings.copy()
         try:
             with open(settings_path, 'rb') as settings_file:
-                settings = self.settings.update(plistlib.load(settings_file))
-                self.settings['state'].update(settings['state'])
+                saved_settings = plistlib.load(settings_file)
+        except:
+            #settings file missing or corrupt
+            saved_settings = None
+        if saved_settings:
+            for key in settings:
+                settings[key].update(saved_settings.get(key, {}))
+        self.settings = settings
+        
+    def save_settings(self):
+        self.get_settings()
+        self.settings['state'].update(
+            {
+                'interface_type': self.radio_var.get(),
+                'terminal_app': self.terminal_var.get(),
+                'notebook_type': self.nb_var.get(),
+                'notebook_dir': self.notebook_dir.get(),
+            }
+        )
+        try:
+            with open(settings_path, 'wb') as settings_file:
+                plistlib.dump(self.settings, settings_file)
         except:
             pass
 
-    def save_settings(self):
-        self.get_settings()
-        self.settings['state'] = {
-            'interface_type': self.radio_var.get(),
-            'terminal_app': self.terminal_var.get(),
-            'notebook_type': self.nb_var.get(),
-            'notebook_dir': self.notebook_dir.get(),
-            }
-        with open(settings_path, 'wb') as settings_file:
-            plistlib.dump(self.settings, settings_file)
-            
     def update_radio_buttons(self):
         radio = self.radio_var.get()
         if radio == 'cli':
