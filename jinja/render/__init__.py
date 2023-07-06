@@ -48,9 +48,10 @@ class JinjaMaster:
         with open('output/%s'%name, 'w') as output:
             output.write(template.render(self.params))
 
-def main(sage_version='10.1'):
+def main(sage_version='10.1', python_version='3.11.1'):
     dashed = sage_version.replace('.', '-')
     params={
+        'python_version': python_version,
         'sage_version': sage_version,
         'sage_dash_version': dashed,
         'sage_long_version': sage_version + '.0',
@@ -62,4 +63,5 @@ def main(sage_version='10.1'):
     JM.make_file('kernel.json')
     JM.make_file('Info.plist')
     JM.make_file('Distribution')
+    JM.make_file('pyvenv.cfg')
 

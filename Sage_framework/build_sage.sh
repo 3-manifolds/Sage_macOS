@@ -1,4 +1,9 @@
 VERSION=`../bin/get_sage_version`
+PYTHON="repo/sage/venv/bin/python3"
+PY_VERSION=`${PYTHON} -V | cut -d' ' -f2 | cut -d. -f1,2`
+SITE_PACKAGES="venv/lib/python${PY_VERSION}/site-packages"
+PIP_INSTALL="venv/bin/sage -pip install"
+PIP_OPTS="--upgrade --no-user --no-deps --target ${SITE_PACKAGES}"
 if [ -L /var/tmp/sage-$VERSION-current ]; then
     rm /var/tmp/sage-$VERSION-current
 elif [ -e /var/tmp/sage-$VERSION-current ]; then
@@ -22,7 +27,6 @@ else
     export LDFLAGS="-Wl,-platform_version,macos,10.9,11.3"
     export MACOSX_DEPLOYMENT_TARGET="10.9"
 fi
-export MAKE="make -j4"
 CONFIG_OPTIONS="--with-system-python3=no \
 --disable-editable \
 --enable-isl \
@@ -66,9 +70,17 @@ CONFIG_OPTIONS="--with-system-python3=no \
 ./bootstrap
 make configure
 ./configure $CONFIG_OPTIONS > /tmp/configure.out
-make build
+make -j4 build
+make
+# Install some extra pip packages
+${PIP_INSTALL} ${PIP_OPTS} cocoserver
 popd
 mv /var/tmp/sage-$VERSION-current repo/sage
 # Fix the broken p_group_cohomology spkg
 cp -R repo/p_group_cohomology-3.3.2/gap_helper repo/sage/local/share/gap/pkg/p_group_cohomology_helper
 cp repo/p_group_cohomology-3.3.2/singular_helper/dickson.lib repo/sage/local/share/singular/LIB
+# Copy and compress the documentation
+rm -rf repo/documentation.old
+mv repo/documentation repo/documentation.old
+cp -R repo/sage/local/share/doc/sage/html/en repo/documentation
+../bin/compress_site.py repo/documentation

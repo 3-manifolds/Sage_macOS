@@ -9,9 +9,9 @@ BUILD=${BASE_DIR}/build
 VERSION_DIR=${BUILD}/Sage.framework/Versions/${VERSION}
 CURRENT_DIR=${BUILD}/Sage.framework/Versions/Current
 RESOURCE_DIR=${VERSION_DIR}/Resources
-KERNEL_DIR="${VERSION_DIR}/Resources/jupyter/kernels/SageMath-${VERSION}"
 VENV_DIR="local/var/lib/sage/venv-python${PYTHON_LONG_VERSION}"
 VENV_PYLIB="${VENV_DIR}/lib/python${PYTHON_VERSION}"
+VENV_KERNEL_DIR=${VERSION_DIR}/"${VENV_DIR}/share/jupyter/kernels"
 NBEXTENSIONS="${VERSION_DIR}/${VENV_DIR}/share/jupyter/nbextensions"
 THREEJS_SAGE="${NBEXTENSIONS}/threejs-sage"
 INPUT_HOOKS=${VERSION_DIR}/${VENV_PYLIB}/site-packages/IPython/terminal/pt_inputhooks
@@ -65,16 +65,15 @@ else
     TKINTER=_tkinter.cpython-311-darwin-x86_64.so
 fi
 TKINTER_TARGET=_tkinter.cpython-311-darwin.so
+# Install jupyter kernels, etc.
 cp -p ${FILES}/page.html ${VERSION_DIR}/${VENV_PYLIB}/site-packages/notebook/templates/page.html
-cp -p ${FILES}/{sage,sage-env} ${VERSION_DIR}/${VENV_DIR}/bin
 cp -p ${FILES}/kernel.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/repl/ipython_kernel/kernel.py
 rm -rf ${VERSION_DIR}/${VENV_DIR}/share/jupyter/kernels/sagemath
-mkdir -p ${KERNEL_DIR}
-sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${KERNEL_DIR}/kernel.json
+# See sage/repl/ipython_kernel/install.py
+mkdir -p ${VENV_KERNEL_DIR}/sagemath
+sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${VENV_KERNEL_DIR}/sagemath/kernel.json
 cp -p ${FILES}/${TKINTER} ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload/${TKINTER_TARGET}
-cp ${FILES}/sagedoc.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/misc/sagedoc.py
 cp -p ${FILES}/tkinter/__init__.py ${VERSION_DIR}/${VENV_PYLIB}/tkinter/__init__.py
-echo cp ${FILES}/osx.py ${INPUT_HOOKS}
 cp ${FILES}/osx.py ${INPUT_HOOKS}
 cp -p ${FILES}/BuildPackages.sh ${VERSION_DIR}/local/lib/gap/bin
 

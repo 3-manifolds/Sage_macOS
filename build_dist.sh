@@ -34,10 +34,19 @@ cp main.py $APP/Contents/Resources
 cd TclTk_frameworks
 make
 cd ..
-mv TclTk_frameworks/Frameworks/{Tcl,Tk}.framework $APP/Contents/Frameworks
 # Build Sage framework
 cd Sage_framework
 bash build_sage_framework.sh
 cd ..
+# Build Notebook framework (after Sage, so the symlink exists)
+cd Notebook_framework
+bash build_notebook_framework.sh
+cd ..
+# Assemble the frameworks
+mv TclTk_frameworks/Frameworks/{Tcl,Tk}.framework $APP/Contents/Frameworks
 mv Sage_framework/build/Sage.framework $APP/Contents/Frameworks
+mv Notebook_framework/build/Notebook.framework $APP/Contents/Frameworks
+# Install the documentation
+cp -R Sage_framework/repo/documentation $APP/Contents/Resources
+# Sign the app
 bin/sign_app

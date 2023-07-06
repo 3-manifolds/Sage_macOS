@@ -1,0 +1,5 @@
+home = /private/var/tmp/sage-{{sage_version }}-current/venv/bin
+include-system-site-packages = true
+version = {{ python_version }}
+executable = /private/var/tmp/sage-{{ sage_version }}-current/venv/bin/python3
+command = /private/var/tmp/sage-{{ python_version }}-current/venv/bin/python3 -m venv --system-site-packages build/Notebook.framework/Versions/{{ python_version }}

@@ -4,7 +4,6 @@ source IDs.sh
 SAGE_VERSION=`bin/get_sage_version`
 SAGE_DASH_VERSION=$(echo $SAGE_VERSION | sed s/\\\./\\\-/g)
 DIST=SageMath-$SAGE_VERSION
-APP=$DIST/SageMath-$SAGE_DASH_VERSION.app
+APP=$DIST/SageMath-$SAGE_DASH_VERSION.app/Contents/Frameworks/Sage.framework
 OPTIONS="-v --entitlements entitlement.plist --timestamp --options runtime --force"
-codesign -s $DEV_ID $OPTIONS $APP/Contents/MacOS/SageMath
 codesign -s $DEV_ID $OPTIONS $APP

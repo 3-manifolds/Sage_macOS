@@ -113,7 +113,7 @@ class Launcher:
                                capture_output=True)
         return True
 
-    def launch_notebook(self, url=None):
+    def launch_classic(self, url=None):
         environ = {'JUPYTER_RUNTIME_DIR': jupyter_runtime_dir}
         environ.update(os.environ)
         if url is None:
@@ -128,27 +128,18 @@ class Launcher:
             subprocess.run(['open', url], env=environ, capture_output=True)
         return True
 
-    lab_message = (
-        'To use SageMath {0} in a Jupyter Lab notebok you must install the '
-        'Recommended Extras from the SageMath {0} disk image, and you must also '
-        'install the jupyterlab package within Sage by starting sage and '
-        'running:\n\n'
-        '%pip install jupyterlab\n\n').format(sage_version)
-
-    def launch_lab(self):
-        if not self.jupyter_lab_installed():
-            InfoDialog(self, message=self.lab_message)
-            return False
+    def launch_notebook(self, notebook_module):
+        environ = {'JUPYTER_RUNTIME_DIR': jupyter_runtime_dir}
+        environ.update(os.environ)
+        venv_executable = path_join(framework_dir, 'Notebook.framework', 'Versions',
+                                    'Current', 'bin', 'python3')
         if not self.check_notebook_dir():
             showerror(message='Please select a notebook directory.')
             return False
-        environ = {'PYTHONPATH': sage_usersitepackages}
-        environ.update(os.environ)
         notebook_dir = self.notebook_dir.get()
         if not notebook_dir:
             notebook_dir = os.environ['HOME']
-        subprocess.Popen([sys.executable, jupyter_lab_exe,
-                          '--app-dir=%s'%jupyter_lab_dir,
+        subprocess.Popen([venv_executable, '-m' , notebook_module,
                           '--notebook-dir=%s'%notebook_dir], env=environ)
         return True
 
@@ -205,11 +196,11 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
         self.terminal_option = PopupMenu(checks, self.terminal_var, self.terminals)
         self.use_jupyter = ttk.Radiobutton(checks, text="Notebook",
             variable=radio_var, value='nb',  command=self.update_radio_buttons)
-        self.notebook_types = ['Classic Jupyter']
-        if self.settings['state']['notebook_type'] == 'Jupyter Lab':
-            self.notebook_types.insert(0, 'Jupyter Lab')
-        else:
-            self.notebook_types.append('Jupyter Lab')
+        self.notebook_types = ['Classic Jupyter', 'Jupyter Lab', 'Notebook v7']
+        favorite = self.settings['state']['notebook_type']
+        if favorite != 'Classic Jupyter':
+            self.notebook_types.remove(favorite)
+            self.notebook_types.insert(0, favorite)
         self.nb_var = tkinter.Variable(self, self.notebook_types[0])
         self.notebook_option = PopupMenu(checks, self.nb_var, self.notebook_types)
         notebook_dir_frame = ttk.Frame(checks)
@@ -329,12 +320,14 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
                 jupyter_openers = [f for f in os.listdir(jupyter_runtime_dir)
                                    if f[-4:] == 'html']
                 if not jupyter_openers:
-                    launched = self.launch_notebook(None)
+                    launched = self.launch_classic(None)
                 else:
                     html_file = path_join(jupyter_runtime_dir, jupyter_openers[0]) 
-                    launched = self.launch_notebook(html_file)
+                    launched = self.launch_classic(html_file)
             elif app == 'Jupyter Lab':
-                launched = self.launch_lab()
+                launched = self.launch_notebook('jupyterlab')
+            elif app == 'Notebook v7':
+                launched = self.launch_notebook('notebook')
             else:
                 raise RuntimeError()
         if launched:
