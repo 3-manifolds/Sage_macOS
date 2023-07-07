@@ -15,6 +15,8 @@ VENV_KERNEL_DIR=${VERSION_DIR}/"${VENV_DIR}/share/jupyter/kernels"
 NBEXTENSIONS="${VERSION_DIR}/${VENV_DIR}/share/jupyter/nbextensions"
 THREEJS_SAGE="${NBEXTENSIONS}/threejs-sage"
 INPUT_HOOKS=${VERSION_DIR}/${VENV_PYLIB}/site-packages/IPython/terminal/pt_inputhooks
+NOTEBOOK_VENV=${VERSION_DIR}/notebook_venv
+
 # This allows Sage.framework to be a symlink to the framework inside the application.
 if ! [ -d "${BUILD}/Sage.framework" ]; then
     mkdir -p "${BUILD}"/Sage.framework
@@ -94,18 +96,45 @@ ln -s ../../jupyter-js-widgets ${NBEXTENSIONS}/widgets/notebook/js
 rm -rf ${VERSION_DIR}/local/lib/saclib
 rm -rf ${VERSION_DIR}/local/share/man
 
+# Build a separate venv for notebooks, using sage packages when
+# they meet the requirements of the notebook package.
+echo "Building notebook venv ..."
+${VERSION_DIR}/venv/bin/sage -python -m venv --system-site-packages ${NOTEBOOK_VENV}
+${NOTEBOOK_VENV}/bin/pip install --no-user jupyterlab
+${NOTEBOOK_VENV}/bin/pip install --no-user notebook==7.0.0.rc0 
+# Clean up the venv
+rm -rf ${NOTEBOOK_VENV}/lib/python3.11/site-packages/setuptools*
+rm -rf ${NOTEBOOK_VENV}/lib/python3.11/site-packages/pip*
+rm -rf ${NOTEBOOK_VENV}/bin/pip*
+rm -rf ${NOTEBOOK_VENV}/bin/activate*
+rm ${NOTEBOOK_VENV}/bin/Activate.ps1
+# Fix the executable symlink so that it points to the Sage python
+rm ${NOTEBOOK_VENV}/bin/python3
+ln -s ../../venv/bin/python3 ${NOTEBOOK_VENV}/bin/python3
+# The pyvenv.cfg file is what makes a venv into a venv.  A minimal
+# venv contains a python executable, a site-packages directory, and a
+# pyvenv.cfg file.  The pyvenv.cfg file must either go in the same
+# directory as the python executable for the venv, or one level up.
+# (The executable is allowed to be a symlink, which will not be
+# dereferenced when determining its location.)  The top level of a
+# framework version directory can only contain directories, symlinks
+# or signed code files.  So we place the pyvenv.cfg in the bin
+# directory.  We customize it so it shows the venv home as being
+# the bin directory in the sage venv, relative to our /var/tmp symlink.
+cp ../jinja/output/pyvenv.cfg ${NOTEBOOK_VENV}/pyvenv.cfg
+
 # Fix up rpaths and shebangs 
 echo "Patching files ..."
 source ../IDs.sh
 mv files_to_sign files_to_sign.bak
-##mv ${VERSION_DIR}/${VENV_DIR}/lib/python${PYTHON_VERSION} ${RESOURCE_DIR}
-##python3 fix_paths.py repo ${RESOURCE_DIR}/python${PYTHON_VERSION} > files_to_sign
 python3 fix_paths.py repo ${VERSION_DIR}/local/bin >> files_to_sign
 python3 fix_paths.py repo ${VERSION_DIR}/local/lib >> files_to_sign
 python3 fix_paths.py repo ${VERSION_DIR}/local/libexec >> files_to_sign
 python3 fix_paths.py repo ${VERSION_DIR}/${VENV_DIR}/bin >> files_to_sign
 python3 fix_paths.py repo ${VERSION_DIR}/${VENV_DIR}/lib >> files_to_sign
-##ln -s ../../../../../../Resources/python${PYTHON_VERSION} ${VERSION_DIR}/${VENV_DIR}/lib
+find ${NOTEBOOK_VENV} -name '*.so' >> files_to_sign
+python3 fix_scripts.py ${NOTEBOOK_VENV}/bin
+
 # Fix the absolute symlinks for the GAP packages
 pushd ${VERSION_DIR}/local/share/gap/pkg > /dev/null
 for pkg in `ls` ; do
@@ -127,5 +156,5 @@ python3 sign_sage.py
 # Start sage to create a minimal set of bytecode files.
 echo "Starting Sage to create byte code files ..."
 ${VERSION_DIR}/venv/bin/sage -c "print(2+2) ; exit"
-echo Signing the framework again
+echo "Signing the framework again:"
 python3 sign_sage.py framework

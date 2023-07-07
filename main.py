@@ -131,8 +131,8 @@ class Launcher:
     def launch_notebook(self, notebook_module):
         environ = {'JUPYTER_RUNTIME_DIR': jupyter_runtime_dir}
         environ.update(os.environ)
-        venv_executable = path_join(framework_dir, 'Notebook.framework', 'Versions',
-                                    'Current', 'bin', 'python3')
+        venv_executable = path_join(framework_dir, 'sage.framework', 'Versions',
+                                    'Current', 'notebook_venv', 'bin', 'python3')
         if not self.check_notebook_dir():
             showerror(message='Please select a notebook directory.')
             return False
