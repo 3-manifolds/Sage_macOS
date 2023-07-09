@@ -69,7 +69,6 @@ fi
 TKINTER_TARGET=_tkinter.cpython-311-darwin.so
 # Install jupyter kernels, etc.
 cp -p ${FILES}/page.html ${VERSION_DIR}/${VENV_PYLIB}/site-packages/notebook/templates/page.html
-cp -p ${FILES}/kernel.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/repl/ipython_kernel/kernel.py
 rm -rf ${VERSION_DIR}/${VENV_DIR}/share/jupyter/kernels/sagemath
 # See sage/repl/ipython_kernel/install.py
 mkdir -p ${VENV_KERNEL_DIR}/sagemath
