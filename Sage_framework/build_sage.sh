@@ -9,8 +9,21 @@ if [ -L /var/tmp/sage-$VERSION-current ]; then
 elif [ -e /var/tmp/sage-$VERSION-current ]; then
     echo /var/tmp/sage-$VERSION-current is not a symlink !!!
 fi
-mv repo/sage /var/tmp/sage-$VERSION-current
+
+# Make sure that runpath.sh exists, is correct, and is executable.
+# The sage bash script requires this.
+SAGE_SYMLINK="/var/tmp/sage-$VERSION-current"
+echo SAGE_SYMLINK=${SAGE_SYMLINK} > repo/sage/local/var/lib/sage/runpath.sh
+chmod +x  repo/sage/local/var/lib/sage/runpath.sh
+
+# For the build, we relocate the sage root to the location where the
+# sage symlink will be when sage is actually being run. This tricks the
+# build system into generating appropriate shebangs for installed scripts
+# and deals with any other random places where sage may use a hardwired
+# path to the sage root.  By default a sage build cannot be relocated.
+mv repo/sage ${SAGE_SYMLINK}
 pushd /var/tmp/sage-$VERSION-current
+
 if [ $(uname -m) == "arm64" ]; then
     export CFLAGS="-O2 -mmacosx-version-min=11.0"
     export CXXFLAGS="$CFLAGS -stdlib=libc++"
@@ -70,9 +83,12 @@ CONFIG_OPTIONS="--with-system-python3=no \
 ./bootstrap
 make configure
 ./configure $CONFIG_OPTIONS > /tmp/configure.out
+# Do the main build with 4 CPUs
 make -j4 build
-make
-# Install some extra pip packages
+# Run make again, without -j4, to build the documentation.
+# The doc build does not seem to work when done in parallel.
+make --no-print-directory sagemath_doc_html-SAGE_DOCS-no-deps
+# Install cocoserver "by hand" - this is simpler than making an spkg.
 ${PIP_INSTALL} ${PIP_OPTS} cocoserver
 popd
 mv /var/tmp/sage-$VERSION-current repo/sage
