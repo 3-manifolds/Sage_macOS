@@ -1,9 +1,4 @@
 VERSION=`../bin/get_sage_version`
-PYTHON="repo/sage/venv/bin/python3"
-PY_VERSION=`${PYTHON} -V | cut -d' ' -f2 | cut -d. -f1,2`
-SITE_PACKAGES="venv/lib/python${PY_VERSION}/site-packages"
-PIP_INSTALL="venv/bin/sage -pip install"
-PIP_OPTS="--upgrade --no-user --no-deps --target ${SITE_PACKAGES}"
 if [ -L /var/tmp/sage-$VERSION-current ]; then
     rm /var/tmp/sage-$VERSION-current
 elif [ -e /var/tmp/sage-$VERSION-current ]; then
@@ -85,18 +80,24 @@ make configure
 ./configure $CONFIG_OPTIONS > /tmp/configure.out
 # Do the main build with 4 CPUs
 make -j4 build
-# Run make again, without -j4, to build the documentation.
-# The doc build does not seem to work when done in parallel.
-make --no-print-directory sagemath_doc_html-SAGE_DOCS-no-deps
 # Install cocoserver "by hand" - this is simpler than making an spkg.
-${PIP_INSTALL} ${PIP_OPTS} cocoserver
+SITE_PACKAGES=`venv/bin/python3 -c "import site; print(site.getsitepackages()[0])"`
+PIP_ARGS="install --upgrade --no-user --no-deps --target ${SITE_PACKAGES}"
+venv/bin/python3 -m pip ${PIP_ARGS} cocoserver
+# Build the documentatation.
+# The doc build does not seem to work when done in parallel, so no -j4.
+# make doc-clean doc-uninstall
+make
+# Move the repo back where it belongs.
 popd
 mv /var/tmp/sage-$VERSION-current repo/sage
 # Fix the broken p_group_cohomology spkg
 cp -R repo/p_group_cohomology-3.3.2/gap_helper repo/sage/local/share/gap/pkg/p_group_cohomology_helper
 cp repo/p_group_cohomology-3.3.2/singular_helper/dickson.lib repo/sage/local/share/singular/LIB
 # Copy and compress the documentation
-rm -rf repo/documentation.old
-mv repo/documentation repo/documentation.old
+if [ -e repo/documentation ]; then
+    rm -rf repo/documentation.old
+    mv repo/documentation repo/documentation.old
+fi
 cp -R repo/sage/local/share/doc/sage/html/en repo/documentation
 ../bin/compress_site.py repo/documentation

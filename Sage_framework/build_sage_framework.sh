@@ -100,7 +100,9 @@ rm -rf ${VERSION_DIR}/local/share/man
 echo "Building notebook venv ..."
 ${VERSION_DIR}/venv/bin/sage -python -m venv --system-site-packages ${NOTEBOOK_VENV}
 ${NOTEBOOK_VENV}/bin/pip install --no-user jupyterlab
+${NOTEBOOK_VENV}/bin/pip install --no-user jupyterlabwidgets
 ${NOTEBOOK_VENV}/bin/pip install --no-user notebook==7.0.0rc2
+${NOTEBOOK_VENV}/bin/pip install --no-user --ignore-installed ipywidgets
 # Clean up the venv
 rm -rf ${NOTEBOOK_VENV}/lib/python3.11/site-packages/setuptools*
 rm -rf ${NOTEBOOK_VENV}/lib/python3.11/site-packages/pip*
