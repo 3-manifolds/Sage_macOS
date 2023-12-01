@@ -77,6 +77,7 @@ cp -p ${FILES}/${TKINTER} ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload/${TKINTER_TAR
 cp -p ${FILES}/tkinter/__init__.py ${VERSION_DIR}/${VENV_PYLIB}/tkinter/__init__.py
 cp ${FILES}/osx.py ${INPUT_HOOKS}
 cp -p ${FILES}/BuildPackages.sh ${VERSION_DIR}/local/lib/gap/bin
+cp ${FILES}/sage-notebook ${VERSION_DIR}/${VENV_DIR}/bin
 
 # Fix illegal symlinks that point outside of the bundle
 # rm ${VERSION_DIR}/local/share/gap/{gac,gap}
@@ -123,6 +124,9 @@ ln -s ../../venv/bin/python3 ${NOTEBOOK_VENV}/bin/python3
 # directory.  We customize it so it shows the venv home as being
 # the bin directory in the sage venv, relative to our /var/tmp symlink.
 cp ../jinja/output/pyvenv.cfg ${NOTEBOOK_VENV}/pyvenv.cfg
+NOTEBOOK_KERNELS=${NOTEBOOK_VENV}/share/jupyter/kernels
+mkdir -p ${NOTEBOOK_KERNELS}/sagemath
+sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${NOTEBOOK_KERNELS}/sagemath/kernel.json
 
 # Fix up rpaths and shebangs 
 echo "Patching files ..."
@@ -135,6 +139,14 @@ python3 fix_paths.py repo ${VERSION_DIR}/${VENV_DIR}/bin >> files_to_sign
 python3 fix_paths.py repo ${VERSION_DIR}/${VENV_DIR}/lib >> files_to_sign
 find ${NOTEBOOK_VENV} -name '*.so' >> files_to_sign
 python3 fix_scripts.py ${NOTEBOOK_VENV}/bin
+
+# Replace Sage's Pillow with the binary package from pypi, so libjpeg will work.
+# Do this after running fix_paths, since the rpaths are set by delocate
+PIP_TARGET=${VERSION_DIR}/${VENV_PYLIB}/site-packages
+PIP_ARGS="install --upgrade --no-user --force --only-binary :all:"
+echo Re-installing Pillow
+${VERSION_DIR}/venv/bin/python3 -m pip ${PIP_ARGS} --target ${PIP_TARGET} Pillow
+find ${PIP_TARGET}/PIL -name '*.so' >> files_to_sign
 
 # Fix the absolute symlinks for the GAP packages
 pushd ${VERSION_DIR}/local/share/gap/pkg > /dev/null
