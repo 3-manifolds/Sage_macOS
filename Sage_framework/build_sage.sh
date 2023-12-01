@@ -3,21 +3,23 @@ if [ -L /var/tmp/sage-$VERSION-current ]; then
     rm /var/tmp/sage-$VERSION-current
 elif [ -e /var/tmp/sage-$VERSION-current ]; then
     echo /var/tmp/sage-$VERSION-current is not a symlink !!!
+    exit 1
 fi
-
-# Make sure that runpath.sh exists, is correct, and is executable.
-# The sage bash script requires this.
-SAGE_SYMLINK="/var/tmp/sage-$VERSION-current"
-echo SAGE_SYMLINK=${SAGE_SYMLINK} > repo/sage/local/var/lib/sage/runpath.sh
-chmod +x  repo/sage/local/var/lib/sage/runpath.sh
 
 # For the build, we relocate the sage root to the location where the
 # sage symlink will be when sage is actually being run. This tricks the
 # build system into generating appropriate shebangs for installed scripts
 # and deals with any other random places where sage may use a hardwired
 # path to the sage root.  By default a sage build cannot be relocated.
+
+SAGE_SYMLINK="/var/tmp/sage-$VERSION-current"
 mv repo/sage ${SAGE_SYMLINK}
-pushd /var/tmp/sage-$VERSION-current
+pushd ${SAGE_SYMLINK}
+# Make sure that runpath.sh exists, is correct, and is executable.
+# The sage bash script requires this.
+mkdir -p local/var/lib/sage
+echo SAGE_SYMLINK=${SAGE_SYMLINK} > local/var/lib/sage/runpath.sh
+chmod +x local/var/lib/sage/runpath.sh
 
 if [ $(uname -m) == "arm64" ]; then
     export CFLAGS="-O2 -mmacosx-version-min=11.0"
@@ -32,7 +34,11 @@ else
     export SAGE_FAT_BINARY="yes"
     export CFLAGS="-O2 -mmacosx-version-min=10.9 -mno-avx -mno-avx2 -mno-bmi2"
     export CXXFLAGS="$CFLAGS -stdlib=libc++"
-    export LDFLAGS="-Wl,-platform_version,macos,10.9,11.3"
+    if [ `/usr/bin/ld -ld_classic 2> >(grep -c warning)` != "0" ] ; then
+	export LDFLAGS="-ld_classic -Wl,-platform_version,macos,10.9,11.3"
+    else
+	export LDFLAGS="-Wl,-platform_version,macos,10.9,11.3"
+    fi
     export MACOSX_DEPLOYMENT_TARGET="10.9"
 fi
 CONFIG_OPTIONS="--with-system-python3=no \

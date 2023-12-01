@@ -3,7 +3,7 @@ import sys, os, re
 bin = os.path.dirname(os.path.abspath(sys.argv[0]))
 version_file = os.path.join(bin, '..', 'Sage_framework', 'repo', 'sage',
     'VERSION.txt')
-get_version_re = re.compile('SageMath version ([0-9]*\.[0-9]*)')
+get_version_re = re.compile(r'SageMath version ([0-9]*\.[0-9]*)')
 with open(version_file) as input_file:
     m = get_version_re.match(input_file.readline())
 sage_version = m.groups()[0]

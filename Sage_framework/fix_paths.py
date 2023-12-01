@@ -4,7 +4,7 @@ import subprocess
 import re
 LOCAL_LIB = '/private/var/tmp/sage-X.X-current/local/lib'
 get_info = re.compile(b'Filetype: (?P<filetype>.*)| *LC_LOAD_DYLIB: (?P<dylib>.*)| *LC_RPATH: (?P<rpath>.*)')
-get_version = re.compile('SageMath version ([0-9]*\.[0-9]*)')
+get_version = re.compile(r'SageMath version ([0-9]*\.[0-9]*)')
 
 # Bigendian encoding of the magic numbers for mach-O binaries
 feedface_big = b'\xfe\xed\xfa\xce'

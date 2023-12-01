@@ -3,7 +3,6 @@
 # of the repo.
 set -e
 SAGE_VERSION=`bin/get_sage_version`
-PYTHON_VERSION=`bin/get_python_version`
 SAGE_DASH_VERSION=$(echo $SAGE_VERSION | sed s/\\\./\\\-/g)
 SAGE_SCORE_VERSION=$(echo $SAGE_VERSION | sed s/\\\./\\\_/g)
 DIST=SageMath-$SAGE_VERSION
