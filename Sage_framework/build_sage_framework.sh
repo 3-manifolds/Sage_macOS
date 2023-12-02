@@ -146,7 +146,8 @@ PIP_TARGET=${VERSION_DIR}/${VENV_PYLIB}/site-packages
 PIP_ARGS="install --upgrade --no-user --force --only-binary :all:"
 echo Re-installing Pillow
 ${VERSION_DIR}/venv/bin/python3 -m pip ${PIP_ARGS} --target ${PIP_TARGET} Pillow
-find ${PIP_TARGET}/PIL -name '*.so' >> files_to_sign
+find ${PIP_TARGET}/PIL/ -name '*.dylib' >> files_to_sign
+find ${PIP_TARGET}/PIL/ -name '*.so' >> files_to_sign
 
 # Fix the absolute symlinks for the GAP packages
 pushd ${VERSION_DIR}/local/share/gap/pkg > /dev/null
