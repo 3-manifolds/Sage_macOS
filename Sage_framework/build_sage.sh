@@ -92,8 +92,9 @@ PIP_ARGS="install --upgrade --no-user --no-deps --target ${SITE_PACKAGES}"
 venv/bin/python3 -m pip ${PIP_ARGS} cocoserver
 # Build the documentatation.
 # The doc build does not seem to work when done in parallel, so no -j4.
-# make doc-clean doc-uninstall
-make
+pushd src/doc
+make PATH=$SAGE_SYMLINK/venv/bin:$PATH SAGE_ROOT=$SAGE_SYMLINK doc-html--all
+popd
 # Move the repo back where it belongs.
 popd
 mv /var/tmp/sage-$VERSION-current repo/sage
