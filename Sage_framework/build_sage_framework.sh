@@ -78,6 +78,8 @@ cp -p ${FILES}/tkinter/__init__.py ${VERSION_DIR}/${VENV_PYLIB}/tkinter/__init__
 cp ${FILES}/osx.py ${INPUT_HOOKS}
 cp -p ${FILES}/BuildPackages.sh ${VERSION_DIR}/local/lib/gap/bin
 cp ${FILES}/sage-notebook ${VERSION_DIR}/${VENV_DIR}/bin
+sed "s/__VERSION__/${VERSION}/g" "${FILES}"/sage-notebook > ${VERSION_DIR}/${VENV_DIR}/bin/sage-notebook
+
 
 # Fix illegal symlinks that point outside of the bundle
 # rm ${VERSION_DIR}/local/share/gap/{gac,gap}
@@ -137,8 +139,8 @@ python3 fix_paths.py repo ${VERSION_DIR}/local/lib >> files_to_sign
 python3 fix_paths.py repo ${VERSION_DIR}/local/libexec >> files_to_sign
 python3 fix_paths.py repo ${VERSION_DIR}/${VENV_DIR}/bin >> files_to_sign
 python3 fix_paths.py repo ${VERSION_DIR}/${VENV_DIR}/lib >> files_to_sign
+python3 fix_scripts.py ${VERSION_DIR}/$VENV_DIR}/bin
 find ${NOTEBOOK_VENV} -name '*.so' >> files_to_sign
-python3 fix_scripts.py ${NOTEBOOK_VENV}/bin
 
 # Replace Sage's Pillow with the binary package from pypi, so libjpeg will work.
 # Do this after running fix_paths, since the rpaths are set by delocate
