@@ -141,6 +141,7 @@ python3 fix_paths.py repo ${VERSION_DIR}/${VENV_DIR}/bin >> files_to_sign
 python3 fix_paths.py repo ${VERSION_DIR}/${VENV_DIR}/lib >> files_to_sign
 python3 fix_scripts.py ${VERSION_DIR}/$VENV_DIR}/bin
 find ${NOTEBOOK_VENV} -name '*.so' >> files_to_sign
+find ${NOTEBOOK_VENV} -name '*.dylib' >> files_to_sign
 
 # Replace Sage's Pillow with the binary package from pypi, so libjpeg will work.
 # Do this after running fix_paths, since the rpaths are set by delocate
