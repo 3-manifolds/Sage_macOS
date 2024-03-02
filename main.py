@@ -113,21 +113,6 @@ class Launcher:
                                capture_output=True)
         return True
 
-    def launch_classic(self, url=None):
-        environ = {'JUPYTER_RUNTIME_DIR': jupyter_runtime_dir}
-        environ.update(os.environ)
-        if url is None:
-            if not self.check_notebook_dir():
-                return False
-            jupyter_notebook_dir = self.notebook_dir.get()
-            if not jupyter_notebook_dir:
-                jupyter_notebook_dir = os.environ['HOME']
-            subprocess.Popen([sage_executable, '--jupyter', 'notebook',
-                     '--notebook-dir=%s'%jupyter_notebook_dir], env=environ)
-        else:
-            subprocess.run(['open', url], env=environ, capture_output=True)
-        return True
-
     def launch_notebook(self, notebook_module):
         environ = {'JUPYTER_RUNTIME_DIR': jupyter_runtime_dir}
         environ.update(os.environ)
@@ -196,9 +181,9 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
         self.terminal_option = PopupMenu(checks, self.terminal_var, self.terminals)
         self.use_jupyter = ttk.Radiobutton(checks, text="Notebook",
             variable=radio_var, value='nb',  command=self.update_radio_buttons)
-        self.notebook_types = ['Classic Jupyter', 'Jupyter Lab', 'Notebook v7']
+        self.notebook_types = ['Jupyter Notebook', 'JupyterLab']
         favorite = self.settings['state']['notebook_type']
-        if favorite != 'Classic Jupyter':
+        if favorite != 'Jupyter Notebook' and favorite in self.notebook_types:
             self.notebook_types.remove(favorite)
             self.notebook_types.insert(0, favorite)
         self.nb_var = tkinter.Variable(self, self.notebook_types[0])
@@ -238,7 +223,7 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
         'state': {
             'interface_type': 'cli',
             'terminal_app': 'Terminal.app',
-            'notebook_type': 'Classic Jupyter',
+            'notebook_type': 'Jupyter Notebook',
             'notebook_dir': '',
         },
     }
@@ -316,20 +301,13 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
             launched = self.launch_terminal(app=self.terminal_var.get())
         elif interface == 'nb':
             app = self.nb_var.get()
-            if app == 'Classic Jupyter':
-                jupyter_openers = [f for f in os.listdir(jupyter_runtime_dir)
-                                   if f[-4:] == 'html']
-                if not jupyter_openers:
-                    launched = self.launch_classic(None)
-                else:
-                    html_file = path_join(jupyter_runtime_dir, jupyter_openers[0]) 
-                    launched = self.launch_classic(html_file)
-            elif app == 'Jupyter Lab':
+            if not app in self.notebook_types:
+                app = 'Jupyter Notebook'
+                self.nb_var.set(app)
+            if app == 'JupyterLab':
                 launched = self.launch_notebook('jupyterlab')
-            elif app == 'Notebook v7':
-                launched = self.launch_notebook('notebook')
             else:
-                raise RuntimeError()
+                launched = self.launch_notebook('notebook')
         if launched:
             self.save_settings()
             self.quit()

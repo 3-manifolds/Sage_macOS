@@ -104,7 +104,7 @@ echo "Building notebook venv ..."
 ${VERSION_DIR}/venv/bin/sage -python -m venv --system-site-packages ${NOTEBOOK_VENV}
 ${NOTEBOOK_VENV}/bin/pip install --no-user --upgrade jupyterlab
 ${NOTEBOOK_VENV}/bin/pip install --no-user --upgrade jupyterlab_widgets
-${NOTEBOOK_VENV}/bin/pip install --no-user --upgrade notebook
+${NOTEBOOK_VENV}/bin/pip install --no-user --ignore-installed notebook
 ${NOTEBOOK_VENV}/bin/pip install --no-user --ignore-installed ipywidgets
 # Clean up the venv
 rm -rf ${NOTEBOOK_VENV}/lib/python3.11/site-packages/setuptools*
@@ -122,7 +122,7 @@ ln -s ../../venv/bin/python3 ${NOTEBOOK_VENV}/bin/python3
 # (The executable is allowed to be a symlink, which will not be
 # dereferenced when determining its location.)  The top level of a
 # framework version directory can only contain directories, symlinks
-# or signed code files.  So we place the pyvenv.cfg in the bin
+# or signed code files.  So we place the pyvenv.cfg in the venv
 # directory.  We customize it so it shows the venv home as being
 # the bin directory in the sage venv, relative to our /var/tmp symlink.
 cp ../jinja/output/pyvenv.cfg ${NOTEBOOK_VENV}/pyvenv.cfg
