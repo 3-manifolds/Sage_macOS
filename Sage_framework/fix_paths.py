@@ -128,7 +128,6 @@ class MachFile:
         # Stripping more than this breaks the gcc stub library, but probably most executables
         # and libraries could be stripped to -u -r without causing problems.
         subprocess.run(['strip', '-x', self.path], capture_output=True)
-        print(self.path)
 
 class ScriptFile:
     def __init__(self, repo, symlink, path):
@@ -182,37 +181,22 @@ MAKEFILE = 'python3.9/config-3.9-darwin/Makefile'
 DARWIN_DATA = 'python3.9/_sysconfigdata__darwin_darwin.py'
 SAGE_CONFIG = 'python3.9/site-packages/sage_conf.py'
 
-#def fix_files(repo, symlink, directory):
-def fix_files(repo, directory):
+delocated_pkgs = ['PIL', 'zmq']
+def is_delocated(path):
+    for pkg in delocated_pkgs:
+        if path.find(pkg) > 0:
+            return True
+    return False
+
+def fix_files(directory):
     for dirpath, dirnames, filenames in os.walk(directory):
         for filename in filenames:
             fullpath = os.path.join(dirpath, filename)
             if mach_check(fullpath):
-                MF = MachFile(fullpath)
-                MF.fix()
-                #if MF.filetype == "MH_DYLIB":
-                #    id_path = os.path.join("@rpath", os.path.split(fullpath)[1])
-                #    subprocess.run(['macher', 'set_id', id_path, fullpath])
-            # elif shebang_check(fullpath):
-            #     ScriptFile(repo, symlink, fullpath).fix()
-            # elif (fullpath.endswith('.pc') or
-            #         fullpath.endswith(MAKEFILE) or
-            #         fullpath.endswith(DARWIN_DATA) or
-            #         fullpath.endswith(SAGE_CONFIG)):
-            #     ConfigFile(repo, symlink, fullpath).fix()
-
-# def fix_config_files(directory):
-#     for dirpath, dirnames, filenames in os.walk(directory):
-#         for filename in filenames:
-#             fullpath = os.path.join(dirpath, filename)
-#             ConfigFile(fullpath).fix()
-
-# def fix_scripts(directory):
-#     for dirpath, dirnames, filenames in os.walk(directory):
-#         for filename in filenames:
-#             fullpath = os.path.join(dirpath, filename)
-#             if shebang_check(fullpath):
-#                 ScriptFile(fullpath).fix()
+                if not is_delocated(fullpath):
+                    MF = MachFile(fullpath)
+                    MF.fix()
+                print(fullpath)
 
 if __name__ == '__main__':
     try:
@@ -224,4 +208,4 @@ if __name__ == '__main__':
     sage_version = m.groups()[0]
     LOCAL_LIB = LOCAL_LIB.replace('X.X', sage_version)
     repo = os.path.abspath(repo)
-    fix_files(repo, directory)
+    fix_files(directory)

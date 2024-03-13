@@ -12,6 +12,7 @@ fi
 # and deals with any other random places where sage may use a hardwired
 # path to the sage root.  By default a sage build cannot be relocated.
 
+cp requirements.txt /tmp
 SAGE_SYMLINK="/var/tmp/sage-$VERSION-current"
 mv repo/sage ${SAGE_SYMLINK}
 pushd ${SAGE_SYMLINK}
@@ -42,6 +43,7 @@ else
     export MACOSX_DEPLOYMENT_TARGET="10.9"
 fi
 CONFIG_OPTIONS="--with-system-python3=no \
+--disable-notebook \
 --disable-editable \
 --enable-isl \
 --enable-4ti2 \
@@ -82,33 +84,23 @@ CONFIG_OPTIONS="--with-system-python3=no \
 --enable-tdlib \
 --enable-tides"
 ./bootstrap
-make configure
+# make configure
 ./configure $CONFIG_OPTIONS > /tmp/configure.out
 # Do the main build with 4 CPUs
 make -j4 build
-# Install cocoserver "by hand" - this is simpler than making an spkg.
-SITE_PACKAGES=`venv/bin/python3 -c "import site; print(site.getsitepackages()[0])"`
-PIP_ARGS="install --upgrade --no-user --no-deps --target ${SITE_PACKAGES}"
-venv/bin/python3 -m pip ${PIP_ARGS} cocoserver
-# Build the documentatation.
-# The doc build does not seem to work when done in parallel, so no -j4.
-make doc-clean doc-uninstall
-pushd src/doc
-export PATH=$SAGE_SYMLINK/venv/bin:$PATH
-export SAGE_ROOT=$SAGE_SYMLINK
-make clean
-make doc-html--all
-popd
+# Fix timestamp on xz so we don't have to rebuild gmp every time
+INSTALLED="local/var/lib/sage/installed"
+STAMP=`date -r $INSTALLED/patch* "+%Y-%m-%dT%H:%M:%S"`
+touch -d ${STAMP} ${INSTALLED}/xz*
+# Install a bunch of binary wheels (pillow and notebooks).
+PIP_ARGS="install --no-user --force-reinstall --upgrade-strategy eager"
+venv/bin/python3 -m pip $PIP_ARGS -r /tmp/requirements.txt
+# Install cocoserver
+PIP_ARGS="install --no-user --upgrade --no-deps"
+venv/bin/python3 -m pip $PIP_ARGS cocoserver
 # Move the repo back where it belongs.
 popd
 mv /var/tmp/sage-$VERSION-current repo/sage
 # Fix the broken p_group_cohomology spkg
 cp -R repo/p_group_cohomology-3.3.2/gap_helper repo/sage/local/share/gap/pkg/p_group_cohomology_helper
 cp repo/p_group_cohomology-3.3.2/singular_helper/dickson.lib repo/sage/local/share/singular/LIB
-# Copy and compress the documentation
-if [ -e repo/documentation ]; then
-    rm -rf repo/documentation.old
-    mv repo/documentation repo/documentation.old
-fi
-cp -R repo/sage/local/share/doc/sage/html/en repo/documentation
-../bin/compress_site.py repo/documentation

@@ -20,7 +20,6 @@ import plistlib
 import platform
 
 this_python = 'python' + '.'.join(platform.python_version_tuple()[:2])
-jupyter_id = re.compile('nbserver-([0-9]+)-open.html')
 contents_dir = abspath(path_join(sys.argv[0], pardir, pardir))
 framework_dir = path_join(contents_dir, 'Frameworks')
 info_plist = path_join(contents_dir, 'Info.plist')
@@ -39,11 +38,6 @@ sagemath_version = get_version()
 app_support_dir = path_join(os.environ['HOME'], 'Library', 'Application Support',
                                     'SageMath')
 settings_path = path_join(app_support_dir, 'Settings.plist')
-jupyter_runtime_dir = path_join(app_support_dir, 'Jupyter')
-jupyter_lab_dir = path_join(sage_userbase, 'share', 'jupyter', 'lab')
-jupyter_lab_exe = path_join(sage_userbase, 'bin', 'jupyter-lab')
-
-###config_file = path_join(app_support_dir, 'config')
 
 class PopupMenu(ttk.Menubutton):
     def __init__(self, parent, variable, values):
@@ -113,19 +107,17 @@ class Launcher:
                                capture_output=True)
         return True
 
-    def launch_notebook(self, notebook_module):
-        environ = {'JUPYTER_RUNTIME_DIR': jupyter_runtime_dir}
-        environ.update(os.environ)
-        venv_executable = path_join(framework_dir, 'sage.framework', 'Versions',
-                                    'Current', 'notebook_venv', 'bin', 'python3')
+    def launch_notebook(self, notebook_type):
+        sage_executable = path_join(framework_dir, 'sage.framework', 'Versions',
+                                    'Current', 'venv', 'bin', 'sage')
         if not self.check_notebook_dir():
             showerror(message='Please select a notebook directory.')
             return False
         notebook_dir = self.notebook_dir.get()
         if not notebook_dir:
             notebook_dir = os.environ['HOME']
-        subprocess.Popen([venv_executable, '-m' , notebook_module,
-                          '--notebook-dir=%s'%notebook_dir], env=environ)
+        subprocess.Popen([sage_executable, '-n', notebook_type,
+                          '--notebook-dir=%s'%notebook_dir])
         return True
 
     def find_app(self, bundle_id):
@@ -133,14 +125,6 @@ class Launcher:
         result = subprocess.run(['osascript', '-'], input=script, text=True,
                                     capture_output=True)
         return result.stdout.strip() == 'true' 
-
-    def jupyter_lab_installed(self):
-        if not os.path.exists(jupyter_lab_dir):
-            return False
-        if not os.path.exists(jupyter_lab_exe):
-            return False
-        return True
-
 
 class LaunchWindow(tkinter.Toplevel, Launcher):
     def __init__(self, root):
@@ -273,8 +257,8 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
 
     def update_environment(self):
         required_paths = [
-        '/var/tmp/sage-9.8-current/local/bin',
-        '/var/tmp/sage-9.8-current/venv/bin',
+        '/var/tmp/sage-10.3-current/local/bin',
+        '/var/tmp/sage-10.3-current/venv/bin',
         '/bin',
         '/usr/bin',
         '/usr/local/bin',
@@ -307,7 +291,7 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
             if app == 'JupyterLab':
                 launched = self.launch_notebook('jupyterlab')
             else:
-                launched = self.launch_notebook('notebook')
+                launched = self.launch_notebook('jupyter')
         if launched:
             self.save_settings()
             self.quit()
@@ -332,24 +316,6 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
         return True
             
     def browse_notebook_dir(self):
-        json_files = [filename for filename in os.listdir(jupyter_runtime_dir)
-                          if os.path.splitext(filename)[1] == '.json']
-        if json_files:
-            answer = askyesno(message='You already have a Jupyter server running with '
-                                  'the notebook directory shown.  Do you want to stop '
-                                  'that server and start a new one?')
-            if answer == tkinter.YES:
-                for json_file in json_files:
-                    with open(os.path.join(jupyter_runtime_dir, json_file)) as in_file:
-                        try:
-                            pid = int(json.load(in_file)['pid'])
-                            os.kill(pid, signal.SIGINT)
-                            time.sleep(2)
-                            os.kill(pid, signal.SIGINT)
-                        except:
-                            pass
-            else:
-                return
         directory = askdirectory(parent=self, initialdir=os.environ['HOME'],
             message='Choose or create a folder for Jupyter notebooks')
         if directory:
@@ -564,7 +530,7 @@ The app is copyright © 2021 by Marc Culler, Nathan Dunfield, Matthias Gӧrner a
         self.root_window = root = tkinter.Tk()
         root.withdraw()
         os.chdir(os.environ['HOME'])
-        os.makedirs(jupyter_runtime_dir, mode=0o755, exist_ok=True)
+        #os.makedirs(jupyter_runtime_dir, mode=0o755, exist_ok=True)
         self.icon = tkinter.Image("photo", file=self.icon_file)
         root.tk.call('wm','iconphoto', root._w, self.icon)
         self.menubar = menubar = tkinter.Menu(root)
