@@ -7,6 +7,7 @@ import signal
 import json
 import time
 import plistlib
+import webbrowser
 import tkinter
 from tkinter import ttk
 from tkinter.font import Font
@@ -15,6 +16,8 @@ from tkinter.filedialog import askdirectory
 from tkinter.messagebox import showerror, showwarning, askyesno, askokcancel
 from tkinter.scrolledtext import ScrolledText
 from sage.version import version as sage_version
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 import os
 import plistlib
 import platform
@@ -28,6 +31,8 @@ sage_executable =  path_join(current, 'venv', 'bin', 'sage')
 sage_userbase = path_join(os.environ['HOME'], '.sage', 'local')
 sage_userlib = path_join(sage_userbase, 'lib', this_python)
 sage_usersitepackages = path_join(sage_userlib, 'site-packages') 
+jupyter_runtime_dir = os.path.join(os.environ['HOME'], 'Library',
+    'Jupyter', 'runtime')
 
 def get_version():
     with open(info_plist, 'rb') as plist_file:
@@ -38,6 +43,23 @@ sagemath_version = get_version()
 app_support_dir = path_join(os.environ['HOME'], 'Library', 'Application Support',
                                     'SageMath')
 settings_path = path_join(app_support_dir, 'Settings.plist')
+
+
+class DirectoryObserver(Observer):
+    """Calls a callback when the top level of a directory changes."""
+
+    class Handler(FileSystemEventHandler):
+        def __init__(self, callback):
+            super().__init__()
+            self.callback = callback
+
+        def on_modified(self, event):
+            self.callback()
+
+    def __init__(self, path, callback):
+        super().__init__(self)
+        self.daemon = True
+        self.schedule(self.Handler(callback), path, recursive=False)
 
 class PopupMenu(ttk.Menubutton):
     def __init__(self, parent, variable, values):
@@ -127,6 +149,8 @@ class Launcher:
         return result.stdout.strip() == 'true' 
 
 class LaunchWindow(tkinter.Toplevel, Launcher):
+    jp_link_re = re.compile('jpserver-([0-9]*)-open.html')
+
     def __init__(self, root):
         Launcher.__init__(self)
         self.get_settings()
@@ -134,27 +158,42 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
         tkinter.Toplevel.__init__(self)
         self.tk.call('::tk::unsupported::MacWindowStyle', 'style', self._w,
                          'document', 'closeBox')
-        self.protocol("WM_DELETE_WINDOW", self.quit)
+        self.protocol("WM_DELETE_WINDOW", self.close)
         self.title('SageMath')
         self.columnconfigure(0, weight=1)
         frame = ttk.Frame(self, padding=10, width=300)
         frame.columnconfigure(0, weight=1)
-        frame.grid(row=0, column=0, sticky=tkinter.NSEW)
+        frame.grid(row=0, column=0, sticky='nsew')
         self.update_idletasks()
 	# Logo
-        resource_dir = abspath(path_join(sys.argv[0], pardir, pardir, 'Resources'))
+        resource_dir = abspath(path_join(sys.argv[0], pardir, pardir,
+            'Resources'))
         logo_file = path_join(resource_dir, 'sage_logo_256.png')
         try:
             self.logo_image = tkinter.PhotoImage(file=logo_file)
             logo = ttk.Label(frame, image=self.logo_image)
         except tkinter.TclError:
             logo = ttk.Label(frame, text='Logo Here')
+    # Jupyter Servers
+        servers = ttk.Labelframe(frame, text='Jupyter Servers', padding=10)
+        servers.columnconfigure(3, weight=1)
+        ttk.Label(servers, text='Server PID:').grid(row=1, column=0, sticky='e')
+        self.server_box = ttk.Combobox(servers, width=16)
+        self.server_box.grid(row=1, column=1, columnspan=2, sticky='w')
+        self.connect_button = ttk.Button(servers, text="Connect",
+            padding=(-8, 0), command=self.connect)
+        self.connect_button.grid(row=2, column=1, sticky='w', padx=2)
+        self.shutdown_button = ttk.Button(servers, text="Shut Down",
+                padding=(-8, 0), command=self.shutdown)
+        self.shutdown_button.grid(row=2, column=2, sticky='e')
 	# Interfaces
-        checks = ttk.Labelframe(frame, text="Available User Interfaces", padding=10)
-        self.radio_var = radio_var = tkinter.Variable(checks,
-                                         self.settings['state']['interface_type'])
-        self.use_cli = ttk.Radiobutton(checks, text="Command line", variable=radio_var,
-            value='cli', command=self.update_radio_buttons)
+        interfaces = ttk.Labelframe(frame, text="New User Interface",
+            padding=10)
+        self.radio_var = radio_var = tkinter.Variable(interfaces,
+            self.settings['state']['interface_type'])
+        self.use_cli = ttk.Radiobutton(interfaces, text="Command line",
+            variable=radio_var, value='cli',
+            command=self.update_radio_buttons)
         self.terminals = ['Terminal.app']
         if self.find_app('com.googlecode.iterm2'):
             if self.settings['state']['terminal_app'] == 'iTerm.app':
@@ -162,8 +201,9 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
             else:
                 self.terminals.append('iTerm.app')
         self.terminal_var = tkinter.Variable(self, self.terminals[0])
-        self.terminal_option = PopupMenu(checks, self.terminal_var, self.terminals)
-        self.use_jupyter = ttk.Radiobutton(checks, text="Notebook",
+        self.terminal_option = PopupMenu(interfaces,
+            self.terminal_var, self.terminals)
+        self.use_jupyter = ttk.Radiobutton(interfaces, text="Notebook",
             variable=radio_var, value='nb',  command=self.update_radio_buttons)
         self.notebook_types = ['Jupyter Notebook', 'JupyterLab']
         favorite = self.settings['state']['notebook_type']
@@ -171,10 +211,11 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
             self.notebook_types.remove(favorite)
             self.notebook_types.insert(0, favorite)
         self.nb_var = tkinter.Variable(self, self.notebook_types[0])
-        self.notebook_option = PopupMenu(checks, self.nb_var, self.notebook_types)
-        notebook_dir_frame = ttk.Frame(checks)
+        self.notebook_option = PopupMenu(interfaces, self.nb_var,
+            self.notebook_types)
+        notebook_dir_frame = ttk.Frame(interfaces)
         ttk.Label(notebook_dir_frame, text='Using notebooks from:').grid(
-            row=0, column=0, sticky=tkinter.W, padx=12)
+            row=0, column=0, sticky='w', padx=12)
         self.notebook_dir = ttk.Entry(notebook_dir_frame, width=24)
         self.notebook_dir.insert(tkinter.END, self.settings['state']['notebook_dir'])
         self.notebook_dir.config(state='readonly')
@@ -182,24 +223,76 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
             command=self.browse_notebook_dir, state=tkinter.DISABLED)
         self.notebook_dir.grid(row=1, column=0, padx=8)
         self.browse.grid(row=1, column=1)
-	# Launch button
-        self.launch = ttk.Button(frame, text="Launch", command=self.launch_sage)
+	    # Launch button
+        launch_frame = ttk.Frame(interfaces)
+        self.launch = ttk.Button(launch_frame, text="Launch", command=self.launch_sage)
+        self.launch.pack()
+        launch_frame.grid(row=5, column=0, columnspan=2)
     # Build the interfaces frame
-        self.use_cli.grid(row=0, column=0, sticky=tkinter.W, pady=5)
-        self.terminal_option.grid(row=1, column=0, sticky=tkinter.W, padx=10, pady=5)
-        self.use_jupyter.grid(row=2, column=0, sticky=tkinter.W, pady=5)
-        self.notebook_option.grid(row=3, column=0, sticky=tkinter.W, padx=10, pady=5)
-        notebook_dir_frame.grid(row=4, column=0, sticky=tkinter.W, pady=5)
+        self.use_cli.grid(row=0, column=0, sticky='w', pady=5)
+        self.terminal_option.grid(row=1, column=0, sticky='w', padx=10, pady=5)
+        self.use_jupyter.grid(row=2, column=0, sticky='w', pady=5)
+        self.notebook_option.grid(row=3, column=0, sticky='w', padx=10, pady=5)
+        notebook_dir_frame.grid(row=4, column=0, sticky='w', pady=5)
 	# Build the window
         logo.grid(row=0, column=0, pady=5)
-        checks.grid(row=1, column=0, padx=10, pady=10, sticky=tkinter.EW)
-        self.launch.grid(row=2, column=0)
-        self.geometry('380x380+400+400')
+        servers.grid(row=1, column=0, padx=10, pady=10, sticky='ew')
+        interfaces.grid(row=2, column=0, padx=10, pady=10, sticky='ew')
+        self.geometry('380x500+400+400')
         self.update_radio_buttons()
-        
-    def quit(self):
-        self.destroy()
-        self.root.destroy()
+
+    def update_links(self, links):
+        if len(links) == 0:
+            self.server_box.set('')
+            self.server_box.configure(placeholder='No servers available.')
+            self.server_box.configure(state='disabled')
+            self.connect_button.configure(state='disabled')
+            self.shutdown_button.configure(state='disabled')
+            return
+        self.jp_links = {}
+        for link in links:
+            try:
+                self.jp_links[self.jp_link_re.match(link).groups()[0]] = link
+            except:
+                pass
+        pids = list(self.jp_links.keys())
+        self.server_box.configure(state='readonly')
+        self.server_box.configure(values=pids)
+        self.server_box.set(pids[0])
+        self.connect_button.configure(state='normal')
+        self.shutdown_button.configure(state='normal')
+
+    def connect(self):
+        pid = self.server_box.get()
+        if not pid:
+            showwarning(parent=self,
+                message="Please select a Jupyter server.")
+            return
+        try:
+            link = self.jp_links[pid]
+            url = os.path.join('file:///', jupyter_runtime_dir, link)
+            subprocess.run(['open', url])
+            self.withdraw()
+        except:
+            showwarning(parent=self, message="Failed to get server URL.")
+            return
+
+    def shutdown(self):
+        pid = self.server_box.get()
+        if not pid:
+            showwarning(parent=self,
+                message="Please select a Jupyter server.")
+            return
+        try:
+            os.kill(int(pid), signal.SIGTERM)
+            self.withdraw()
+        except:
+            showwarning(parent=self,
+                message="Failed to kill process %s." %pid)
+            return
+
+    def close(self):
+        self.withdraw()
 
     default_settings = {
         'environment': {
@@ -294,7 +387,7 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
                 launched = self.launch_notebook('jupyter')
         if launched:
             self.save_settings()
-            self.quit()
+            self.close()
 
     def check_notebook_dir(self):
         notebook_dir = self.notebook_dir.get()
@@ -343,9 +436,9 @@ class AboutDialog(Dialog):
             logo = ttk.Label(frame, image=self.logo_image)
         else:
             logo = ttk.Label(frame, text='Logo Here')
-        logo.grid(row=0, column=0, padx=20, pady=20, sticky=tkinter.N)
+        logo.grid(row=0, column=0, padx=20, pady=20, sticky='n')
         message = tkinter.Message(frame, text=self.content)
-        message.grid(row=1, column=0, padx=20, sticky=tkinter.EW)
+        message.grid(row=1, column=0, padx=20, sticky='ew')
         frame.pack()
 
     def buttonbox(self):
@@ -380,14 +473,14 @@ class InfoDialog(Dialog):
             logo = ttk.Label(frame, image=self.logo_image)
         else:
             logo = ttk.Label(frame, text='Logo Here')
-        logo.grid(row=0, column=0, padx=20, pady=20, sticky=tkinter.N)
+        logo.grid(row=0, column=0, padx=20, pady=20, sticky='n')
         font = tkinter.font.Font()
         font.config(size=18)
         text = tkinter.Text(frame, wrap=tkinter.WORD, bd=0,
             highlightthickness=0, bg='SystemWindowBackgroundColor',
             width=self.text_width, height=self.text_height,
             font=self.text_font)
-        text.grid(row=1, column=0, padx=20, sticky=tkinter.EW)
+        text.grid(row=1, column=0, padx=20, sticky='ew')
         text.insert(tkinter.INSERT, self.message)
         text.config(state=tkinter.DISABLED)
         frame.pack()
@@ -416,27 +509,27 @@ class EnvironmentEditor(tkinter.Toplevel):
         self.remove = tkinter.Image('nsimage', name='remove', source='NSRemoveTemplate',
                         width=20, height=4)
         self.left = ttk.Frame(self, padding=0)
-        ttk.Label(self, text = 'Variable').grid(row=0, column=0, padx=10, sticky='W')
-        ttk.Label(self, text = 'Value').grid(row=0, column=1, sticky='W')
+        ttk.Label(self, text = 'Variable').grid(row=0, column=0, padx=10, sticky='w')
+        ttk.Label(self, text = 'Value').grid(row=0, column=1, sticky='w')
         self.varnames = tkinter.StringVar(self)
         if self.varlist:
             self.varnames.set(self.varlist)
         self.listbox = tkinter.Listbox(self.left, selectmode='browse',
                           listvariable=self.varnames, height=19)
-        self.listbox.grid(row=1, column=0, columnspan=2, sticky='NSEW')
+        self.listbox.grid(row=1, column=0, columnspan=2, sticky='nsew')
         button_frame = ttk.Frame(self.left, padding=(0, 4, 0, 10))
         ttk.Button(button_frame, style="GradientButton", image='add',
-            command=self.add_var).grid(row=0, column=0, sticky='NW')
+            command=self.add_var).grid(row=0, column=0, sticky='nw')
         ttk.Button(button_frame, style="GradientButton", image='remove',
-            padding=(0,8), command=self.remove_var).grid(row=0, column=1, sticky='NW')
-        button_frame.grid(row=2, column=0, sticky='NW')
+            padding=(0,8), command=self.remove_var).grid(row=0, column=1, sticky='nw')
+        button_frame.grid(row=2, column=0, sticky='nw')
         self.columnconfigure(1, weight=1)
         self.rowconfigure(1, weight=1)
-        self.left.grid(row=1, rowspan=2, column=0, sticky='NSW', padx=10, pady=10)
+        self.left.grid(row=1, rowspan=2, column=0, sticky='nsw', padx=10, pady=10)
         self.text = ScrolledText(self)
-        self.text.frame.grid(row=1, column=1, pady=10, sticky='NSEW')
+        self.text.frame.grid(row=1, column=1, pady=10, sticky='nsew')
         ttk.Button(self, text='Done', command = self.done).grid(
-            row=2, column=1, pady=20, padx=20, sticky='ES')
+            row=2, column=1, pady=20, padx=20, sticky='es')
         self.listbox.bind("<<ListboxSelect>>",
             lambda e: self.update())
         self.selected = None
@@ -530,16 +623,16 @@ The app is copyright © 2021 by Marc Culler, Nathan Dunfield, Matthias Gӧrner a
         self.root_window = root = tkinter.Tk()
         root.withdraw()
         os.chdir(os.environ['HOME'])
-        #os.makedirs(jupyter_runtime_dir, mode=0o755, exist_ok=True)
         self.icon = tkinter.Image("photo", file=self.icon_file)
         root.tk.call('wm','iconphoto', root._w, self.icon)
         self.menubar = menubar = tkinter.Menu(root)
         root.createcommand('::tk::mac::ShowPreferences', self.edit_env)
         apple_menu = tkinter.Menu(menubar, name="apple")
-        apple_menu.add_command(label='About SageMath ...', command=self.about_sagemath)
+        apple_menu.add_command(label='About SageMath ...',
+                                   command=self.about_sagemath)
         menubar.add_cascade(menu=apple_menu)
         root.config(menu=menubar)
-        ttk.Label(root, text="SageMath 9.4").pack(padx=20, pady=20)
+        ttk.Label(root, text="SageMath").pack(padx=20, pady=20)
 
     def about_sagemath(self):
         AboutDialog(self.root_window, 'SageMath', self.about)
@@ -548,16 +641,31 @@ The app is copyright © 2021 by Marc Culler, Nathan Dunfield, Matthias Gӧrner a
         editor = EnvironmentEditor(self.launcher)
         editor.go()
 
+    def update_server_info(self):
+        jp_files = os.listdir(jupyter_runtime_dir)
+        jp_links = [f for f in jp_files if f.endswith('.html')]
+        count = str(len(jp_links)) if jp_links else ''
+        self.root_window.tk.call('wm', 'iconbadge', '.', count)
+        self.launcher.update_links(jp_links)
+
     def run(self):
-        symlink = path_join(os.path.sep, 'var', 'tmp', 'sage-%s-current'%sagemath_version)
+        symlink = path_join(os.path.sep, 'var', 'tmp',
+                                'sage-%s-current' % sagemath_version)
         self.launcher = LaunchWindow(root=self.root_window)
+        self.update_server_info()
         if not os.path.islink(symlink):
             try:
                 os.symlink(current, symlink)
             except Exception as e:
                 showwarning(parent=self.root_window,
-                            message="%s Cannot create %s; SageMath must exit."%(e, symlink))
+                    message="%s Cannot create %s; "
+                            "SageMath must exit."%(e, symlink))
                 sys.exit(1)
+        self.root_window.createcommand('tk::mac::ReopenApplication',
+                                      self.launcher.deiconify)
+        observer = DirectoryObserver(jupyter_runtime_dir,
+            self.update_server_info)
+        observer.start()
         self.root_window.mainloop()
         
 if __name__ == '__main__':

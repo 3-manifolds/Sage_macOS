@@ -53,7 +53,6 @@ packaging==23.2
 pandocfilters==1.5.1
 parso==0.8.3
 pexpect==4.9.0
-pillow==10.2.0
 platformdirs==4.2.0
 prometheus-client==0.20.0
 prompt-toolkit==3.0.43
@@ -90,4 +89,6 @@ charset-normalizer==3.3.2
 psutil==5.9.8
 pyzmq==25.1.2
 tornado==6.4
-
+# packages not related to jupyter
+pillow==10.2.0  
+watchdog==4.0.0
