@@ -141,7 +141,6 @@ class Launcher:
 
     def launch_notebook(self, notebook_type):
         if not self.check_notebook_dir():
-            showerror(message='Please select a notebook directory.')
             return False
         notebook_dir = self.notebook_dir.get()
         environ = {'JUPYTER_RUNTIME_DIR': jupyter_runtime_dir,
@@ -555,6 +554,7 @@ The app is copyright © 2021 by Marc Culler, Nathan Dunfield, Matthias Gӧrner a
 
     def __init__(self):
         os.makedirs(app_support_dir, exist_ok=True)
+        os.makedirs(jupyter_runtime_dir, exist_ok=True)
         self.root_window = root = tkinter.Tk()
         root.withdraw()
         os.chdir(os.environ['HOME'])
