@@ -29,5 +29,5 @@ if [ -e repo/documentation ]; then
     mv repo/documentation repo/documentation.old
 fi
 cp -R repo/sage/local/share/doc/sage/html/en repo/documentation
-cp -R repo/sage/local/share/mathjax repo/documentation/_static
+cp -R repo/sage/local/share/mathjax/mathjax repo/documentation/_static
 ../bin/compress_site.py repo/documentation
