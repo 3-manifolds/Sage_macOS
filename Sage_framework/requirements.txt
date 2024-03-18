@@ -90,5 +90,4 @@ psutil==5.9.8
 pyzmq==25.1.2
 tornado==6.4
 # packages not related to jupyter
-pillow==10.2.0  
-watchdog==4.0.0
+pillow==10.2.0

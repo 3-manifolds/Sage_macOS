@@ -16,8 +16,6 @@ from tkinter.filedialog import askdirectory
 from tkinter.messagebox import showerror, showwarning, askyesno, askokcancel
 from tkinter.scrolledtext import ScrolledText
 from sage.version import version as sage_version
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
 import os
 import plistlib
 import platform
@@ -28,11 +26,10 @@ framework_dir = path_join(contents_dir, 'Frameworks')
 info_plist = path_join(contents_dir, 'Info.plist')
 current = path_join(framework_dir, 'Sage.framework', 'Versions', 'Current')
 sage_executable =  path_join(current, 'venv', 'bin', 'sage')
+sage_jupyter_path = path_join(current, 'venv', 'share', 'jupyter')
 sage_userbase = path_join(os.environ['HOME'], '.sage', 'local')
 sage_userlib = path_join(sage_userbase, 'lib', this_python)
-sage_usersitepackages = path_join(sage_userlib, 'site-packages') 
-jupyter_runtime_dir = os.path.join(os.environ['HOME'], 'Library',
-    'Jupyter', 'runtime')
+sage_usersitepackages = path_join(sage_userlib, 'site-packages')
 
 def get_version():
     with open(info_plist, 'rb') as plist_file:
@@ -40,26 +37,12 @@ def get_version():
     return info['CFBundleShortVersionString']
 
 sagemath_version = get_version()
+app_name = 'SageMath-%s' % sagemath_version.replace('.', '-')
 app_support_dir = path_join(os.environ['HOME'], 'Library', 'Application Support',
-                                    'SageMath')
+                                    app_name)
 settings_path = path_join(app_support_dir, 'Settings.plist')
-
-
-class DirectoryObserver(Observer):
-    """Calls a callback when the top level of a directory changes."""
-
-    class Handler(FileSystemEventHandler):
-        def __init__(self, callback):
-            super().__init__()
-            self.callback = callback
-
-        def on_modified(self, event):
-            self.callback()
-
-    def __init__(self, path, callback):
-        super().__init__(self)
-        self.daemon = True
-        self.schedule(self.Handler(callback), path, recursive=False)
+jupyter_runtime_dir = os.path.join(app_support_dir, 'Jupyter', 'runtime')
+jp_pid_re = re.compile('jpserver-([0-9]*).*')
 
 class PopupMenu(ttk.Menubutton):
     def __init__(self, parent, variable, values):
@@ -77,6 +60,8 @@ class PopupMenu(ttk.Menubutton):
         self.config(menu=self.menu)
 
 class Launcher:
+    jp_json_re = re.compile('jpserver-[0-9]*\.json')
+    url_fmt = 'http://localhost:{port}/{nb_type}?token={token}'
     sage_cmd = 'clear ; %s ; exit'%sage_executable
     terminal_script = """
         set command to "%s"
@@ -119,6 +104,31 @@ class Launcher:
         return appExists
     """
 
+    def check_notebook_dir(self):
+        notebook_dir = self.notebook_dir.get()
+        if not notebook_dir.strip():
+            showwarning(parent=self,
+                message="Please choose or create a folder for your Jupyter notebooks.")
+            return False
+        if not os.path.exists(notebook_dir):
+            answer = askyesno(message='May we create the folder %s?'%notebook_dir)
+            if answer == tkinter.YES:
+                os.makedirs(notebook_dir, exist_ok=True)
+            else:
+                return False
+        try:
+            os.listdir(notebook_dir)
+        except:
+            showerror(message='Sorry. We do not have permission to read %s'%directory)
+            return False
+        return True
+            
+    def find_app(self, bundle_id):
+        script = self.find_app_script%bundle_id
+        result = subprocess.run(['osascript', '-'], input=script, text=True,
+                                    capture_output=True)
+        return result.stdout.strip() == 'true' 
+
     def launch_terminal(self, app):
         if app == 'Terminal.app':
             subprocess.run(['osascript', '-'], input=self.terminal_script, text=True,
@@ -130,26 +140,31 @@ class Launcher:
         return True
 
     def launch_notebook(self, notebook_type):
-        sage_executable = path_join(framework_dir, 'sage.framework', 'Versions',
-                                    'Current', 'venv', 'bin', 'sage')
         if not self.check_notebook_dir():
             showerror(message='Please select a notebook directory.')
             return False
         notebook_dir = self.notebook_dir.get()
-        if not notebook_dir:
-            notebook_dir = os.environ['HOME']
+        environ = {'JUPYTER_RUNTIME_DIR': jupyter_runtime_dir,
+                    'JUPYTER_PATH': sage_jupyter_path}
+        environ.update(os.environ)
+        json_files = [f for f in os.listdir(jupyter_runtime_dir)
+                           if self.jp_json_re.match(f)]
+        if json_files:
+            filename = os.path.join(jupyter_runtime_dir, json_files[0])
+            with open(filename) as json_file:
+                info = json.load(json_file)
+            info['nb_type'] = 'lab' if notebook_type=='jupyterlab' else 'tree'
+            if info['root_dir'] == notebook_dir:
+                url = self.url_fmt.format(**info)
+                subprocess.run(['open', url], env=environ)
+                return True
+        sage_executable = path_join(framework_dir, 'sage.framework', 'Versions',
+                                    'Current', 'venv', 'bin', 'sage')
         subprocess.Popen([sage_executable, '-n', notebook_type,
-                          '--notebook-dir=%s'%notebook_dir])
+                          '--notebook-dir=%s'%notebook_dir], env=environ)
         return True
 
-    def find_app(self, bundle_id):
-        script = self.find_app_script%bundle_id
-        result = subprocess.run(['osascript', '-'], input=script, text=True,
-                                    capture_output=True)
-        return result.stdout.strip() == 'true' 
-
 class LaunchWindow(tkinter.Toplevel, Launcher):
-    jp_link_re = re.compile('jpserver-([0-9]*)-open.html')
 
     def __init__(self, root):
         Launcher.__init__(self)
@@ -174,20 +189,8 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
             logo = ttk.Label(frame, image=self.logo_image)
         except tkinter.TclError:
             logo = ttk.Label(frame, text='Logo Here')
-    # Jupyter Servers
-        servers = ttk.Labelframe(frame, text='Jupyter Servers', padding=10)
-        servers.columnconfigure(3, weight=1)
-        ttk.Label(servers, text='Server PID:').grid(row=1, column=0, sticky='e')
-        self.server_box = ttk.Combobox(servers, width=16)
-        self.server_box.grid(row=1, column=1, columnspan=2, sticky='w')
-        self.connect_button = ttk.Button(servers, text="Connect",
-            padding=(-8, 0), command=self.connect)
-        self.connect_button.grid(row=2, column=1, sticky='w', padx=2)
-        self.shutdown_button = ttk.Button(servers, text="Shut Down",
-                padding=(-8, 0), command=self.shutdown)
-        self.shutdown_button.grid(row=2, column=2, sticky='e')
 	# Interfaces
-        interfaces = ttk.Labelframe(frame, text="New User Interface",
+        interfaces = ttk.Labelframe(frame, text="Available User Interfaces",
             padding=10)
         self.radio_var = radio_var = tkinter.Variable(interfaces,
             self.settings['state']['interface_type'])
@@ -223,73 +226,23 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
             command=self.browse_notebook_dir, state=tkinter.DISABLED)
         self.notebook_dir.grid(row=1, column=0, padx=8)
         self.browse.grid(row=1, column=1)
-	    # Launch button
-        launch_frame = ttk.Frame(interfaces)
-        self.launch = ttk.Button(launch_frame, text="Launch", command=self.launch_sage)
-        self.launch.pack()
-        launch_frame.grid(row=5, column=0, columnspan=2)
     # Build the interfaces frame
         self.use_cli.grid(row=0, column=0, sticky='w', pady=5)
         self.terminal_option.grid(row=1, column=0, sticky='w', padx=10, pady=5)
         self.use_jupyter.grid(row=2, column=0, sticky='w', pady=5)
         self.notebook_option.grid(row=3, column=0, sticky='w', padx=10, pady=5)
         notebook_dir_frame.grid(row=4, column=0, sticky='w', pady=5)
+    # Launch button
+        launch_frame = ttk.Frame(frame)
+        self.launch = ttk.Button(launch_frame, text="Launch", command=self.launch_sage)
+        self.launch.pack()
 	# Build the window
         logo.grid(row=0, column=0, pady=5)
-        servers.grid(row=1, column=0, padx=10, pady=10, sticky='ew')
         interfaces.grid(row=2, column=0, padx=10, pady=10, sticky='ew')
-        self.geometry('380x500+400+400')
+        launch_frame.grid(row=3, column=0)
+        self.geometry('380x390+400+400')
         self.update_radio_buttons()
-
-    def update_links(self, links):
-        if len(links) == 0:
-            self.server_box.set('')
-            self.server_box.configure(placeholder='No servers available.')
-            self.server_box.configure(state='disabled')
-            self.connect_button.configure(state='disabled')
-            self.shutdown_button.configure(state='disabled')
-            return
-        self.jp_links = {}
-        for link in links:
-            try:
-                self.jp_links[self.jp_link_re.match(link).groups()[0]] = link
-            except:
-                pass
-        pids = list(self.jp_links.keys())
-        self.server_box.configure(state='readonly')
-        self.server_box.configure(values=pids)
-        self.server_box.set(pids[0])
-        self.connect_button.configure(state='normal')
-        self.shutdown_button.configure(state='normal')
-
-    def connect(self):
-        pid = self.server_box.get()
-        if not pid:
-            showwarning(parent=self,
-                message="Please select a Jupyter server.")
-            return
-        try:
-            link = self.jp_links[pid]
-            url = os.path.join('file:///', jupyter_runtime_dir, link)
-            subprocess.run(['open', url])
-            self.withdraw()
-        except:
-            showwarning(parent=self, message="Failed to get server URL.")
-            return
-
-    def shutdown(self):
-        pid = self.server_box.get()
-        if not pid:
-            showwarning(parent=self,
-                message="Please select a Jupyter server.")
-            return
-        try:
-            os.kill(int(pid), signal.SIGTERM)
-            self.withdraw()
-        except:
-            showwarning(parent=self,
-                message="Failed to kill process %s." %pid)
-            return
+        self.update_idletasks()
 
     def close(self):
         self.withdraw()
@@ -389,25 +342,6 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
             self.save_settings()
             self.close()
 
-    def check_notebook_dir(self):
-        notebook_dir = self.notebook_dir.get()
-        if not notebook_dir.strip():
-            showwarning(parent=self,
-                message="Please choose or create a folder for your Jupyter notebooks.")
-            return False
-        if not os.path.exists(notebook_dir):
-            answer = askyesno(message='May we create the folder %s?'%notebook_dir)
-            if answer == tkinter.YES:
-                os.makedirs(notebook_dir, exist_ok=True)
-            else:
-                return False
-        try:
-            os.listdir(notebook_dir)
-        except:
-            showerror(message='Sorry. We do not have permission to read %s'%directory)
-            return False
-        return True
-            
     def browse_notebook_dir(self):
         directory = askdirectory(parent=self, initialdir=os.environ['HOME'],
             message='Choose or create a folder for Jupyter notebooks')
@@ -620,6 +554,7 @@ The app is copyright © 2021 by Marc Culler, Nathan Dunfield, Matthias Gӧrner a
 """
 
     def __init__(self):
+        os.makedirs(app_support_dir, exist_ok=True)
         self.root_window = root = tkinter.Tk()
         root.withdraw()
         os.chdir(os.environ['HOME'])
@@ -641,18 +576,10 @@ The app is copyright © 2021 by Marc Culler, Nathan Dunfield, Matthias Gӧrner a
         editor = EnvironmentEditor(self.launcher)
         editor.go()
 
-    def update_server_info(self):
-        jp_files = os.listdir(jupyter_runtime_dir)
-        jp_links = [f for f in jp_files if f.endswith('.html')]
-        count = str(len(jp_links)) if jp_links else ''
-        self.root_window.tk.call('wm', 'iconbadge', '.', count)
-        self.launcher.update_links(jp_links)
-
     def run(self):
         symlink = path_join(os.path.sep, 'var', 'tmp',
                                 'sage-%s-current' % sagemath_version)
         self.launcher = LaunchWindow(root=self.root_window)
-        self.update_server_info()
         if not os.path.islink(symlink):
             try:
                 os.symlink(current, symlink)
@@ -663,10 +590,41 @@ The app is copyright © 2021 by Marc Culler, Nathan Dunfield, Matthias Gӧrner a
                 sys.exit(1)
         self.root_window.createcommand('tk::mac::ReopenApplication',
                                       self.launcher.deiconify)
-        observer = DirectoryObserver(jupyter_runtime_dir,
-            self.update_server_info)
-        observer.start()
+        self.root_window.createcommand('tk::mac::Quit', self.quit)
         self.root_window.mainloop()
+
+    def shutdown_servers(self):
+        try:
+            jp_files = os.listdir(jupyter_runtime_dir)
+        except:
+            return
+        pids = set()
+        for filename in jp_files:
+            m = jp_pid_re.match(filename)
+            if m:
+                pids.add(m.groups()[0])
+        if pids:
+            answer = askokcancel(
+                message='Quitting the SageMath app will terminate '
+                        'all notebooks.  Unsaved changes will be lost.')
+            if answer == False:
+                return False
+            for pid in pids:
+                try:
+                    os.kill(int(pid), signal.SIGTERM)
+                except:
+                    pass
+            for filename in jp_files:
+                if filename == 'jupyter_cookie_secret':
+                    continue
+                if os.path.exists(filename):
+                    os.unlink(filename)
+        return True
+
+    def quit(self):
+        if self.shutdown_servers():
+            self.launcher.destroy()
+            self.root_window.destroy()
         
 if __name__ == '__main__':
     SageApp().run()

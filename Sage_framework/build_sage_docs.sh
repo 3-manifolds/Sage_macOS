@@ -18,6 +18,7 @@ make doc-clean doc-uninstall
 pushd src/doc
 export PATH=${SAGE_SYMLINK}/venv/bin:$PATH
 export SAGE_ROOT=${SAGE_SYMLINK}
+export MATHJAX_DIR=mathjax
 make doc-html--all
 popd
 popd
@@ -28,4 +29,5 @@ if [ -e repo/documentation ]; then
     mv repo/documentation repo/documentation.old
 fi
 cp -R repo/sage/local/share/doc/sage/html/en repo/documentation
+cp -R repo/sage/local/share/mathjax repo/documentation/_static
 ../bin/compress_site.py repo/documentation
