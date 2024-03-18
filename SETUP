@@ -33,12 +33,9 @@ somewhere on your system, then you can create the Tcl directories and
 run, for example.
 
 % cd Tcl
-% fossil open /path/to/Tcl.fossil core-8-6-branch
+% fossil open /path/to/Tcl.fossil core-8-branch
 % cd ../Tk
-% fossil open /path/to/Tk.fossil core-8-6-branch
-
-Alternatively, you may use source tarballs from the latest core-8-6-branch
-release.
+% fossil open /path/to/Tk.fossil core-8-branch
 
 Credentials
 -----------
@@ -59,6 +56,36 @@ package/IDs.sh :
 export APPLE_ID=user@example.com
 export ONE_TIME_PASS=abcd-efgh-ijkl-mnop
 export DEV_ID=YOURCERTID
+
+Build Steps
+-----------
+
+The bin directory contains scripts which handle each step of building the
+application bundle, once the Sage distribution has been built.  A valid
+Apple developer id is needed to run the scripts build_dist, notarize_app,
+and notarize_dmg.  However, the build_dist can be modified by commenting
+out the 4 lines in the section "Render templates and install the package"
+in order to allow building a signed but unnotarized copy of the app,
+without the associated extras package.  This does require a self-signed
+certificate, which must be listed in IDs.sh.
+
+The steps are:
+# Build Sage and the Sage documentation
+cd Sage_framework
+bash build_sage.sh
+# If Sage built successfully, continue ...
+bash build_sage_docs.sh
+# Verify that the documentation looks OK (requires cocoserver)
+coco repo/documentation
+# Build the app
+cd ..
+bin/build_dist
+# This provides the app.  If you have a valid Developer ID you can now
+# notarize the app and the installer ...
+bin/quick_dmg
+bin/notarize_app # takes 45 minutes or so
+bin/fancy_dmg
+bin/notarize_dmg # takes another 45 minutes or so
 
 Building the frameworks
 -----------------------
