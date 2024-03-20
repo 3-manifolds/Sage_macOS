@@ -97,6 +97,10 @@ ln -s ../../jupyter-js-widgets ${NBEXTENSIONS}/widgets/notebook/js
 rm -rf ${VERSION_DIR}/local/lib/saclib
 rm -rf ${VERSION_DIR}/local/share/man
 
+# Update Sage's jupyter kernel directory.
+rm -rf  ${VERSION_DIR}/venv/share/jupyter/kernels
+cp -R ../package/local_share/jupyter/kernels ${VERSION_DIR}/venv/share/jupyter
+
 # Fix up rpaths and shebangs 
 echo "Patching files ..."
 source ../IDs.sh
