@@ -25,9 +25,9 @@ with version 10.3, meant to prevent having unused server processes
 running on the system.)
 
 The disk image includes an Installer package which creates an
-executable bash script named /usr/local/bin/sage that can be used
-to run sage from a shell or script.  It also installs Jupyter
-kernel descriptions in a standard location in /usr/local to
+executable script ``/usr/local/bin/sage`` that can be used
+to start sage from a shell or script.  It also installs Jupyter
+kernel specifications in a standard location in /usr/local to
 enable other Jupyter applications to use the Sage kernel.
 
 The sage script does not support the -i option, because installing
@@ -35,6 +35,7 @@ new packages inside of a notarized application bundle causes the
 signature to become invalid and the application to be unusable.
 However, the application already includes as many optional
 packages as possible.  In addition, the Sage %pip command can
-be used to install PyPI packages in the user's .sage directory.
+be used to install PyPI packages in the user's .sage directory,
+allowing them to be accessed during a Sage session.
 
 *  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v2.3.0/total.svg
