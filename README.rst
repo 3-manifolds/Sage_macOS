@@ -1,29 +1,40 @@
 Sage_MacOS
 ==========
 
-The Sage_MacOS project aims to provide a simple, streamlined macOS application which
-runs SageMath and can be installed by the usual process of dragging the application
-bundle to the /Applications directory.  There is a signed and notarized release of
-such an app for the current version of SageMath available in the Releases section, which
-is accessable from the right hand side of this page.
+The Sage_MacOS project provides a macOS application which allows
+starting a Sage session running either in a command line or in a
+Jupyter or JupyterLab notebook. It is distributed as a single file
+disk image which can be installed by the familiar process of
+dragging the application icon to the Applications folder.  The
+application and the disk image are signed and notarized, so no
+special set up is required to run the app.
 
-The structure of the application bundle is that the main executable is a small C
-program which execs the sage python interpreter to run a small tkinter application.
-The Frameworks section of the bundle contains frameworks for Tcl, Tk and Sage.  The
-Sage framework contains the result of a standard build of Sage with inessential
-components removed.  Executables and libraries in the framework have modified load
-paths and rpaths designed to make the framework fully relocatable and self-contained
-to allow for signing and notarization.
+When the app is started by clicking its icon it opens a small window
+which allows selecting a user interface.  Clicking the "Launch" button
+starts Sage running with the chosen command line or notebook
+interface and closes the window.  If a notebook interface was
+requested, a Jupyter server will be started. The window will
+reopen if the icon is clicked again, allowing starting a new session.
 
-The application opens a small window which can launch Sage, either as a command line
-program or as a Jupyter notebook.  The command line interface can run either in
-Terminal.app or, if it is installed, in iTerm.app. Once Sage is launched, the app
-exits.  This behavior is similar to that of Apple's Launchpad.app.  The application
-icon can be placed in the dock to make it easy to launch Sage at any time. 
+As with a typical macOS application, SageMath continues to run
+until it is stopped by selecting Quit from the File menu, or
+typing Command-Q, or selecting Quit from the contextual menu
+on the Dock icon.  When the app quits it will terminate the Jupyter
+server process, if one was started.  (This is a change starting
+with version 10.3, meant to prevent having unused server processes
+running on the system.)
 
-The distrubution includes an Installer package which creates an executable bash script
-named /usr/local/bin/sage that can be used to run sage from a shell or script.  It
-also installs Jupyter kernel descriptions in a standard location in /usr/local to
-enable Jupyter applications to run Sage.
+The disk image includes an Installer package which creates an
+executable bash script named /usr/local/bin/sage that can be used
+to run sage from a shell or script.  It also installs Jupyter
+kernel descriptions in a standard location in /usr/local to
+enable other Jupyter applications to use the Sage kernel.
 
-*  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v2.2.0/total.svg
+The sage script does not support the -i option, because installing
+new packages inside of a notarized application bundle causes the
+signature to become invalid and the application to be unusable.
+However, the application already includes as many optional
+packages as possible.  In addition, the Sage %pip command can
+be used to install PyPI packages in the user's .sage directory.
+
+*  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v2.3.0/total.svg
