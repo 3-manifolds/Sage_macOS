@@ -44,10 +44,12 @@ cp -R "${REPO}"/local/etc/ ${VERSION_DIR}/local/etc
 cp -R "${REPO}"/local/libexec/ ${VERSION_DIR}/local/libexec
 ln -s lib "${VERSION_DIR}"/local/lib64
 mkdir -p ${VERSION_DIR}/local/var/lib/sage/{installed,scripts}
-mkdir -p ${VERSION_DIR}/${VENV_DIR}
+mkdir -p ${VERSION_DIR}/${VENV_DIR}/etc
 cp -R "${REPO}"/local/var/lib/sage/installed/ ${VERSION_DIR}/local/var/lib/sage/installed
 cp -R "${REPO}"/local/var/lib/sage/scripts/ ${VERSION_DIR}/local/var/lib/sage/scripts
 cp -R "${REPO}"/${VENV_DIR}/{bin,lib,include,share} ${VERSION_DIR}/${VENV_DIR}
+cp -R "${REPO}"/${VENV_DIR}/etc/jupyter ${VERSION_DIR}/${VENV_DIR}/etc
+
 rm -rf ${VERSION_DIR}/${VENV_DIR}/share/{doc,man}
 mkdir -p ${VERSION_DIR}/local/share
 for share_dir in `ls "${REPO}"/local/share`; do
