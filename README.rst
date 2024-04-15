@@ -39,3 +39,4 @@ be used to install PyPI packages in the user's .sage directory,
 allowing them to be accessed during a Sage session.
 
 *  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v2.3.0/total.svg
+*  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v2.3.1/total.svg
