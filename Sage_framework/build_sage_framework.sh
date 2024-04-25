@@ -80,7 +80,7 @@ cp ${FILES}/osx.py ${INPUT_HOOKS}
 cp -p ${FILES}/BuildPackages.sh ${VERSION_DIR}/local/lib/gap/bin
 cp ${FILES}/sage-notebook ${VERSION_DIR}/${VENV_DIR}/bin
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/sage-notebook > ${VERSION_DIR}/${VENV_DIR}/bin/sage-notebook
-
+cp ${FILES}/sage-env ${VERSION_DIR}/${VENV_DIR}/bin
 
 # Fix illegal symlinks that point outside of the bundle
 # rm ${VERSION_DIR}/local/share/gap/{gac,gap}
