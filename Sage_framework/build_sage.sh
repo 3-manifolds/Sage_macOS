@@ -51,7 +51,6 @@ CONFIG_OPTIONS="--with-system-python3=no \
 --enable-buckygen \
 --enable-cbc \
 --enable-coxeter3 \
---enable-cryptominisat \
 --enable-csdp \
 --enable-e_antic \
 --enable-frobby \
