@@ -62,12 +62,8 @@ echo SAGE_SYMLINK=/var/tmp/sage-${VERSION}-current > ${VERSION_DIR}/local/var/li
 chmod 755 ${VERSION_DIR}/local/var/lib/sage/runpath.sh
 
 # Copy our modified files into the bundle
-if [ $(uname -m) == "arm64" ]; then
-    TKINTER=_tkinter.cpython-311-darwin-arm64.so
-else
-    TKINTER=_tkinter.cpython-311-darwin-x86_64.so
-fi
-TKINTER_TARGET=_tkinter.cpython-311-darwin.so
+TKINTER=_tkinter.cpython-312-darwin.so
+TKINTER_TARGET=_tkinter.cpython-312-darwin.so
 # Install jupyter kernels, etc.
 cp -p ${FILES}/page.html ${VERSION_DIR}/${VENV_PYLIB}/site-packages/notebook/templates/page.html
 rm -rf ${VERSION_DIR}/${VENV_DIR}/share/jupyter/kernels/sagemath
@@ -80,6 +76,7 @@ cp ${FILES}/osx.py ${INPUT_HOOKS}
 cp -p ${FILES}/BuildPackages.sh ${VERSION_DIR}/local/lib/gap/bin
 cp ${FILES}/sage-notebook ${VERSION_DIR}/${VENV_DIR}/bin
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/sage-notebook > ${VERSION_DIR}/${VENV_DIR}/bin/sage-notebook
+cp ${FILES}/sage ${VERSION_DIR}/${VENV_DIR}/bin
 cp ${FILES}/sage-env ${VERSION_DIR}/${VENV_DIR}/bin
 
 # Fix illegal symlinks that point outside of the bundle

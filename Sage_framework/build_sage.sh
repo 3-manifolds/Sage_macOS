@@ -27,9 +27,6 @@ if [ $(uname -m) == "arm64" ]; then
     export CXXFLAGS="$CFLAGS -stdlib=libc++"
     export LDFLAGS="-Wl,-platform_version,macos,11.0,11.1 -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
     export MACOSX_DEPLOYMENT_TARGET="11.0"
-#    export CC=/usr/bin/gcc
-#    export CXX=/usr/bin/clang++
-#    export FC=/opt/homebrew/bin/gfortran-11
 else
     export GMP_CONFIGURE="--enable-fat"
     export SAGE_FAT_BINARY="yes"
@@ -83,24 +80,27 @@ CONFIG_OPTIONS="--with-system-python3=no \
 --enable-symengine_py \
 --enable-tdlib \
 --enable-tides"
+
 ./bootstrap
-# make configure
 ./configure $CONFIG_OPTIONS > /tmp/configure.out
+# Force xz to be built first.  Otherwise it gets built after gmp even
+# though gmp lists xz as a dependency.  This means that gmp and the
+# many packages that depend on it are rebuilt for every incremental
+# build
+make xz
 # Do the main build with 4 CPUs
+export MAKE="make -j4"
 make -j4 build
-# Fix timestamp on xz so we don't have to rebuild gmp every time
-INSTALLED="local/var/lib/sage/installed"
-STAMP=`date -r $INSTALLED/patch* "+%Y-%m-%dT%H:%M:%S"`
-touch -d ${STAMP} ${INSTALLED}/xz*
-# Install a bunch of binary wheels (pillow and notebooks).
-PIP_ARGS="install --no-user --force-reinstall --upgrade-strategy eager"
-venv/bin/python3 -m pip $PIP_ARGS -r /tmp/requirements.txt
-# Install cocoserver
-PIP_ARGS="install --no-user --upgrade --no-deps"
-venv/bin/python3 -m pip $PIP_ARGS cocoserver
-# Move the repo back where it belongs.
-popd
-mv /var/tmp/sage-$VERSION-current repo/sage
-# Fix the broken p_group_cohomology spkg
-cp -R repo/p_group_cohomology-3.3.2/gap_helper repo/sage/local/share/gap/pkg/p_group_cohomology_helper
-cp repo/p_group_cohomology-3.3.2/singular_helper/dickson.lib repo/sage/local/share/singular/LIB
+
+# # Install a bunch of binary wheels (pillow and notebooks).
+# PIP_ARGS="install --no-user --force-reinstall --upgrade-strategy eager"
+# venv/bin/python3 -m pip $PIP_ARGS -r /tmp/requirements.txt
+# # Install cocoserver
+# PIP_ARGS="install --no-user --upgrade --no-deps"
+# venv/bin/python3 -m pip $PIP_ARGS cocoserver
+# # Move the repo back where it belongs.
+# popd
+# mv /var/tmp/sage-$VERSION-current repo/sage
+# # Fix the broken p_group_cohomology spkg
+# #cp -R repo/p_group_cohomology-3.3.2/gap_helper repo/sage/local/share/gap/pkg/p_group_cohomology_helper
+# #cp repo/p_group_cohomology-3.3.2/singular_helper/dickson.lib repo/sage/local/share/singular/LIB
