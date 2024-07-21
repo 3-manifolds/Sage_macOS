@@ -41,6 +41,7 @@ from tkinter.constants import *
 import re
 
 wantobjects = 1
+_debug = False  # set to True to print executed Tcl/Tk commands
 
 TkVersion = float(_tkinter.TK_VERSION)
 TclVersion = float(_tkinter.TCL_VERSION)
@@ -69,7 +70,10 @@ def _stringify(value):
         else:
             value = '{%s}' % _join(value)
     else:
-        value = str(value)
+        if isinstance(value, bytes):
+            value = str(value, 'latin1')
+        else:
+            value = str(value)
         if not value:
             value = '{}'
         elif _magic_re.search(value):
@@ -98,6 +102,35 @@ def _flatten(seq):
 try: _flatten = _tkinter._flatten
 except AttributeError: pass
 
+def _normalize(value):
+    if isinstance(value, _tkinter.Tcl_Obj) and value.typename == 'pixel':
+        # Don't convert pixels to numbers in configure introspection.
+        return str(value)
+    intval = floatval = None
+    try:
+        intval = int(value)
+    except (TypeError, ValueError):
+        pass
+    try:
+        floatval = float(value)
+    except (TypeError, ValueError):
+        pass
+    if intval is not None and intval == floatval:
+        return intval
+    if floatval is not None:
+        return floatval
+    if intval is not None:
+        return intval
+    if isinstance(value, (tuple, list)):
+        return tuple(_normalize(x) for x in value)
+    result = str(value)
+    split = result.split()
+    if len(split) > 0:
+        try:
+            return tuple(int(x) for x in split)
+        except:
+            pass
+    return result
 
 def _cnfmerge(cnfs):
     """Internal function."""
@@ -411,7 +444,6 @@ class Variable:
             self._tk.globalunsetvar(self._name)
         if self._tclCommands is not None:
             for name in self._tclCommands:
-                #print '- Tkinter: deleted command', name
                 self._tk.deletecommand(name)
             self._tclCommands = None
 
@@ -640,7 +672,8 @@ class BooleanVar(Variable):
     def get(self):
         """Return the value of the variable as a bool."""
         try:
-            return self._tk.getboolean(self._tk.globalgetvar(self._name))
+            return self._tk.getboolean(
+                _normalize(self._tk.globalgetvar(self._name)))
         except TclError:
             raise ValueError("invalid literal for getboolean()")
 
@@ -683,7 +716,6 @@ class Misc:
         this widget in the Tcl interpreter."""
         if self._tclCommands is not None:
             for name in self._tclCommands:
-                #print '- Tkinter: deleted command', name
                 self.tk.deletecommand(name)
             self._tclCommands = None
 
@@ -691,7 +723,6 @@ class Misc:
         """Internal function.
 
         Delete the Tcl command provided in NAME."""
-        #print '- Tkinter: deleted command', name
         self.tk.deletecommand(name)
         try:
             self._tclCommands.remove(name)
@@ -974,7 +1005,7 @@ class Misc:
         """Return None, "local" or "global" if this widget has
         no, a local or a global grab."""
         status = self.tk.call('grab', 'status', self._w)
-        if status == 'none' or not status: status = None
+        if status == 'none': status = None
         return status
 
     def option_add(self, pattern, value, priority = None):
@@ -1026,7 +1057,7 @@ class Misc:
                 return self.tk.call(('selection', 'get') + self._options(kw))
             except TclError:
                 del kw['type']
-        return self.tk.call(('selection', 'get') + self._options(kw))
+        return str(self.tk.call(('selection', 'get') + self._options(kw)))
 
     def selection_handle(self, command, **kw):
         """Specify a function COMMAND to call if the X
@@ -1155,7 +1186,7 @@ class Misc:
 
     def winfo_id(self):
         """Return identifier ID for this widget."""
-        return int(self.tk.call('winfo', 'id', self._w), 0)
+        return int(self.tk.call('winfo', 'id', self._w))
 
     def winfo_interps(self, displayof=0):
         """Return the name of all Tcl interpreters for this display."""
@@ -1181,6 +1212,8 @@ class Misc:
 
     def winfo_pathname(self, id, displayof=0):
         """Return the pathname of the widget given by ID."""
+        if isinstance(id, int):
+            id = hex(id)
         args = ('winfo', 'pathname') \
                + self._displayof(displayof) + (id,)
         return self.tk.call(args)
@@ -1448,10 +1481,27 @@ class Misc:
         return self._bind(('bind', self._w), sequence, func, add)
 
     def unbind(self, sequence, funcid=None):
-        """Unbind for this widget for event SEQUENCE  the
-        function identified with FUNCID."""
-        self.tk.call('bind', self._w, sequence, '')
-        if funcid:
+        """Unbind for this widget the event SEQUENCE.
+
+        If FUNCID is given, only unbind the function identified with FUNCID
+        and also delete the corresponding Tcl command.
+
+        Otherwise destroy the current binding for SEQUENCE, leaving SEQUENCE
+        unbound.
+        """
+        self._unbind(('bind', self._w, sequence), funcid)
+
+    def _unbind(self, what, funcid=None):
+        if funcid is None:
+            self.tk.call(*what, '')
+        else:
+            lines = self.tk.call(what).split('\n')
+            prefix = f'if {{"[{funcid} '
+            keep = '\n'.join(line for line in lines
+                             if not line.startswith(prefix))
+            if not keep.strip():
+                keep = ''
+            self.tk.call(*what, keep)
             self.deletecommand(funcid)
 
     def bind_all(self, sequence=None, func=None, add=None):
@@ -1459,11 +1509,11 @@ class Misc:
         An additional boolean parameter ADD specifies whether FUNC will
         be called additionally to the other bound function or whether
         it will replace the previous function. See bind for the return value."""
-        return self._bind(('bind', 'all'), sequence, func, add, 0)
+        return self._root()._bind(('bind', 'all'), sequence, func, add, True)
 
     def unbind_all(self, sequence):
         """Unbind for all widgets for event SEQUENCE all functions."""
-        self.tk.call('bind', 'all' , sequence, '')
+        self._root()._unbind(('bind', 'all', sequence))
 
     def bind_class(self, className, sequence=None, func=None, add=None):
         """Bind to widgets with bindtag CLASSNAME at event
@@ -1473,12 +1523,12 @@ class Misc:
         whether it will replace the previous function. See bind for
         the return value."""
 
-        return self._bind(('bind', className), sequence, func, add, 0)
+        return self._root()._bind(('bind', className), sequence, func, add, True)
 
     def unbind_class(self, className, sequence):
         """Unbind for all widgets with bindtag CLASSNAME for event SEQUENCE
         all functions."""
-        self.tk.call('bind', className , sequence, '')
+        self._root()._unbind(('bind', className, sequence))
 
     def mainloop(self, n=0):
         """Call the mainloop of Tk."""
@@ -1672,11 +1722,13 @@ class Misc:
         cnf = {}
         for x in self.tk.splitlist(self.tk.call(*args)):
             x = self.tk.splitlist(x)
+            x = x[:-1] + (_normalize(x[-1]),)
             cnf[x[0][1:]] = (x[0][1:],) + x[1:]
         return cnf
 
     def _getconfigure1(self, *args):
         x = self.tk.splitlist(self.tk.call(*args))
+        x = x[:-1] + (_normalize(x[-1]),)
         return (x[0][1:],) + x[1:]
 
     def _configure(self, cmd, cnf, kw):
@@ -1705,7 +1757,7 @@ class Misc:
 
     def cget(self, key):
         """Return the resource value for a KEY given as string."""
-        return self.tk.call(self._w, 'cget', '-' + key)
+        return _normalize(self.tk.call(self._w, 'cget', '-' + key))
 
     __getitem__ = cget
 
@@ -1806,7 +1858,7 @@ class Misc:
                     return self.tk.getint(svalue)
             except (ValueError, TclError):
                 pass
-        return value
+        return _normalize(value)
 
     def _grid_configure(self, command, index, cnf, kw):
         """Internal function."""
@@ -1819,15 +1871,17 @@ class Misc:
         else:
             options = self._options(cnf, kw)
         if not options:
-            return _splitdict(
+            result = _splitdict(
                 self.tk,
                 self.tk.call('grid', command, self._w, index),
                 conv=self._gridconvvalue)
+            return result
         res = self.tk.call(
                   ('grid', command, self._w, index)
                   + options)
         if len(options) == 1:
             return self._gridconvvalue(res)
+        return res
 
     def grid_columnconfigure(self, index, cnf={}, **kw):
         """Configure column INDEX of a grid.
@@ -2305,7 +2359,7 @@ class Tk(Misc, Wm):
 
     def __init__(self, screenName=None, baseName=None, className='Tk',
                  useTk=True, sync=False, use=None):
-        """Return a new Toplevel widget on screen SCREENNAME. A new Tcl interpreter will
+        """Return a new top level widget on screen SCREENNAME. A new Tcl interpreter will
         be created. BASENAME will be used for the identification of the profile file (see
         readprofile).
         It is constructed from sys.argv[0] without extensions if None is given. CLASSNAME
@@ -2324,6 +2378,8 @@ class Tk(Misc, Wm):
                 baseName = baseName + ext
         interactive = False
         self.tk = _tkinter.create(screenName, baseName, className, interactive, wantobjects, useTk, sync, use)
+        if _debug:
+            self.tk.settrace(_print_command)
         if useTk:
             self._loadtk()
         if not sys.flags.ignore_environment:
@@ -2339,7 +2395,7 @@ class Tk(Misc, Wm):
         self._tkloaded = True
         global _default_root
         # Version sanity checks
-        tk_version = self.tk.getvar('tk_version')
+        tk_version = str(self.tk.getvar('tk_version'))
         if tk_version != _tkinter.TK_VERSION:
             raise RuntimeError("tk.h version (%s) doesn't match libtk.a version (%s)"
                                % (_tkinter.TK_VERSION, tk_version))
@@ -2400,6 +2456,7 @@ class Tk(Misc, Wm):
         should when sys.stderr is None."""
         import traceback
         print("Exception in Tkinter callback", file=sys.stderr)
+        sys.last_exc = val
         sys.last_type = exc
         sys.last_value = val
         sys.last_traceback = tb
@@ -2408,6 +2465,14 @@ class Tk(Misc, Wm):
     def __getattr__(self, attr):
         "Delegate attribute access to the interpreter object"
         return getattr(self.tk, attr)
+
+
+def _print_command(cmd, *, file=sys.stderr):
+    # Print executed Tcl/Tk commands.
+    assert isinstance(cmd, tuple)
+    cmd = _join(cmd)
+    print(cmd, file=file)
+
 
 # Ideally, the classes Pack, Place and Grid disappear, the
 # pack/place/grid methods are defined on the Widget class, and
@@ -2464,7 +2529,8 @@ class Pack:
     def pack_info(self):
         """Return information about the packing options
         for this widget."""
-        d = _splitdict(self.tk, self.tk.call('pack', 'info', self._w))
+        d = _splitdict(self.tk, self.tk.call('pack', 'info', self._w),
+                           conv=_normalize)
         if 'in' in d:
             d['in'] = self.nametowidget(d['in'])
         return d
@@ -2516,7 +2582,8 @@ class Place:
     def place_info(self):
         """Return information about the placing options
         for this widget."""
-        d = _splitdict(self.tk, self.tk.call('place', 'info', self._w))
+        d = _splitdict(self.tk, self.tk.call('place', 'info', self._w),
+                           conv=_normalize)
         if 'in' in d:
             d['in'] = self.nametowidget(d['in'])
         return d
@@ -2567,7 +2634,8 @@ class Grid:
     def grid_info(self):
         """Return information about the options
         for positioning this widget in a grid."""
-        d = _splitdict(self.tk, self.tk.call('grid', 'info', self._w))
+        d = _splitdict(self.tk, self.tk.call('grid', 'info', self._w),
+            conv=_normalize)
         if 'in' in d:
             d['in'] = self.nametowidget(d['in'])
         return d
@@ -2789,9 +2857,7 @@ class Canvas(Widget, XView, YView):
     def tag_unbind(self, tagOrId, sequence, funcid=None):
         """Unbind for all items with TAGORID for event SEQUENCE  the
         function identified with FUNCID."""
-        self.tk.call(self._w, 'bind', tagOrId, sequence, '')
-        if funcid:
-            self.deletecommand(funcid)
+        self._unbind((self._w, 'bind', tagOrId, sequence), funcid)
 
     def tag_bind(self, tagOrId, sequence=None, func=None, add=None):
         """Bind to all items with TAGORID at event SEQUENCE a call to function FUNC.
@@ -2816,7 +2882,7 @@ class Canvas(Widget, XView, YView):
 
     def coords(self, *args):
         """Return a list of coordinates for the item given in ARGS."""
-        # XXX Should use _flatten on args
+        args = _flatten(args)
         return [self.tk.getdouble(x) for x in
                            self.tk.splitlist(
                    self.tk.call((self._w, 'coords') + args))]
@@ -2946,8 +3012,8 @@ class Canvas(Widget, XView, YView):
 
     def itemcget(self, tagOrId, option):
         """Return the resource value for an OPTION for item TAGORID."""
-        return self.tk.call(
-            (self._w, 'itemcget') + (tagOrId, '-'+option))
+        return _normalize(
+            self.tk.call((self._w, 'itemcget') + (tagOrId, '-'+option)))
 
     def itemconfigure(self, tagOrId, cnf=None, **kw):
         """Configure resources of an item TAGORID.
@@ -3056,11 +3122,16 @@ class Checkbutton(Widget):
         Widget.__init__(self, master, 'checkbutton', cnf, kw)
 
     def _setup(self, master, cnf):
+        # Because Checkbutton defaults to a variable with the same name as
+        # the widget, Checkbutton default names must be globally unique,
+        # not just unique within the parent widget.
         if not cnf.get('name'):
             global _checkbutton_count
             name = self.__class__.__name__.lower()
             _checkbutton_count += 1
-            cnf['name'] = f'!{name}{_checkbutton_count}'
+            # To avoid collisions with ttk.Checkbutton, use the different
+            # name template.
+            cnf['name'] = f'!{name}-{_checkbutton_count}'
         super()._setup(master, cnf)
 
     def deselect(self):
@@ -3255,7 +3326,7 @@ class Listbox(Widget, XView, YView):
     def index(self, index):
         """Return index of item identified with INDEX."""
         i = self.tk.call(self._w, 'index', index)
-        if i == 'none' or not i: return None
+        if i == 'none': return None
         return self.tk.getint(i)
 
     def insert(self, index, *elements):
@@ -3429,8 +3500,7 @@ class Menu(Widget):
     def index(self, index):
         """Return the index of a menu item identified by INDEX."""
         i = self.tk.call(self._w, 'index', index)
-        if i == 'none' or not i: return None
-        return self.tk.getint(i)
+        return None if i in ('', 'none') else self.tk.getint(i)  # GH-103685.
 
     def invoke(self, index):
         """Invoke a menu item identified by INDEX and execute
@@ -3774,7 +3844,7 @@ class Text(Widget, XView, YView):
 
     def get(self, index1, index2=None):
         """Return the text from INDEX1 to INDEX2 (not included)."""
-        return str(self.tk.call(self._w, 'get', index1, index2))
+        return self.tk.call(self._w, 'get', index1, index2)
     # (Image commands are new in 8.0)
 
     def image_cget(self, index, option):
@@ -3899,9 +3969,7 @@ class Text(Widget, XView, YView):
     def tag_unbind(self, tagName, sequence, funcid=None):
         """Unbind for all characters with TAGNAME for event SEQUENCE  the
         function identified with FUNCID."""
-        self.tk.call(self._w, 'tag', 'bind', tagName, sequence, '')
-        if funcid:
-            self.deletecommand(funcid)
+        return self._unbind((self._w, 'tag', 'bind', tagName, sequence), funcid)
 
     def tag_bind(self, tagName, sequence, func, add=None):
         """Bind to all characters with TAGNAME at event SEQUENCE a call to function FUNC.
@@ -3909,6 +3977,11 @@ class Text(Widget, XView, YView):
         An additional boolean parameter ADD specifies whether FUNC will be
         called additionally to the other bound function or whether it will
         replace the previous function. See bind for the return value."""
+        return self._bind((self._w, 'tag', 'bind', tagName),
+                  sequence, func, add)
+
+    def _tag_bind(self, tagName, sequence=None, func=None, add=None):
+        # For tests only
         return self._bind((self._w, 'tag', 'bind', tagName),
                   sequence, func, add)
 
@@ -4069,8 +4142,6 @@ class Image:
         elif kw: cnf = kw
         options = ()
         for k, v in cnf.items():
-            if callable(v):
-                v = self._register(v)
             options = options + ('-'+k, v)
         self.tk.call(('image', 'create', imgtype, name,) + options)
         self.name = name
@@ -4097,8 +4168,6 @@ class Image:
         for k, v in _cnfmerge(kw).items():
             if v is not None:
                 if k[-1] == '_': k = k[:-1]
-                if callable(v):
-                    v = self._register(v)
                 res = res + ('-'+k, v)
         self.tk.call((self.name, 'config') + res)
 
@@ -4621,7 +4690,7 @@ class PanedWindow(Widget):
 
 def _test():
     root = Tk()
-    text = "This is Tcl/Tk version %s" % TclVersion
+    text = "This is Tcl/Tk %s" % root.globalgetvar('tk_patchLevel')
     text += "\nThis should be a cedilla: \xe7"
     label = Label(root, text=text)
     label.pack()

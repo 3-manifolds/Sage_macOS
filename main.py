@@ -146,7 +146,7 @@ class Launcher:
         environ = {
             'JUPYTER_RUNTIME_DIR': jupyter_runtime_dir,
             'JUPYTER_PATH': sage_jupyter_path,
-            'PYTHONUSERBASE': sage-userbase,
+            'PYTHONUSERBASE': sage_userbase,
             }
         environ.update(os.environ)
         json_files = [f for f in os.listdir(jupyter_runtime_dir)
