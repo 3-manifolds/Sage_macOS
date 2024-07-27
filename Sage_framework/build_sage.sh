@@ -116,4 +116,3 @@ make -j8 build
 # Move the repo back where it belongs.
 popd
 mv /var/tmp/sage-$VERSION-current repo/sage
-
