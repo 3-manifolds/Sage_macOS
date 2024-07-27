@@ -33,8 +33,7 @@ def get_version():
 
 sagemath_version = get_version()
 app_name = 'SageMath-%s' % sagemath_version.replace('.', '-')
-app_support_dir = path_join(os.environ['HOME'], 'Library',
-    'Application Support', app_name)
+app_support_dir = path_join(os.environ['HOME'], 'Library', app_name)
 settings_path = path_join(app_support_dir, 'Settings.plist')
 jupyter_runtime_dir = os.path.join(app_support_dir, 'Jupyter', 'runtime')
 sage_userbase = app_support_dir

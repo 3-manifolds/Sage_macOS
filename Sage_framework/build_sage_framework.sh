@@ -65,7 +65,6 @@ chmod 755 ${VERSION_DIR}/local/var/lib/sage/runpath.sh
 TKINTER=_tkinter.cpython-312-darwin.so
 TKINTER_TARGET=_tkinter.cpython-312-darwin.so
 # Install jupyter kernels, etc.
-cp -p ${FILES}/page.html ${VERSION_DIR}/${VENV_PYLIB}/site-packages/notebook/templates/page.html
 rm -rf ${VERSION_DIR}/${VENV_DIR}/share/jupyter/kernels/sagemath
 # See sage/repl/ipython_kernel/install.py
 mkdir -p ${VENV_KERNEL_DIR}/sagemath

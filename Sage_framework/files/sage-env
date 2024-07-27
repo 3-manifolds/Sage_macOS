@@ -383,6 +383,13 @@ fi
 # https://github.com/sagemath/sage/issues/14243 and
 # https://github.com/sagemath/sage/issues/18955.
 
+if [ -e "$SAGE_ROOT/venv/bin" ]; then
+    . "$SAGE_ROOT/venv/bin/sage-version.sh"
+    SAGE_DASH_VERSION=$(echo $SAGE_VERSION | sed s/\\\./\\\-/g)
+    PYTHONUSERBASE="$HOME/Library/SageMath-$SAGE_DASH_VERSION"
+    export PYTHONUSERBASE
+fi
+
 if [ "$PYTHONUSERBASE" = "" ]; then
     PYTHONUSERBASE="$DOT_SAGE/local"
     export PYTHONUSERBASE

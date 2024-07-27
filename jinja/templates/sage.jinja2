@@ -2,7 +2,9 @@
 VERSION={{ sage_version }}
 DASH_VERSION={{ sage_dash_version }}
 SYMLINK=/var/tmp/sage-$VERSION-current
-APP=SageMath-$DASH_VERSION.app
+APPNAME=SageMath-$DASH_VERSION
+APP=$APPNAME.app
+USERBASE=$HOME/Library/$APPNAME
 USE_MINIMAL_ENV=no
 for arg do
   shift
@@ -28,8 +30,8 @@ if [ ! -e $SYMLINK ]; then
     exit 1
 fi
 if [ "$USE_MINIMAL_ENV" == "yes" ]; then
-    MIN_ENV="USER=$USER LOGNAME=$LOGNAME SHELL=$SHELL HOME=$HOME TERM=$TERM LANG=$LANG"
-    /usr/bin/env - PATH="$PATH" $MIN_ENV "$SYMLINK"/venv/bin/sage "$@"
+    MIN_ENV="USER=$USER LOGNAME=$LOGNAME SHELL=$SHELL HOME=$HOME TERM=$TERM LANG=$LANG PYTHONUSERBASE=$USERBASE"
+    /usr/bin/env -i PATH="$PATH" $MIN_ENV "$SYMLINK"/venv/bin/sage "$@"
 else
-    "$SYMLINK"/venv/bin/sage "$@"
+    /usr/bin/env "PYTHONUSERBASE=$USERBASE" "$SYMLINK"/venv/bin/sage "$@"
 fi
