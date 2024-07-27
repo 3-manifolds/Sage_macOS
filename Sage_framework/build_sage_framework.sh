@@ -69,7 +69,7 @@ rm -rf ${VERSION_DIR}/${VENV_DIR}/share/jupyter/kernels/sagemath
 # See sage/repl/ipython_kernel/install.py
 mkdir -p ${VENV_KERNEL_DIR}/sagemath
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${VENV_KERNEL_DIR}/sagemath/kernel.json
-cp -p ${FILES}/${TKINTER} ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload/${TKINTER_TARGET}
+#cp -p ${FILES}/${TKINTER} ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload/${TKINTER_TARGET}
 cp -p ${FILES}/tkinter/__init__.py ${VERSION_DIR}/${VENV_PYLIB}/tkinter/__init__.py
 cp ${FILES}/osx.py ${INPUT_HOOKS}
 cp -p ${FILES}/BuildPackages.sh ${VERSION_DIR}/local/lib/gap/bin
@@ -128,6 +128,8 @@ find ${BUILD}/Sage.framework -name '*.pyc' -delete
 # Sign the framework.
 echo "Signing files ..."
 python3 sign_sage.py
+# Overwrite the _tkinter extension with our signed version (????)
+cp -p ${FILES}/${TKINTER} ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload/${TKINTER_TARGET}
 # Start sage to create a minimal set of bytecode files.
 echo "Starting Sage to create byte code files ..."
 ${VERSION_DIR}/venv/bin/sage -c "print(2+2) ; exit"
