@@ -116,6 +116,7 @@ class MachFile:
 
     def fix(self):
         rpaths = self.fixed_rpaths()
+        subprocess.run(['codesign', '--remove-signature', self.path], capture_output=True)
         subprocess.run(['macher', 'clear_rpaths', self.path], capture_output=True)
         for rpath in rpaths:
             subprocess.run(['macher', 'add_rpath', rpath, self.path], capture_output=True)

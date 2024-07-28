@@ -1656,7 +1656,8 @@ class _sage_doc:
         url = self._base_url + os.path.join(name, "index.html")
         path = os.path.join(self._base_path, name, "index.html")
         if doc_server:
-           doc_server.visit(name) 
+           doc_server.visit(name)
+           return
         elif os.path.exists(path):
             os.system(browser() + " " + path)
         else:
