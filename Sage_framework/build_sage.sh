@@ -122,9 +122,3 @@ venv/bin/python3 -m pip $PIP_ARGS cocoserver
 # Move the repo back where it belongs.
 popd
 mv /var/tmp/sage-$VERSION-current repo/sage
-# Fix the broken p_group_cohomology spkg
-#cp -R repo/p_group_cohomology-3.3.2/gap_helper repo/sage/local/share/gap/pkg/p_group_cohomology_helper
-
-# Move the repo back where it belongs.
-popd
-mv /var/tmp/sage-$VERSION-current repo/sage
