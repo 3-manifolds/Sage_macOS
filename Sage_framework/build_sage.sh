@@ -1,7 +1,3 @@
-# This script replaces sage's pillow and notebook packages and their
-# dependencies with current versions installed from binary wheels.  It
-# also installs cocoserver, for viewing the documentation.
-
 if ! [ -e repo/sage ]; then
     echo "The sage distribution is not where we expect to find it."
     echo "This script must be run from the Sage_framework directory."
@@ -112,18 +108,6 @@ make xz
 # Do the main build with 8 CPUs
 export MAKE="make -j8"
 make -j8 build
-
-# Re-install pillow jupyterlab and notebook.
-PIP_ARGS="install --no-user --force-reinstall --upgrade-strategy eager"
-venv/bin/python3 -m pip $PIP_ARGS pillow jupyterlab notebook
-# Install cocoserver
-PIP_ARGS="install --no-user --upgrade --no-deps"
-venv/bin/python3 -m pip $PIP_ARGS cocoserver
-# Move the repo back where it belongs.
-popd
-mv /var/tmp/sage-$VERSION-current repo/sage
-# Fix the broken p_group_cohomology spkg
-#cp -R repo/p_group_cohomology-3.3.2/gap_helper repo/sage/local/share/gap/pkg/p_group_cohomology_helper
 
 # Move the repo back where it belongs.
 popd
