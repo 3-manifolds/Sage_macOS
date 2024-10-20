@@ -1,8 +1,8 @@
 #!/bin/bash
 source ../IDs.sh
 PKG_ID=`../bin/get_sage_version | sed s/\\\\./_/g`
-VERSION=1.0
 SAGE_VERSION=`../bin/get_sage_version`
+VERSION=$SAGE_VERSION
 SAGETEX="../Sage_framework/repo/sage/venv/share/texmf/tex/latex/sagetex"
 KERNEL_DIR="local_share/jupyter/kernels/SageMath-$SAGE_VERSION"
 JINJA_OUTPUT="../jinja/output"

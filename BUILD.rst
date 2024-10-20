@@ -1,3 +1,6 @@
+Prerequisites
+=============
+
 Several things need to be in place before you can run the scripts which build
 the SageMath frameworks and app.  You may need to install XCode in order to
 have the xcrun notarize-app and xcrun staple commands available.
@@ -11,19 +14,7 @@ https://github.com/culler/macher/releases/download/v1.3/macher
 This is a single file executable which can go anywhere in your path.
 It is used by the fix_paths.py script in Sage_framework.
 
-Sage Source Code
-----------------
-
-The scripts assume that a clone of the SageMath github repository is located in
-Sage_framework/repo/sage where the bigrepo is used to build an expanded version
-of SageMath that includes as mony optional packages as possible. The scripts
-build_sage.sh and build_big_sage.sh handle the configuration and build.
-
-Note that currently the gfortran spkg does not build on arm64 systems.
-Instead, the build script assumes that the Homebrew gfortran is installed on the
-system and it copies the gfortran libraries into the bundle and adjusts their
-load paths.
-
+Tcl and Tk source code
 ----------------------
 
 The TclTk_framework directory should contain subdirectories Tk and Tcl
@@ -33,9 +24,24 @@ somewhere on your system, then you can create the Tcl directories and
 run, for example.
 
 % cd Tcl
-% fossil open /path/to/Tcl.fossil core-8-branch
+% fossil open /path/to/Tcl.fossil core-9-0-0
 % cd ../Tk
-% fossil open /path/to/Tk.fossil core-8-branch
+% fossil open /path/to/Tk.fossil core-9-0-0
+
+If you do not have fossil, source tarballs for Tcl and Tk can be
+downloaded from:
+https://www.tcl.tk/software/tcltk/download.html
+
+Fossil can be downloaded from:
+https://fossil-scm.org/home/uv/download.html
+
+create-dmg
+----------
+
+The create-dmg script is used to build the final release dmg with the
+background image and folder icons.  It is expected to be installed in
+/usr/local/bin.  It can be downloaded from:
+https://github.com/create-dmg/create-dmg
 
 Credentials
 -----------
@@ -58,7 +64,7 @@ export ONE_TIME_PASS=abcd-efgh-ijkl-mnop
 export DEV_ID=YOURCERTID
 
 Build Steps
------------
+===========
 
 The bin directory contains scripts which handle each step of building the
 application bundle, once the Sage distribution has been built.  A valid
@@ -72,12 +78,18 @@ certificate, which must be listed in IDs.sh.
 The steps are:
 # Build Sage and the Sage documentation
 cd Sage_framework
+mkdir repo
+git clone https://github.com/sagemath/sage.git
+cd ../..
 bash build_sage.sh
-# If Sage built successfully, continue ...
+
+# If Sage builds successfully, continue ...
 bash build_sage_docs.sh
+
 # Verify that the documentation looks OK (requires cocoserver)
 coco repo/documentation
-# Build the app
+
+# Build the App
 cd ..
 bin/build_dist
 # This provides the app.  If you have a valid Developer ID you can now
@@ -87,54 +99,11 @@ bin/notarize_app # takes 45 minutes or so
 bin/fancy_dmg
 bin/notarize_dmg # takes another 45 minutes or so
 
-Building the frameworks
------------------------
-
-The Sage framework is built (once Sage has been compiled) with:
-% cd Sage_framework
-% bash build_sage_framework.sh
-% cd ..
-
-The Tcl and Tk frameworks are built with:
-% cd TclTk_frameworks
-% make
-% cd ..
-
-The frameworks are signed as part of the build process.
-
-Building the installer
-----------------------
-
-% cd package
-% bash build_package.sh
-% cd ..
-
-Assembling the app
-------------------
-For version X.Y of sage:
-
-% mkdir SageMath-X.Y
-% cp -R app_template SageMath-X.Y/SageMath-X-Y.app
-% mv Sage_framework/build/Sage.framework SageMath-X.Y/SageMath-X-Y.app/Contents/Frameworks
-% mv TclTk_frameworks/Frameworks/*.framework SageMath-X.Y/SageMath-X-Y.app/Contents/Frameworks
-% mv package/Recommended_X_Y.pkg SageMath-X.Y
-
-Signing the app
----------------
-% codesign -s YOURCERTID -vvvv --timestamp --options runtime --force --entitlements\
-Sage_framework/entitlement.plist SageMath-X.Y/SageMath-X-Y.app
-
-The notarization dance
-----------------------
-Once the app has been signed, notarization requires these steps, which assume
-that you have created a notarization profile with the command
-% xcrun notarytool store-credentials --apple-id XXXX --password YYYY --team-id ZZZZ
-* Create a disk image from the directory SageMath-X.Y
-* Send the disk image to Apple to be notarized:
-  % xcrun notarytool submit SageMath-9.6.dmg --keychain-profile your_profile --wait
-* Staple the notarization ticket to the app:
-  % xcrun stapler staple SageMath-X.Y/SageMath-X-Y.app
-* Create a new disk image from the directory SageMath-X.Y
-* Send the new disk image to Apple to be notarized.
-* Staple the notarization ticket to the disk image:
-  % xcrun stapler staple SageMath-X.Y.dmg
+# You now have a working disk image named SageMath-X.Y.dmg
+# To create the hash file, rename the image, depending on the
+# architecture of the build system, as
+  SageMath-X.Y_x86_64
+# or
+  SageMath-X.Y_arm64
+# and then run:
+bin/build_hashes

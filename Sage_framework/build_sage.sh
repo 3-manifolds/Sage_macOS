@@ -107,8 +107,8 @@ make xz
 
 # Do the main build with 8 CPUs
 export MAKE="make -j8"
-make -j8 build
+make build
 
-# Move the repo back where it belongs.
+# Move the repo back where it came from.
 popd
 mv /var/tmp/sage-$VERSION-current repo/sage

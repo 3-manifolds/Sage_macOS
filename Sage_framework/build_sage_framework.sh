@@ -1,5 +1,6 @@
 BASE_DIR=`pwd`
 VERSION=`../bin/get_sage_version`
+SAGE_SYMLINK="/var/tmp/sage-$VERSION-current"
 PYTHON_LONG_VERSION=`readlink repo/sage/venv | cut -f2 -d '-' | sed s/python//`
 PYTHON_VERSION=`echo ${PYTHON_LONG_VERSION} | cut -f 1,2 -d'.'`
 echo Building framework for SageMath ${VERSION} using Python ${PYTHON_LONG_VERSION}
@@ -50,6 +51,7 @@ cp -R "${REPO}"/local/var/lib/sage/scripts/ ${VERSION_DIR}/local/var/lib/sage/sc
 cp -R "${REPO}"/${VENV_DIR}/{bin,lib,include,share} ${VERSION_DIR}/${VENV_DIR}
 cp -R "${REPO}"/${VENV_DIR}/etc/jupyter ${VERSION_DIR}/${VENV_DIR}/etc
 
+# Copy the useful parts of local/share
 rm -rf ${VERSION_DIR}/${VENV_DIR}/share/{doc,man}
 mkdir -p ${VERSION_DIR}/local/share
 for share_dir in `ls "${REPO}"/local/share`; do
@@ -57,6 +59,7 @@ for share_dir in `ls "${REPO}"/local/share`; do
 	cp -R "${REPO}"/local/share/$share_dir ${VERSION_DIR}/local/share/$share_dir
     fi
 done
+
 # Create the runpath.sh script
 echo SAGE_SYMLINK=/var/tmp/sage-${VERSION}-current > ${VERSION_DIR}/local/var/lib/sage/runpath.sh
 chmod 755 ${VERSION_DIR}/local/var/lib/sage/runpath.sh
@@ -96,6 +99,29 @@ rm -rf ${VERSION_DIR}/local/share/man
 # Update Sage's jupyter kernel directory.
 rm -rf  ${VERSION_DIR}/venv/share/jupyter/kernels
 cp -R ../package/local_share/jupyter/kernels ${VERSION_DIR}/venv/share/jupyter
+
+# # Install current versions of pip packages over the ones built by Sage
+
+if [ -L ${SAGE_SYMLINK} ]; then
+    rm ${SAGE_SYMLINK}
+elif [ -e ${SAGE_SYMLINK} ]; then
+    echo ${SAGE_SYMLINK} is not a symlink !!!
+    exit 1
+fi
+mv $VERSION_DIR $SAGE_SYMLINK
+pushd ${SAGE_SYMLINK}
+
+PIP_ARGS="install --upgrade --no-user --force-reinstall --upgrade-strategy eager"
+venv/bin/python3 -m pip $PIP_ARGS jupyterlab
+venv/bin/python3 -m pip $PIP_ARGS notebook
+venv/bin/python3 -m pip $PIP_ARGS pillow
+
+# Install cocoserver
+PIP_ARGS="install --no-user --upgrade --no-deps"
+venv/bin/python3 -m pip $PIP_ARGS cocoserver
+
+popd
+mv $SAGE_SYMLINK $VERSION_DIR
 
 # Fix up rpaths and shebangs 
 echo "Patching files ..."
