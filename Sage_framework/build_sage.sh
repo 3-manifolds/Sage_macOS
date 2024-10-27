@@ -85,6 +85,7 @@ CONFIG_OPTIONS="--with-system-python3=no \
 --enable-pari_galpol \
 --enable-pari_nftables \
 --enable-plantri \
+--enable-sagemath-bliss \
 --enable-sage_numerical_backends_coin \
 --enable-pynormaliz \
 --enable-pycosat \
