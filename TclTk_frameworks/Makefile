@@ -20,21 +20,20 @@ Setup:
 	mkdir -p Frameworks
 
 TclTk:
-	rm -rf dist ; \
-	bash build_tcltk.sh ; \
-	find dist/Frameworks/Tcl.framework -name '*.a' -delete ; \
-	find dist/Frameworks/Tk.framework -name '*.a' -delete ; \
 	rm -rf ${TCL_FRAMEWORK}
 	rm -rf ${TK_FRAMEWORK}
-	mv dist/Frameworks/Tcl.framework Frameworks
-	mv dist/Frameworks/Tk.framework Frameworks
-	chmod +w ${TCL_LIB} ${TK_LIB}
-	${MACHER} set_id @rpath/Tcl ${TCL_LIB}
-	${MACHER} set_id @rpath/Tk ${TK_LIB}
+	rm -rf build
+	bash build_tcltk.sh
+	mv build/tk/Tcl.framework Frameworks
+	mv build/tk/Tk.framework Frameworks
 	rm -rf ${WISH}
-	rm ${TCL_FRAMEWORK}/{PrivateHeaders,Tcl,tclConfig.sh}
+	rm ${TCL_FRAMEWORK}/{PrivateHeaders,tclConfig.sh,libtclstub.a}
+	chmod +w ${TCL_VERSION_DIR}/{Tcl_debug,libtclstub.a}
+	rm ${TCL_VERSION_DIR}/{Tcl_debug,libtclstub.a}
 	mv ${TCL_VERSION_DIR}/{tclConfig.sh,tclooConfig.sh} ${TCL_VERSION_DIR}/Resources
-	rm ${TK_FRAMEWORK}/{PrivateHeaders,Tk,tkConfig.sh}
+	rm ${TK_FRAMEWORK}/{PrivateHeaders,tkConfig.sh,libtkstub.a}
+	chmod +w ${TK_VERSION_DIR}/{Tk_debug,libtkstub.a}
+	rm ${TK_VERSION_DIR}/{Tk_debug,libtkstub.a}
 	mv ${TK_VERSION_DIR}/tkConfig.sh ${TK_VERSION_DIR}/Resources
 
 Sign:
