@@ -7,7 +7,7 @@ TCL_LIB=${TCL_VERSION_DIR}/Tcl
 TK_FRAMEWORK=Frameworks/Tk.framework
 TK_VERSION_DIR=${TK_FRAMEWORK}/Versions/Current
 TK_LIB=${TK_VERSION_DIR}/Tk
-WISH=${TK_VERSION_DIR}/Resources/Wish.app
+WISH="${TK_VERSION_DIR}/Resources/Wish.app"
 WISH_LINK="${TK_VERSION_DIR}/Resources/Wish Shell.app"
 DEV_ID := $(shell source ../IDs.sh && echo $$DEV_ID)
 CS_OPTS=-v -s ${DEV_ID} --timestamp --options runtime --entitlements entitlement.plist --force
@@ -27,15 +27,15 @@ TclTk:
 	bash build_tcltk.sh
 	mv build/tcl/Tcl.framework Frameworks
 	mv build/tk/Tk.framework Frameworks
-	rm -rf "${WISH}"
-	rm -rf "${WISH_LINK}"
+	rm -r ${WISH}
+	rm ${WISH_LINK}
 	rm ${TCL_FRAMEWORK}/{PrivateHeaders,tclConfig.sh,libtclstub.a}
-	chmod +w ${TCL_VERSION_DIR}/{Tcl_debug,libtclstub.a}
-	rm ${TCL_VERSION_DIR}/{Tcl_debug,libtclstub.a}
+	chmod +w ${TCL_VERSION_DIR}/libtclstub.a
+	rm ${TCL_VERSION_DIR}/libtclstub.a
 	mv ${TCL_VERSION_DIR}/{tclConfig.sh,tclooConfig.sh} ${TCL_VERSION_DIR}/Resources
 	rm ${TK_FRAMEWORK}/{PrivateHeaders,tkConfig.sh,libtkstub.a}
-	chmod +w ${TK_VERSION_DIR}/{Tk_debug,libtkstub.a}
-	rm ${TK_VERSION_DIR}/{Tk_debug,libtkstub.a}
+	chmod +w ${TK_VERSION_DIR}/libtkstub.a
+	rm ${TK_VERSION_DIR}/libtkstub.a
 	mv ${TK_VERSION_DIR}/tkConfig.sh ${TK_VERSION_DIR}/Resources
 
 Sign:
