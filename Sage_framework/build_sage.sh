@@ -45,14 +45,14 @@ if [ $(uname -m) == "arm64" ]; then
 else
     export GMP_CONFIGURE="--enable-fat"
     export SAGE_FAT_BINARY="yes"
-    export CFLAGS="-O2 -mmacosx-version-min=10.9 -mno-avx -mno-avx2 -mno-bmi2"
+    export CFLAGS="-O2 -mmacosx-version-min=10.12 -mno-avx2 -mno-bmi2"
     export CXXFLAGS="$CFLAGS -stdlib=libc++"
     if [ `/usr/bin/ld -ld_classic 2> >(grep -c warning)` != "0" ] ; then
-	export LDFLAGS="-ld_classic -Wl,-platform_version,macos,10.9,11.3"
+	export LDFLAGS="-ld_classic -Wl,-platform_version,macos,10.12,11.3"
     else
-	export LDFLAGS="-Wl,-platform_version,macos,10.9,11.3"
+	export LDFLAGS="-Wl,-platform_version,macos,10.12,11.3"
     fi
-    export MACOSX_DEPLOYMENT_TARGET="10.9"
+    export MACOSX_DEPLOYMENT_TARGET="10.12"
 fi
 # Run bootstrap and configure.
 CONFIG_OPTIONS="--with-system-python3=no \

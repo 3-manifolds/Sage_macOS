@@ -24,7 +24,7 @@ TclTk:
 	rm -rf ${TK_FRAMEWORK}
 	rm -rf build
 	bash build_tcltk.sh
-	mv build/tk/Tcl.framework Frameworks
+	mv build/tcl/Tcl.framework Frameworks
 	mv build/tk/Tk.framework Frameworks
 	rm -rf ${WISH}
 	rm ${TCL_FRAMEWORK}/{PrivateHeaders,tclConfig.sh,libtclstub.a}

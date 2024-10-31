@@ -1,12 +1,11 @@
 In order for Sage to run on older macOS systems we specify a minimum
-target of 10.9 and we need to disable AVX2 instructions.  (There are
+target of 10.12 and we need to disable AVX2 instructions.  (There are
 Intel CPUs which are new enough to run Big Sur yet do not support
-AVX2.)  In order to support CPUs that can run 10.11 we also need to
-disable AVX and BMI.  We can do this for givaro with SAGE_FAT_BINARY=yes
-but that does not work with gmp because the gmp spkg ignores SAGE_FAT_BINARY
-on macOS.  So we need to also set GMP_CONFIGURE.  Also, the givaro package
-disables sse and sse2 when SAGE_FAT_BINARY is set, but that is unnecessary
-(according to conda) so we modify the spkg.
+AVX2.)  We can do this for givaro with SAGE_FAT_BINARY=yes but that
+does not work with gmp because the gmp spkg ignores SAGE_FAT_BINARY on
+macOS.  So we need to also set GMP_CONFIGURE.  Also, the givaro
+package disables sse and sse2 when SAGE_FAT_BINARY is set, but that is
+unnecessary (according to conda) so we modify the spkg.
 
 Setting the minimum OS version target has become trickier now that Apple's
 ld accepts the new -platform_version option.  Just using -mmacosx-version-min=10.9
@@ -27,9 +26,9 @@ documentation on the web.)
 
 $ export GMP_CONFIGURE="--enable-fat"
 $ export SAGE_FAT_BINARY="yes"
-$ export CFLAGS="-mmacosx-version-min=10.9 -mno-avx -mno-avx2 -mno-bmi2"
-$ export LDFLAGS="-Wl,-platform_version,macos,10.9,11.3"
-$ export MACOSX_DEPLOYMENT_TARGET="10.9"
-$ export MAKE="make -j4"
+$ export CFLAGS="-mmacosx-version-min=10.12 -mno-avx2 -mno-bmi2"
+$ export LDFLAGS="-Wl,-platform_version,macos,10.12,11.3"
+$ export MACOSX_DEPLOYMENT_TARGET="10.12"
+$ export MAKE="make -j8"
 $ ./configure --without-system-python3
 $ make build
