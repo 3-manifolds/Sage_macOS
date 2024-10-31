@@ -8,6 +8,7 @@ TK_FRAMEWORK=Frameworks/Tk.framework
 TK_VERSION_DIR=${TK_FRAMEWORK}/Versions/Current
 TK_LIB=${TK_VERSION_DIR}/Tk
 WISH=${TK_VERSION_DIR}/Resources/Wish.app
+WISH_LINK="${TK_VERSION_DIR}/Resources/Wish Shell.app"
 DEV_ID := $(shell source ../IDs.sh && echo $$DEV_ID)
 CS_OPTS=-v -s ${DEV_ID} --timestamp --options runtime --entitlements entitlement.plist --force
 PY_CS_OPTS=-v -s ${DEV_ID} --timestamp --options runtime --force
@@ -26,7 +27,8 @@ TclTk:
 	bash build_tcltk.sh
 	mv build/tcl/Tcl.framework Frameworks
 	mv build/tk/Tk.framework Frameworks
-	rm -rf ${WISH}
+	rm -rf "${WISH}"
+	rm -rf "${WISH_LINK}"
 	rm ${TCL_FRAMEWORK}/{PrivateHeaders,tclConfig.sh,libtclstub.a}
 	chmod +w ${TCL_VERSION_DIR}/{Tcl_debug,libtclstub.a}
 	rm ${TCL_VERSION_DIR}/{Tcl_debug,libtclstub.a}
