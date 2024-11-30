@@ -30,4 +30,5 @@ if [ -e repo/documentation ]; then
 fi
 cp -R repo/sage/local/share/doc/sage/html/en repo/documentation
 cp -R repo/sage/local/share/mathjax/mathjax repo/documentation/_static
+patch -d repo/documentation -p0 < doc.patch
 ../bin/compress_site.py repo/documentation

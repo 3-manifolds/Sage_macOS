@@ -1,0 +1,12 @@
+*** index.html.orig	Sat Nov 30 11:25:13 2024
+--- index.html	Sat Nov 30 11:25:44 2024
+***************
+*** 282,288 ****
+  <h1>Documentation</h1>
+  <p>
+  This is documentation for Sage 10.5.rc2.
+- Documentations in other languages are available <a href="../../index.html">here</a>.
+  </p>
+  
+  <h2>
+--- 282,287 ----
