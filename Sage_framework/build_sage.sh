@@ -67,6 +67,7 @@ CONFIG_OPTIONS="--with-system-python3=no \
 --enable-buckygen \
 --enable-cbc \
 --enable-coxeter3 \
+--enable-sagemath_coxeter3 \
 --enable-csdp \
 --enable-e_antic \
 --enable-frobby \
@@ -77,6 +78,7 @@ CONFIG_OPTIONS="--with-system-python3=no \
 --enable-libsemigroups \
 --enable-lrslib \
 --enable-meataxe \
+--enable-sagemath_meataxe \
 --enable-mcqd \
 --enable-mpfrcx \
 --enable-normaliz \
@@ -92,6 +94,7 @@ CONFIG_OPTIONS="--with-system-python3=no \
 --enable-pysingular \
 --enable-qepcad \
 --enable-sirocco \
+--enable-sagemath_sirocco \
 --enable-symengine \
 --enable-symengine_py \
 --enable-tdlib \
