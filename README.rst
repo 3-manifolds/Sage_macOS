@@ -20,9 +20,7 @@ As with a typical macOS application, SageMath continues to run
 until it is stopped by selecting Quit from the File menu, or
 typing Command-Q, or selecting Quit from the contextual menu
 on the Dock icon.  When the app quits it will terminate the Jupyter
-server process, if one was started.  (This is a change starting
-with version 10.3, meant to prevent having unused server processes
-running on the system.)
+server process, if one was started.
 
 The disk image includes an Installer package which creates an
 executable script ``/usr/local/bin/sage`` that can be used
@@ -38,4 +36,4 @@ packages as possible.  In addition, the Sage %pip command can
 be used to install PyPI packages in the user's Library directory,
 allowing them to be accessed during a Sage session.
 
-*  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v2.4.0/total.svg
+*  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v2.5.0/total.svg
