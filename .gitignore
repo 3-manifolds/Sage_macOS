@@ -16,6 +16,7 @@ Sage_framework/dev_id.py
 TclTk_frameworks/Frameworks/
 TclTk_frameworks/Tcl
 TclTk_frameworks/Tk
+hashes*
 package/packages
 package/local_share
 package/local_bin/sage
