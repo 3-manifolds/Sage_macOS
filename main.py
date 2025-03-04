@@ -19,6 +19,7 @@ from sage.version import version as sage_version
 import os
 import plistlib
 import platform
+import certifi
 
 this_python = 'python' + '.'.join(platform.python_version_tuple()[:2])
 contents_dir = abspath(path_join(sys.argv[0], pardir, pardir))
@@ -129,6 +130,7 @@ class Launcher:
     def launch_terminal(self, app):
         env = dict(self.environment)
         env['PYTHONUSERBASE'] = sage_userbase
+        env['SSL_CERT_FILE'] = certifi.where()
         env_str = " ".join(rf"{key}='{value}'" for key, value in env.items())
         if app == 'Terminal.app':
             sage_cmd = 'clear ; /usr/bin/env %s %s ; exit' % (env_str, sage_executable)
