@@ -27,11 +27,13 @@ if [ ! -e $SYMLINK ]; then
 fi
 if [ ! -e $SYMLINK ]; then
     echo Could not find $APP
+    echo Please start sage from the GUI to restore your environment.
     exit 1
 fi
+SSL_CERT_FILE=`$SYMLINK/venv/bin/python3 -c "import certifi; print(certifi.where())"`
 if [ "$USE_MINIMAL_ENV" == "yes" ]; then
-    MIN_ENV="USER=$USER LOGNAME=$LOGNAME SHELL=$SHELL HOME=$HOME TERM=$TERM LANG=$LANG PYTHONUSERBASE=$USERBASE"
+    MIN_ENV="USER=$USER LOGNAME=$LOGNAME SHELL=$SHELL HOME=$HOME TERM=$TERM LANG=$LANG PYTHONUSERBASE=\"$USERBASE\" SSL_CERT_FILE=\"$SSL_CERTFILE\""
     /usr/bin/env -i PATH="$PATH" $MIN_ENV "$SYMLINK"/venv/bin/sage "$@"
 else
-    /usr/bin/env "PYTHONUSERBASE=$USERBASE" "$SYMLINK"/venv/bin/sage "$@"
+    /usr/bin/env PYTHONUSERBASE="$USERBASE" SSL_CERT_FILE="$SSL_CERT_FILE" "$SYMLINK"/venv/bin/sage "$@"
 fi
