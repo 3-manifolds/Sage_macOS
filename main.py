@@ -60,8 +60,6 @@ class PopupMenu(ttk.Menubutton):
 class Launcher:
     jp_json_re = re.compile(r'jpserver-[0-9]*\.json')
     url_fmt = 'http://localhost:{port}/{nb_type}?token={token}'
-    env = "PYTHONUSERBASE='%s'" % sage_userbase
-    sage_cmd = 'clear ; /usr/bin/env %s %s ; exit' % (env, sage_executable)
     terminal_script = """
         set command to "%s"
         tell application "System Events"
@@ -84,15 +82,15 @@ class Launcher:
             do script command in window 1
             end tell
         end if
-    """%sage_cmd
+    """
 
     iterm_script = """
-        set sageCommand to "/bin/bash -c '%s'"
+        set sageCommand to "/bin/bash -c \\"%s\\""
         tell application "iTerm"
             set sageWindow to (create window with default profile command sageCommand)
             select sageWindow
         end tell
-    """%sage_cmd
+    """
 
     find_app_script = """
         set appExists to false
@@ -129,13 +127,20 @@ class Launcher:
         return result.stdout.strip() == 'true' 
 
     def launch_terminal(self, app):
+        env = dict(self.environment)
+        env['PYTHONUSERBASE'] = sage_userbase
+        env_str = " ".join(rf"{key}='{value}'" for key, value in env.items())
         if app == 'Terminal.app':
-            subprocess.run(['osascript', '-'], input=self.terminal_script, text=True,
+            sage_cmd = 'clear ; /usr/bin/env %s %s ; exit' % (env_str, sage_executable)
+            script = self.terminal_script % sage_cmd
+            subprocess.run(['osascript', '-'], input=script, text=True,
                                capture_output=True)
         elif app == 'iTerm.app':
             subprocess.run(['open', '-a', 'iTerm'], capture_output=True)
-            subprocess.run(['osascript', '-'], input=self.iterm_script, text=True,
-                               capture_output=True)
+            sage_cmd = '/usr/bin/env %s %s' % (env_str, sage_executable)
+            script = self.iterm_script % sage_cmd
+            subprocess.run(['osascript', '-'], input=script, text=True,
+                           capture_output=True)
         return True
 
     def launch_notebook(self, notebook_type):
@@ -227,13 +232,13 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
             command=self.browse_notebook_dir, state=tkinter.DISABLED)
         self.notebook_dir.grid(row=1, column=0, padx=8)
         self.browse.grid(row=1, column=1)
-    # Build the interfaces frame
+        # Build the interfaces frame
         self.use_cli.grid(row=0, column=0, sticky='w', pady=5)
         self.terminal_option.grid(row=1, column=0, sticky='w', padx=10, pady=5)
         self.use_jupyter.grid(row=2, column=0, sticky='w', pady=5)
         self.notebook_option.grid(row=3, column=0, sticky='w', padx=10, pady=5)
         notebook_dir_frame.grid(row=4, column=0, sticky='w', pady=5)
-    # Launch button
+        # Launch button
         launch_frame = ttk.Frame(frame)
         self.launch = ttk.Button(launch_frame, text="Launch", command=self.launch_sage)
         self.launch.pack()
@@ -323,7 +328,7 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
         paths = [path for path in user_paths if path] + required_paths
         unique_paths = list(dict.fromkeys(paths))
         environment['PATH'] = ':'.join(unique_paths)
-        os.environ.update(environment)
+        self.environment = environment
             
     def launch_sage(self):
         self.update_environment()
