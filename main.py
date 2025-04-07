@@ -153,6 +153,7 @@ class Launcher:
             'JUPYTER_RUNTIME_DIR': jupyter_runtime_dir,
             'JUPYTER_PATH': sage_jupyter_path,
             'PYTHONUSERBASE': sage_userbase,
+            'SSL_CERT_FILE': certifi.where()
             }
         environ.update(os.environ)
         json_files = [f for f in os.listdir(jupyter_runtime_dir)
