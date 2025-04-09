@@ -35,5 +35,3 @@ However, the application already includes as many optional
 packages as possible.  In addition, the Sage %pip command can
 be used to install PyPI packages in the user's Library directory,
 allowing them to be accessed during a Sage session.
-
-*  .. image:: https://img.shields.io/github/downloads/3-manifolds/Sage_macOS/v2.5.0/total.svg
