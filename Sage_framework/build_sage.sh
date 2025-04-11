@@ -30,11 +30,22 @@ fi
 mv repo/sage ${SAGE_SYMLINK}
 pushd ${SAGE_SYMLINK}
 
-# Make sure that runpath.sh exists, is correct, and is executable.
-# The sage bash script requires this.
-mkdir -p local/var/lib/sage
-echo SAGE_SYMLINK=${SAGE_SYMLINK} > local/var/lib/sage/runpath.sh
-chmod +x local/var/lib/sage/runpath.sh
+# Install micromamba
+MICROMAMBA_VERSION="1.5.10-0"
+if [[ "$(uname -m)" == "arm64" ]]; then
+  osx_arch="osx-arm64"
+else
+  osx_arch="osx-64"
+fi
+MICROMAMBA_URL="https://github.com/mamba-org/micromamba-releases/releases/download/${MICROMAMBA_VERSION}/micromamba-${osx_arch}"
+MICROMAMBA_DIR="${PWD}/micromamba"
+MICROMAMBA_EXE="${MICROMAMBA_DIR}/micromamba"
+if [[ ! -f ${MICROMAMBA_EXE} ]]; then
+  mkdir -p ${MICROMAMBA_DIR}
+  curl -L -o "${MICROMAMBA_EXE}" "${MICROMAMBA_URL}"
+  chmod +x "${MICROMAMBA_EXE}"
+fi
+eval "$(${MICROMAMBA_EXE} shell hook --shell bash)"
 
 # Set environment variables for the build.
 if [ $(uname -m) == "arm64" ]; then
@@ -54,64 +65,124 @@ else
     fi
     export MACOSX_DEPLOYMENT_TARGET="10.12"
 fi
+
+OPTIONAL_PKGS=" \
+isl \
+4ti2 \
+benzene \
+bliss \
+gap_packages \
+latte_int \
+bliss \
+buckygen \
+cbc \
+coxeter3 \
+sagemath_coxeter3 \
+csdp \
+e_antic \
+frobby \
+igraph \
+kenzo \
+libnauty \
+libsemigroups \
+lrslib \
+meataxe \
+sagemath_meataxe \
+mcqd \
+mpfrcx \
+normaliz \
+p_group_cohomology \
+pari_elldata \
+pari_galpol \
+pari_nftables \
+plantri \
+sagemath-bliss \
+sage_numerical_backends_coin \
+pynormaliz \
+pycosat \
+pysingular \
+qepcad \
+sirocco \
+sagemath_sirocco \
+symengine \
+symengine_py \
+tdlib \
+tides "
+
+# Disable some conda packages. This is strictly not necessary
+# as they get overriden by the SPKGS, but good to keep track
+
+# These packages don't have osx-arm64 packages
+DISABLE_CONDA="4ti2 latte_int lrslib pynormaliz pysingular"
+# These depend on sagelib
+DISABLE_CONDA="$DISABLE_CONDA sagemath_sirocco"
+# No spkg-configure.m4
+DISABLE_CONDA="$DISABLE_CONDA e_antic elliptic_curves"
+# lrsnash missing
+DISABLE_CONDA="$DISABLE_CONDA lrslib"
+# spkg-configure.m4 insufficient
+DISABLE_CONDA="$DISABLE_CONDA mathjax threejs"
+# not sure what's going on here
+DISABLE_CONDA="$DISABLE_CONDA pythran symengine"
+
+CONDA_PKGS="autoconf automake libtool pkg-config"
+for pkg_path in ${SAGE_SYMLINK}/build/pkgs/*; do
+  pkg=$(basename $pkg_path)
+  if [[ " ${DISABLE_CONDA} " != *" ${pkg} "* && -f "${pkg_path}/type" && -f "${pkg_path}/distros/conda.txt" ]]; then
+    pkg_type=$(cat ${pkg_path}/type)
+    if [[ "${pkg_type}" == "standard" || "${OPTIONAL_PKGS}" == *" ${pkg} "* ]]; then
+      conda_txt=$(cat ${pkg_path}/distros/conda.txt | sed '/#/d')
+      CONDA_PKGS="${CONDA_PKGS} ${conda_txt}"
+    fi
+  fi
+done
+
+echo ${CONDA_PKGS}
+
+# Use micromamba to install a binary
+micromamba create --yes \
+  --root-prefix "${MICROMAMBA_DIR}" \
+  --prefix "${PWD}/local" \
+  -c conda-forge \
+  ${CONDA_PKGS}
+
+micromamba activate -p "${PWD}/local"
+# some optional packages don't understand arm64-apple-darwin
+unset build_alias
+unset host_alias
+# workaround for https://github.com/conda-forge/cvxopt-feedstock/pull/74
+cvxopt_file="${PWD}/local/lib/python3.12/site-packages/cvxopt-0.0.0-py3.12.egg-info/PKG-INFO"
+if [[ -f ${cvxopt_file} ]]; then
+  sed -i.bak "s/0.0.0/1.3.2/g" ${cvxopt_file}
+  rm ${cvxopt_file}.bak
+fi
+
+# Make sure that runpath.sh exists, is correct, and is executable.
+# The sage bash script requires this.
+mkdir -p local/var/lib/sage
+echo SAGE_SYMLINK=${SAGE_SYMLINK} > local/var/lib/sage/runpath.sh
+chmod +x local/var/lib/sage/runpath.sh
+
 # Run bootstrap and configure.
-CONFIG_OPTIONS="--with-system-python3=no \
+CONFIG_OPTIONS="--with-python=$(which python3) \
+--enable-system-site-packages \
 --disable-notebook \
 --disable-editable \
---enable-isl \
---enable-4ti2 \
---enable-benzene \
---enable-gap_packages \
---enable-latte_int \
---enable-bliss \
---enable-buckygen \
---enable-cbc \
---enable-coxeter3 \
---enable-sagemath_coxeter3 \
---enable-csdp \
---enable-e_antic \
---enable-frobby \
---enable-gp2c \
---enable-igraph \
---enable-kenzo \
---enable-libnauty \
---enable-libsemigroups \
---enable-lrslib \
---enable-meataxe \
---enable-sagemath_meataxe \
---enable-mcqd \
---enable-mpfrcx \
---enable-normaliz \
---enable-p_group_cohomology \
---enable-pari_elldata \
---enable-pari_galpol \
---enable-pari_nftables \
---enable-plantri \
---enable-sagemath-bliss \
---enable-sage_numerical_backends_coin \
---enable-pynormaliz \
---enable-pycosat \
---enable-pysingular \
---enable-qepcad \
---enable-sirocco \
---enable-sagemath_sirocco \
---enable-symengine \
---enable-symengine_py \
---enable-tdlib \
---enable-tides"
+--disable-gp2c \
+"
+
+for pkg in ${OPTIONAL_PKGS}; do
+  CONFIG_OPTIONS="$CONFIG_OPTIONS --enable-${pkg}"
+done
 
 ./bootstrap
 ./configure $CONFIG_OPTIONS > /tmp/configure.out
 
-# Force xz to be built first.  Otherwise it gets built after gmp even
-# though gmp lists xz as a dependency.  This causes gmp and the
-# many packages that depend on it to get rebuilt in every incremental
-# build.  That is very frustrating.
-make xz
-
 # Do the main build with 8 CPUs
 export MAKE="make -j8"
 make build
+
+# rm -rf ${MICROMAMBA_DIR}
 
 # Move the repo back where it came from.
 popd
