@@ -3,7 +3,9 @@ VERSION=`../bin/get_sage_version`
 SAGE_SYMLINK="/var/tmp/sage-$VERSION-current"
 PYTHON_LONG_VERSION=`readlink repo/sage/venv | cut -f2 -d '-' | sed s/python//`
 PYTHON_VERSION=`echo ${PYTHON_LONG_VERSION} | cut -f 1,2 -d'.'`
+PY_VRSN=`echo ${PYTHON_VERSION} | sed 's/\\.//g'`
 echo Building framework for SageMath ${VERSION} using Python ${PYTHON_LONG_VERSION}
+TKINTER_LIB=_tkinter.cpython-${PY_VRSN}-darwin.so
 REPO=${BASE_DIR}/repo/sage
 FILES=${BASE_DIR}/files
 BUILD=${BASE_DIR}/build
@@ -65,14 +67,12 @@ echo SAGE_SYMLINK=/var/tmp/sage-${VERSION}-current > ${VERSION_DIR}/local/var/li
 chmod 755 ${VERSION_DIR}/local/var/lib/sage/runpath.sh
 
 # Copy our modified files into the bundle
-TKINTER=_tkinter.cpython-312-darwin.so
-TKINTER_TARGET=_tkinter.cpython-312-darwin.so
 # Install jupyter kernels, etc.
 rm -rf ${VERSION_DIR}/${VENV_DIR}/share/jupyter/kernels/sagemath
 # See sage/repl/ipython_kernel/install.py
 mkdir -p ${VENV_KERNEL_DIR}/sagemath
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${VENV_KERNEL_DIR}/sagemath/kernel.json
-#cp -p ${FILES}/${TKINTER} ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload/${TKINTER_TARGET}
+#cp -p ${FILES}/${TKINTER} ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload/
 cp -p ${FILES}/tkinter/__init__.py ${VERSION_DIR}/${VENV_PYLIB}/tkinter/__init__.py
 cp ${FILES}/osx.py ${INPUT_HOOKS}
 cp -p ${FILES}/BuildPackages.sh ${VERSION_DIR}/local/lib/gap/bin
@@ -152,8 +152,8 @@ find ${BUILD}/Sage.framework -name '*.pyc' -delete
 # Sign the framework.
 echo "Signing files ..."
 python3 sign_sage.py
-# Overwrite the _tkinter extension with our signed version (????)
-cp -p ${FILES}/${TKINTER} ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload/${TKINTER_TARGET}
+# Overwrite the _tkinter extension with our signed version
+cp -p ${FILES}/${TKINTER_LIB} ${VERSION_DIR}/${VENV_PYLIB}/lib-dynload/
 # Start sage to create a minimal set of bytecode files.
 echo "Starting Sage to create byte code files ..."
 ${VERSION_DIR}/venv/bin/sage -c "print(2+2) ; exit"
