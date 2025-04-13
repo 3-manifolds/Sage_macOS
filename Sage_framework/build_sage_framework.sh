@@ -80,8 +80,8 @@ cp ${FILES}/sage-notebook ${VERSION_DIR}/${VENV_DIR}/bin
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/sage-notebook > ${VERSION_DIR}/${VENV_DIR}/bin/sage-notebook
 cp ${FILES}/sage ${VERSION_DIR}/${VENV_DIR}/bin
 cp ${FILES}/sage-env ${VERSION_DIR}/${VENV_DIR}/bin
-cp ${FILES}/sagedoc.py ${VERSION_DIR}/${VENV_DIR}/lib/python3.12/site-packages/sage/misc/
-cp ${FILES}/ipython_kernel/* ${VERSION_DIR}/${VENV_DIR}/lib/python3.12/site-packages/sage/repl/ipython_kernel
+cp ${FILES}/sagedoc.py ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/misc/
+cp ${FILES}/ipython_kernel/* ${VERSION_DIR}/${VENV_PYLIB}/site-packages/sage/repl/ipython_kernel
 # Fix illegal symlinks that point outside of the bundle
 rm -rf ${VERSION_DIR}/local/share/jupyter/kernels/sagemath/doc
 rm -f ${VERSION_DIR}/local/share/threejs-sage/threejs-sage
