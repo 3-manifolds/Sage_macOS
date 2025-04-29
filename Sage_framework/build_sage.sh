@@ -53,6 +53,7 @@ if [ $(uname -m) == "arm64" ]; then
     export CXXFLAGS="$CFLAGS -stdlib=libc++"
     export LDFLAGS="-Wl,-platform_version,macos,11.0,11.1 -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
     export MACOSX_DEPLOYMENT_TARGET="11.0"
+    export CONDA_OVERRIDE_OSX=11.0
 else
     export GMP_CONFIGURE="--enable-fat"
     export SAGE_FAT_BINARY="yes"
@@ -64,6 +65,7 @@ else
 	export LDFLAGS="-Wl,-platform_version,macos,10.12,11.3"
     fi
     export MACOSX_DEPLOYMENT_TARGET="10.12"
+    export CONDA_OVERRIDE_OSX=10.13
 fi
 
 OPTIONAL_PKGS=" \
