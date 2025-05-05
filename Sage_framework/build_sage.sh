@@ -127,7 +127,7 @@ DISABLE_CONDA="$DISABLE_CONDA mathjax threejs"
 # not sure what's going on here
 DISABLE_CONDA="$DISABLE_CONDA pythran symengine"
 
-CONDA_PKGS="autoconf automake libtool pkg-config"
+CONDA_PKGS="autoconf automake libtool pkg-config python=3.13"
 for pkg_path in ${SAGE_SYMLINK}/build/pkgs/*; do
   pkg=$(basename $pkg_path)
   if [[ " ${DISABLE_CONDA} " != *" ${pkg} "* && -f "${pkg_path}/type" && -f "${pkg_path}/distros/conda.txt" ]]; then
