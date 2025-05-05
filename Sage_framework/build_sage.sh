@@ -126,6 +126,8 @@ DISABLE_CONDA="$DISABLE_CONDA lrslib"
 DISABLE_CONDA="$DISABLE_CONDA mathjax threejs"
 # not sure what's going on here
 DISABLE_CONDA="$DISABLE_CONDA pythran symengine"
+# unnecessary?
+DISABLE_CONDA="$DISABLE_CONDA r"
 
 CONDA_PKGS="autoconf automake libtool pkg-config python=3.13"
 for pkg_path in ${SAGE_SYMLINK}/build/pkgs/*; do
