@@ -1,0 +1,44 @@
+#!/bin/bash
+VERSION=1.3.1
+SRC_ARCHIVE=mpc-${VERSION}.tar.gz
+SRC_DIR=mpc-${VERSION}
+URL=https://ftp.gnu.org/gnu/mpc/mpc-${VERSION}.tar.gz
+HASH=bac1c1fa79f5602df1e29e4684e103ad55714e02
+INSTALL_PREFIX=`pwd`/local
+
+set -e
+cd mpc
+
+if ! [ -e ${SRC_ARCHIVE} ]; then
+    echo "Downloading source archive ${SRC_ARCHIVE}..."
+    curl -L -O ${URL}
+    ACTUAL_HASH=`/usr/bin/shasum ${SRC_ARCHIVE}  | cut -f 1 -d' '`
+    if [[ ${ACTUAL_HASH} != ${HASH} ]]; then
+	echo Invalid hash value for ${SRC_ARCHIVE}
+	exit 1
+    fi
+fi
+
+if ! [ -d ${SRC_DIR} ]; then
+    tar xfz ${SRC_ARCHIVE}
+    pushd ${SRC_DIR}
+    if [ -e ../patches ]; then
+	for patchfile in `ls ../patches`; do
+	    patch -p1 < ../patches/$patchfile
+	done
+    fi
+    popd
+fi
+
+cd ${SRC_DIR}
+if [ -e Makefile ]; then
+    make distclean
+fi
+./configure \
+    --prefix=${INSTALL_PREFIX} \
+    --with-gmp=${INSTALL_PREFIX} \
+    --with-mpfr=${INSTALL_PREFIX} \
+    LDFLAGS="-Wl,-ld_classic" \
+    CFLAGS="-mmacosx-version-min=10.13 -mno-avx2 -mno-bmi2"
+make -j8
+make install

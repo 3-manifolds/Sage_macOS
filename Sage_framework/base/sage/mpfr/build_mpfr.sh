@@ -1,0 +1,43 @@
+#!/bin/bash
+VERSION=4.2.2
+SRC_ARCHIVE=mpfr-${VERSION}.tar.gz
+SRC_DIR=mpfr-${VERSION}
+URL=https://www.mpfr.org/mpfr-current/mpfr-${VERSION}.tar.gz
+HASH=03aa176cf35d1477e2b6725cde74a728b4ef1a9a
+INSTALL_PREFIX=`pwd`/local
+
+set -e
+cd mpfr
+
+if ! [ -e ${SRC_ARCHIVE} ]; then
+    echo "Downloading source archive ${SRC_ARCHIVE}..."
+    curl -L -O ${URL}
+    ACTUAL_HASH=`/usr/bin/shasum ${SRC_ARCHIVE}  | cut -f 1 -d' '`
+    if [[ ${ACTUAL_HASH} != ${HASH} ]]; then
+	echo Invalid hash value for ${SRC_ARCHIVE}
+	exit 1
+    fi
+fi
+
+if ! [ -d ${SRC_DIR} ]; then
+    tar xfz ${SRC_ARCHIVE}
+    pushd ${SRC_DIR}
+    if [ -e ../patches ]; then
+	for patchfile in `ls ../patches`; do
+	    patch -p1 < ../patches/$patchfile
+	done
+    fi
+fi
+
+cd ${SRC_DIR}
+if [ -e Makefile ]; then
+    make distclean
+fi
+export LDFLAGS="-Wl,-ld_classic"
+export CFLAGS="-mmacosx-version-min=10.13 -mno-avx2 -mno-bmi2"
+./configure \
+    --prefix=${INSTALL_PREFIX} \
+    --with-gmp=${INSTALL_PREFIX}    
+make -j8
+make install
+

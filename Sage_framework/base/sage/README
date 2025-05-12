@@ -1,0 +1,5 @@
+When the SageMath X.Y app is built, the sage root is
+/var/tmp/sage-X.Y-current.  When the app runs it ensures that
+/var/tmp/sage-X.Y-current is a symlink to the sage root in the
+app bundle.  Consequently, when building the sage_base the
+sage_base directory should be renamed as /var/tmp/sage-X.Y-current.
