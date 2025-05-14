@@ -53,8 +53,8 @@ jobs:
           echo "[developer]"  > notabot.cfg
           echo "username = $DEV_USERNAME"  >> notabot.cfg
           echo "password = $DEV_PASSWORD"  >> notabot.cfg
-          echo "identity = $DEV_ID\n"      >> notabot.cfg
-          echo "[entitlements]"
+          echo "identity = $DEV_ID"        >> notabot.cfg
+          echo "[entitlements]"            >> notabot.cfg
           echo "plist_file = entitlements.plist"  >> notabot.cfg
 
       - name: Build base
@@ -69,7 +69,7 @@ jobs:
           cd Sage_base/sage
           tar cfz ../../artifacts/intel_base.tgz local
 
-      - name: Save artifacts
+      - name: Create artifacts
         uses: actions/upload-artifact@v4
         with:
           name: intel_base
