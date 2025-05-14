@@ -36,7 +36,8 @@ tar xf ${TK_SRC_ARCHIVE} --directory=Tk --strip-components=1
 pushd Tcl/unix
 ./configure \
     CFLAGS=-mmacosx-version-min=10.13 \
-    --prefix ${INSTALL_PREFIX}
+    --prefix ${INSTALL_PREFIX}\
+    --disable-zipfs
 make -j8 install-binaries install-libraries install-headers
 popd
 

@@ -5,6 +5,7 @@ SRC_DIR=mpfr-${VERSION}
 URL=https://www.mpfr.org/mpfr-current/mpfr-${VERSION}.tar.gz
 HASH=03aa176cf35d1477e2b6725cde74a728b4ef1a9a
 INSTALL_PREFIX=`pwd`/local
+ARCH=`/usr/bin/arch`
 
 set -e
 cd mpfr
@@ -33,11 +34,21 @@ cd ${SRC_DIR}
 if [ -e Makefile ]; then
     make distclean
 fi
-export LDFLAGS="-Wl,-ld_classic"
-export CFLAGS="-mmacosx-version-min=10.13 -mno-avx2 -mno-bmi2"
-./configure \
+export 
+if [ $ARCH == "arm64" ]; then
+   ./configure \
+    CFLAGS="-mmacosx-version-min=11 -I${INSTALL_PREFIX}/include" \
+    LDFLAGS="-Wl,-ld_classic -L${INSTALL_PREFIX}/lib" \
+    --prefix=${INSTALL_PREFIX} \
+    --with-gmp=${INSTALL_PREFIX}
+	    
+else
+    ./configure \
+    CFLAGS="-mmacosx-version-min=10.13 -mno-avx2 -mno-bmi2  -I${INSTALL_PREFIX}/include" \
+    LDFLAGS="-Wl,-ld_classic -L${INSTALL_PREFIX}/lib" \
     --prefix=${INSTALL_PREFIX} \
     --with-gmp=${INSTALL_PREFIX}    
+fi
 make -j8
 make install
 

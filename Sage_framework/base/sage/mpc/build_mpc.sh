@@ -5,6 +5,7 @@ SRC_DIR=mpc-${VERSION}
 URL=https://ftp.gnu.org/gnu/mpc/mpc-${VERSION}.tar.gz
 HASH=bac1c1fa79f5602df1e29e4684e103ad55714e02
 INSTALL_PREFIX=`pwd`/local
+ARCH=`/usr/bin/arch`
 
 set -e
 cd mpc
@@ -34,11 +35,20 @@ cd ${SRC_DIR}
 if [ -e Makefile ]; then
     make distclean
 fi
-./configure \
+if [ $ARCH == "arm64" ]; then
+    ./configure \
+    --prefix=${INSTALL_PREFIX} \
+    --with-gmp=${INSTALL_PREFIX} \
+    --with-mpfr=${INSTALL_PREFIX} \
+    LDFLAGS="-Wl,-ld_classic" \
+    CFLAGS="-mmacosx-version-min=11"
+else
+    ./configure \
     --prefix=${INSTALL_PREFIX} \
     --with-gmp=${INSTALL_PREFIX} \
     --with-mpfr=${INSTALL_PREFIX} \
     LDFLAGS="-Wl,-ld_classic" \
     CFLAGS="-mmacosx-version-min=10.13 -mno-avx2 -mno-bmi2"
+fi
 make -j8
 make install

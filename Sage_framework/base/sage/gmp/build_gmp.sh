@@ -5,6 +5,7 @@ SRC_DIR=gmp-${VERSION}
 URL=https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
 HASH=b4043dd2964ab1a858109da85c44de224384f352
 INSTALL_PREFIX=`pwd`/local
+ARCH=`/usr/bin/arch`
 
 set -e
 cd gmp
@@ -32,13 +33,20 @@ cd ${SRC_DIR}
 if [ -e Makefile ]; then
     make distclean
 fi
-export 
-./configure \
+export
+if [ $ARCH == "arm64" ]; then
+    ./configure \
+    --prefix=${INSTALL_PREFIX} \
+    --enable-cxx \
+    CFLAGS="-mmacosx-version-min=11" \
+    LDFLAGS="-Wl,-ld_classic"
+else
+    ./configure \
     --prefix=${INSTALL_PREFIX} \
     --enable-cxx \
     CFLAGS="-mmacosx-version-min=10.13 -mno-avx2 -mno-bmi2" \
     LDFLAGS="-Wl,-ld_classic"
-
+fi
 make -j8
 make check
 make install
