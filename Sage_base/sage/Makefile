@@ -4,27 +4,27 @@ GCC_LIB := /usr/local/gcc14/lib
 LOCAL_LIB := $(shell realpath local/lib)
 LIB_DYNLOAD := ${LOCAL_LIB}/python3.13/lib-dynload
 
-all: setup openblas gmp mpfr mpc openssl tcltk python
+all: setup gmp mpfr mpc openblas openssl tcltk python
 
 .PHONY: setup openblas gmp mpfr mpc openssl tcltk tarball 
 
 setup:  notabot.cfg entitlements.plist
 	mkdir -p local/lib
 	cp -a ${GCC_LIB}/libgcc_s*.dylib local/lib
-	macher set_id ${INSTALL_DIR}/libgcc_s.1.1.dylib local/lib/libgcc_s.1.1.dylib 
+	install_name_tool -id ${INSTALL_DIR}/libgcc_s.1.1.dylib local/lib/libgcc_s.1.1.dylib 
 	python -m notabot.sign local/lib/libgcc_s.1.1.dylib
 	cp -a ${GCC_LIB}/libgfortran*.dylib local/lib
-	macher set_id ${INSTALL_DIR}/libgfortran.5.dylib local/lib/libgfortran.dylib
+	install_name_tool -id ${INSTALL_DIR}/libgfortran.5.dylib local/lib/libgfortran.dylib
 	python -m notabot.sign local/lib/libgfortran.dylib
 	cp -a ${GCC_LIB}/libquadmath*.dylib local/lib
-	macher set_id ${INSTALL_DIR}/libquadmath.0.dylib local/lib/libquadmath.dylib
+	install_name_tool -id ${INSTALL_DIR}/libquadmath.0.dylib local/lib/libquadmath.dylib
 	python -m notabot.sign local/lib/libquadmath.dylib
 
 local/lib/libopenblas.dylib: 
 	bash openblas/build_openblas.sh
 
 openblas: local/lib/libopenblas.dylib
-	macher set_id ${INSTALL_DIR}/libopenblasp-r0.3.29.dylib $<
+	install_name_tool -id ${INSTALL_DIR}/libopenblasp-r0.3.29.dylib $<
 	macher clear_rpaths $<
 	macher add_rpath @loader_path $<
 	python -m notabot.sign local/lib/libopenblas.dylib
@@ -33,22 +33,22 @@ local/lib/libgmp.dylib:
 	bash gmp/build_gmp.sh
 
 gmp: local/lib/libgmp.dylib
-	macher set_id ${INSTALL_DIR}/libgmp.10.dylib $<
+	install_name_tool -id ${INSTALL_DIR}/libgmp.10.dylib $<
 	python -m notabot.sign local/lib/libgmp.dylib
 
 local/lib/libmpfr.dylib:
 	bash mpfr/build_mpfr.sh
 
-mpfr: local/lib/libmpfr.dylib
-	macher set_id ${INSTALL_DIR}/libmpfr.6.dylib $<
+mpfr: local/lib/libgmp.dylib local/lib/libmpfr.dylib
+	install_name_tool -id ${INSTALL_DIR}/libmpfr.6.dylib $<
 	macher edit_libpath ${INSTALL_DIR}/libgmp.10.dylib @loader_path/libgmp.10.dylib $<
 	python -m notabot.sign local/lib/libmpfr.dylib
 
 local/lib/libmpc.dylib:
 	bash mpc/build_mpc.sh
 
-mpc: local/lib/libmpc.dylib
-	macher set_id ${INSTALL_DIR}/libmpc.dylib $<
+mpc: local/lib/libgmp.dylib local/lib/libmpfr.dylib local/lib/libmpc.dylib
+	install_name_tool -id ${INSTALL_DIR}/libmpc.dylib $<
 	macher edit_libpath ${INSTALL_DIR}/libmpfr.6.dylib @loader_path/libmpfr.6.dylib $<
 	macher edit_libpath ${INSTALL_DIR}/libgmp.10.dylib @loader_path/libgmp.10.dylib $<
 	python -m notabot.sign local/lib/libmpc.dylib

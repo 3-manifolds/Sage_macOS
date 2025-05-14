@@ -1,6 +1,6 @@
-if ! [ -e base/sage ]; then
-    echo "The base distribution is not where we expect to find it."
-    echo "This script must be run from the Sage_framework directory."
+if ! [ -e sage ]; then
+    echo "The sage directory is not where we expect to find it."
+    echo "This script must be run from the Sage_base directory."
     exit 1
 fi
 
@@ -24,12 +24,18 @@ elif [ -e ${SAGE_SYMLINK} ]; then
     echo ${SAGE_SYMLINK} is not a symlink !!!
     exit 1
 fi
-mv base/sage ${SAGE_SYMLINK}
+mv sage ${SAGE_SYMLINK}
 pushd ${SAGE_SYMLINK}
 
 # Do the main build with 8 CPUs using gmake
-gmake -j8
+gmake -j8 gmp
+gmake -j8 mpfr
+gmake -j8 mpc
+gmake -j8 openblas
+gmake -j8 openssl
+gmake -j8 tcltk
+gmake -j8 python
 
 # Move the repo back where it came from.
 popd
-mv /var/tmp/sage-$VERSION-current base/sage
+mv /var/tmp/sage-$VERSION-current sage
