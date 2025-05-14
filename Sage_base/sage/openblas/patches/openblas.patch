@@ -1,0 +1,40 @@
+diff -rc OpenBLAS-0.3.29/c_check new/c_check
+*** OpenBLAS-0.3.29/c_check	Sun Jan 12 08:02:02 2025
+--- new/c_check	Tue May 13 22:36:37 2025
+***************
+*** 436,442 ****
+      case "$flag" in -l*)
+          case "$flag" in
+              *gfortranbegin*|*frtbegin*|*pathfstart*|*numa*|*crt[0-9]*|\
+!                 *gcc*|*user32*|*kernel32*|*advapi32*|*shell32*|*omp*|\
+                  *[0-9]*) ;;
+              *) linker_l="$linker_l $flag" ;;
+          esac
+--- 436,442 ----
+      case "$flag" in -l*)
+          case "$flag" in
+              *gfortranbegin*|*frtbegin*|*pathfstart*|*numa*|*crt[0-9]*|\
+!                 *gcc*|*user32*|*kernel32*|*advapi32*|*shell32*|*omp*|*lto_library*|\
+                  *[0-9]*) ;;
+              *) linker_l="$linker_l $flag" ;;
+          esac
+diff -rc OpenBLAS-0.3.29/utest/Makefile new/utest/Makefile
+*** OpenBLAS-0.3.29/utest/Makefile	Sun Jan 12 08:02:02 2025
+--- new/utest/Makefile	Tue May 13 16:36:40 2025
+***************
+*** 73,78 ****
+--- 73,86 ----
+  
+  $(UTESTEXTBIN): $(OBJS_EXT)
+  	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ ../$(LIBNAME) $(EXTRALIB)
++ else ifeq ($(OSNAME), Darwin)
++ GF_PREFIX := $(shell gfortran -v -E 2>&1 | awk '/--prefix/' | sed 's/.*prefix=//' | cut -f1 -d' ')
++ $(UTESTBIN): $(OBJS)
++ 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ ../$(LIBNAME) $(EXTRALIB) $(FEXTRALIB)
++ 	install_name_tool -add_rpath $(GF_PREFIX)/lib $@
++ $(UTESTEXTBIN): $(OBJS_EXT)
++ 	$(CC) $(CFLAGS) $(LDFLAGS) -L$(GF_PREFIX)/lib -o $@ $^ ../$(LIBNAME) $(EXTRALIB)
++ 	install_name_tool -add_rpath $(GF_PREFIX)/lib $@
+  else
+  $(UTESTBIN): $(OBJS)
+  	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ ../$(LIBNAME) $(EXTRALIB) $(FEXTRALIB)
