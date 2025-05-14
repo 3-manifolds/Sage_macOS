@@ -14,10 +14,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install gmake and cmake
+      - name: Install build tools
         run: |
           brew update
-          brew install make cmake
+          brew install make cmake gfortran
 
       - name: Build base
         run: |
