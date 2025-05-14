@@ -1,0 +1,33 @@
+jobs:
+  build_package:
+    name: Build Sage base
+    runs-on: ${{ matrix.os }}
+    strategy:
+        matrix:
+            os: [macos-13, macos-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install gmake and cmake
+        run: |
+          brew update
+          brew install make cmake
+
+      - name: Build base
+        run: |
+          cd Sage_base
+          bash build_base.sh
+          
+      - name: Make tarball
+        run: |
+          mkdir artifacts
+          cd Sage_base/sage
+          tar cfz ../../artifacts/base.tgz local
+
+      - name: Save artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Sage_base
+          path: ./artifacts
