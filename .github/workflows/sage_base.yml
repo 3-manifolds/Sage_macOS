@@ -1,3 +1,7 @@
+name: macOS Sage base
+
+on: [push]
+
 jobs:
   build_package:
     name: Build Sage base
