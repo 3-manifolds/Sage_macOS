@@ -1,8 +1,8 @@
 #!/bin/bash
 VERSION=6.3.0
-SRC_ARCHIVE=gmp-${VERSION}.tar.xz
 SRC_DIR=gmp-${VERSION}
-URL=https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.gz
+SRC_ARCHIVE=${SRC_DIR}.tar.gz
+URL=https://ftp.gnu.org/gnu/gmp/${SRC_ARCHIVE}
 HASH=a81a30b55ce5cc4346615224442a9125bc6e62a2
 INSTALL_PREFIX=`pwd`/local
 ARCH=`/usr/bin/arch`
