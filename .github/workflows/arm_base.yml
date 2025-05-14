@@ -1,14 +1,12 @@
-name: macOS Sage base
+name: macOS Sage base for Arm
 
 on: [push]
 
 jobs:
   build_package:
-    name: Build Sage base
-    runs-on: ${{ matrix.os }}
-    strategy:
-        matrix:
-            os: [macos-13, macos-latest]
+    name: Build Sage base for Arm
+
+    runs-on: macos-latest
 
     steps:
       - name: Checkout
@@ -28,10 +26,10 @@ jobs:
         run: |
           mkdir artifacts
           cd Sage_base/sage
-          tar cfz ../../artifacts/base.tgz local
+          tar cfz ../../artifacts/arm_base.tgz local
 
       - name: Save artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Sage_base
+          name: arm_base
           path: ./artifacts

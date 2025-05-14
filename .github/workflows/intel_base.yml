@@ -1,0 +1,35 @@
+name: macOS Sage base for Intel
+
+on: [push]
+
+jobs:
+  build_package:
+    name: Build Sage base for Intel
+
+    runs-on: macos-13
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          brew update
+          brew install make cmake gfortran
+
+      - name: Build base
+        run: |
+          cd Sage_base
+          bash build_base.sh
+          
+      - name: Make tarball
+        run: |
+          mkdir artifacts
+          cd Sage_base/sage
+          tar cfz ../../artifacts/intel_base.tgz local
+
+      - name: Save artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: intel_base
+          path: ./artifacts
