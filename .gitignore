@@ -8,9 +8,6 @@ __pycache__
 *.dmg
 *.bak
 *.pkg
-*.tgz
-*.tar.gz
-*.tar.xz
 *.fossil
 backup
 repo

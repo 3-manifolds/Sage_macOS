@@ -2,7 +2,7 @@
 VERSION=6.3.0
 SRC_ARCHIVE=gmp-${VERSION}.tar.xz
 SRC_DIR=gmp-${VERSION}
-URL=https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
+URL=https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz
 HASH=b4043dd2964ab1a858109da85c44de224384f352
 INSTALL_PREFIX=`pwd`/local
 ARCH=`/usr/bin/arch`

@@ -2,7 +2,7 @@
 VERSION=4.2.2
 SRC_ARCHIVE=mpfr-${VERSION}.tar.gz
 SRC_DIR=mpfr-${VERSION}
-URL=https://www.mpfr.org/mpfr-current/mpfr-${VERSION}.tar.gz
+URL=https://ftp.gnu.org/gnu/mpfr-${VERSION}.tar.gz
 HASH=03aa176cf35d1477e2b6725cde74a728b4ef1a9a
 INSTALL_PREFIX=`pwd`/local
 ARCH=`/usr/bin/arch`

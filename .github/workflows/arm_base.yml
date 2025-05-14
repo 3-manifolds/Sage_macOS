@@ -14,8 +14,7 @@ jobs:
 
       - name: Install build tools
         run: |
-          brew update
-          brew install make cmake gfortran
+          brew install make cmake
 
       - name: Build base
         run: |
