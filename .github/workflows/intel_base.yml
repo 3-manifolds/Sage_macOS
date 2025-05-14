@@ -40,9 +40,9 @@ jobs:
           echo -n "$BUILD_CERTIFICATE_BASE64" | base64 --decode --output=$CERTIFICATE_PATH
 
           # create temporary keychain
-          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
-          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
 
           # import certificate to keychain
           security import $CERTIFICATE_PATH -P "$P12_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
@@ -50,10 +50,12 @@ jobs:
 
           # Create notabot.cfg
           cd Sage_base
-          echo -e "[developer]\nidentity = $DEV_ID"  > notabot.cfg
-          echo -e "username = $DEV_USERNAME"  >> notabot.cfg
-          echo -e "password = $DEV_PASSWORD\n"  >> notabot.cfg
-          echo -e "[entitlements]\nplist_file = entitlements.plist"  >> notabot.cfg
+          echo "[developer]"  > notabot.cfg
+          echo "username = $DEV_USERNAME"  >> notabot.cfg
+          echo "password = $DEV_PASSWORD"  >> notabot.cfg
+          echo "identity = $DEV_ID\n"      >> notabot.cfg
+          echo "[entitlements]"
+          echo "plist_file = entitlements.plist"  >> notabot.cfg
 
       - name: Build base
         run: |
