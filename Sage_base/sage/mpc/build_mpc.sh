@@ -3,7 +3,7 @@ VERSION=1.3.1
 SRC_DIR=mpc-${VERSION}
 SRC_ARCHIVE=${SRC_DIR}.tar.gz
 URL=https://ftp.gnu.org/gnu/mpc/${SRC_ARCHIVE}
-HASH=03aa176cf35d1477e2b6725cde74a728b4ef1a9a
+HASH=bac1c1fa79f5602df1e29e4684e103ad55714e02
 INSTALL_PREFIX=`pwd`/local
 ARCH=`/usr/bin/arch`
 
