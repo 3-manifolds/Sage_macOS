@@ -45,7 +45,7 @@ ${IST}/gmp: ${IST}
 
 ${IST}/mpfr: ${IST}/gmp
 	bash mpfr/build_mpfr.sh
-	macher edit_libpath ${INSTALL_DIR}/libgmp.10.dylib @loader_path/libgmp.10.dylib local/lib/libmpfr.6.dylib
+	install_name_tool -change ${INSTALL_DIR}/libgmp.10.dylib @loader_path/libgmp.10.dylib local/lib/libmpfr.6.dylib
 	python -m notabot.sign local/lib/libmpfr.dylib
 	touch ${IST}/mpfr
 
