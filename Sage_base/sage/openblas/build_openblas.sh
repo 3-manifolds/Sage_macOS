@@ -30,7 +30,7 @@ if ! [ -d ${SRC_DIR} ]; then
 fi
 
 pushd ${SRC_DIR}
-echo make clean
+make clean
 if [ $ARCH == "x86_64" ]; then
     gmake CFLAGS=-mmacosx-version-min=10.8 FFLAGS=-mmacosx-version-min=10.8 LDFLAGS='-Wl,-ld_classic' USE_TLS=1 DYNAMIC_ARCH=1 DYNAMIC_LIST='CORE2 PENRYN NEHALEM SANDYBRIDGE HASWELL SKYLAKEX' MAKE_NB_JOBS=8
 else

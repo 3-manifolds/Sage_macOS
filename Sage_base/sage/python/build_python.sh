@@ -36,7 +36,9 @@ fi
 
 cd ${SRC_DIR}
 
-export MACOSX_DEPLOYMENT_TARGET=10.13
+if [ -e Makefile ]; then
+    make distclean
+fi
 
 ./configure \
     CFLAGS="-mmacosx-version-min=11" \

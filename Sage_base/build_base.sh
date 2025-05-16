@@ -29,13 +29,7 @@ mv sage ${SAGE_SYMLINK}
 pushd ${SAGE_SYMLINK}
 
 # Do the main build with 8 CPUs using gmake
-gmake -j8 gmp
-gmake -j8 mpfr
-gmake -j8 mpc
-gmake -j8 openblas
-gmake -j8 openssl
-gmake -j8 tcltk
-gmake -j8 python
+gmake -j8
 
 # Move the repo back where it came from.
 popd

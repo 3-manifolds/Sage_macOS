@@ -50,5 +50,6 @@ else
     LDFLAGS="-Wl,-ld_classic" \
     CFLAGS="-mmacosx-version-min=10.13 -mno-avx2 -mno-bmi2"
 fi
-make -j8
-make install
+echo "Building mpfr"
+gmake -j8
+gmake install

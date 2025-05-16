@@ -47,6 +47,7 @@ else
     CFLAGS="-mmacosx-version-min=10.13 -mno-avx2 -mno-bmi2" \
     LDFLAGS="-Wl,-ld_classic"
 fi
-make -j8
-make check
-make install
+echo "Building gmp ..."
+gmake -j8
+gmake check
+gmake install

@@ -49,6 +49,6 @@ else
     --prefix=${INSTALL_PREFIX} \
     --with-gmp=${INSTALL_PREFIX}    
 fi
-make -j8
-make install
-
+echo "Building mpfr."
+gmake -j8
+gmake install
