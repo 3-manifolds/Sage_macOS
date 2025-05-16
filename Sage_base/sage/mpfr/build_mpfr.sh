@@ -23,16 +23,13 @@ fi
 if ! [ -d ${SRC_DIR} ]; then
     echo unpacking ${SRC_ARCHIVE}
     tar xfz ${SRC_ARCHIVE}
-    if ! [ -e $SRC_DIR ]; then
-	echo "Tar failed?"
-	ls -l
-    fi
     pushd ${SRC_DIR}
     if [ -e ../patches ]; then
 	for patchfile in `ls ../patches`; do
 	    patch -p1 < ../patches/$patchfile
 	done
     fi
+    popd
 fi
 
 cd ${SRC_DIR}
