@@ -49,7 +49,7 @@ jobs:
           security list-keychain -d user -s $KEYCHAIN_PATH
 
           # Create notabot.cfg
-          cd Sage_base
+          cd Sage_base/sage
           echo "[developer]"  > notabot.cfg
           echo "username = $DEV_USERNAME"  >> notabot.cfg
           echo "password = $DEV_PASSWORD"  >> notabot.cfg
