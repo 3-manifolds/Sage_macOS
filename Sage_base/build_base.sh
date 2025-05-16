@@ -25,12 +25,9 @@ elif [ -e ${SAGE_SYMLINK} ]; then
     echo ${SAGE_SYMLINK} is not a symlink !!!
     exit 1
 fi
+
 mv sage ${SAGE_SYMLINK}
 pushd ${SAGE_SYMLINK}
-
-# Do the main build with 8 CPUs using gmake
-gmake -j8
-
-# Move the repo back where it came from.
+gmake
 popd
 mv /var/tmp/sage-$VERSION-current sage
