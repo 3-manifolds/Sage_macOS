@@ -21,7 +21,12 @@ if ! [ -e ${SRC_ARCHIVE} ]; then
 fi
 
 if ! [ -d ${SRC_DIR} ]; then
+    echo unpacking ${SRC_ARCHIVE}
     tar xfz ${SRC_ARCHIVE}
+    if ! [ -e $SRC_DIR ]; then
+	echo "Tar failed?"
+	ls -l
+    fi
     pushd ${SRC_DIR}
     if [ -e ../patches ]; then
 	for patchfile in `ls ../patches`; do
@@ -40,8 +45,7 @@ if [ $ARCH == "arm64" ]; then
     CFLAGS="-mmacosx-version-min=11 -I${INSTALL_PREFIX}/include" \
     LDFLAGS="-Wl,-ld_classic -L${INSTALL_PREFIX}/lib" \
     --prefix=${INSTALL_PREFIX} \
-    --with-gmp=${INSTALL_PREFIX}
-	    
+    --with-gmp=${INSTALL_PREFIX}	    
 else
     ./configure \
     CFLAGS="-mmacosx-version-min=10.13 -mno-avx2 -mno-bmi2  -I${INSTALL_PREFIX}/include" \
