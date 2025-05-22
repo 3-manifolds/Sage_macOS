@@ -121,7 +121,7 @@ class MachFile:
             subprocess.run(['macher', 'add_rpath', rpath, self.path], capture_output=True)
         for dylib in self.dylibs:
             if (dylib.startswith('/usr') or dylib.startswith('/lib') or
-                    dylib.startswith('@rpath')):
+                    dylib.startswith('@')):
                 continue
             new_dylib = os.path.join('@rpath', os.path.basename(dylib))
             subprocess.run(['macher', 'edit_libpath', dylib, new_dylib, self.path])

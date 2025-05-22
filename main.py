@@ -38,8 +38,8 @@ app_support_dir = path_join(os.environ['HOME'], 'Library', app_name)
 settings_path = path_join(app_support_dir, 'Settings.plist')
 jupyter_runtime_dir = os.path.join(app_support_dir, 'Jupyter', 'runtime')
 sage_userbase = app_support_dir
-sage_executable =  path_join(current, 'venv', 'bin', 'sage')
-sage_jupyter_path = path_join(current, 'venv', 'share', 'jupyter')
+sage_executable =  path_join(current, 'local', 'bin', 'sage')
+sage_jupyter_path = path_join(current, 'local', 'share', 'jupyter')
 
 jp_pid_re = re.compile('jpserver-([0-9]*).*')
 
@@ -168,7 +168,7 @@ class Launcher:
                 subprocess.run(['open', url], env=environ)
                 return True
         sage_executable = path_join(frameworks_dir, 'sage.framework', 'Versions',
-                                    'Current', 'venv', 'bin', 'sage')
+                                    'Current', 'local', 'bin', 'sage')
         subprocess.Popen([sage_executable, '-n', notebook_type,
                           '--notebook-dir=%s'%notebook_dir], env=environ)
         return True
@@ -313,7 +313,6 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
     def update_environment(self):
         required_paths = [
         '/var/tmp/sage-10.3-current/local/bin',
-        '/var/tmp/sage-10.3-current/venv/bin',
         '/bin',
         '/usr/bin',
         '/usr/local/bin',

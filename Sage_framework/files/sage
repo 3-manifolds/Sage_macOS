@@ -86,7 +86,7 @@ SELF=$(resolvelinks "${0}")
 
 SAVED_CWD="`pwd`"
 CURDIR=$(resolvelinks "`dirname $0`")
-cd "$CURDIR/../../../../../../"
+cd "$CURDIR/../../"
 VERSION_DIR="`pwd`"
 cd "$SAVED_CWD"
 runpath_sh=$VERSION_DIR/local/var/lib/sage/runpath.sh

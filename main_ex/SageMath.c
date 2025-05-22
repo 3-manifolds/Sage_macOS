@@ -17,8 +17,9 @@ static void debugMessage(char *msg) {
 }
 
 int main(int argc, char **argv, char **envp) {
-    char executablePath[PATH_MAX];
-    char pythonPath[PATH_MAX];
+    char executablePath[PATH_MAX + 1];
+    char contentsPath[PATH_MAX + 1];
+    char pythonPath[PATH_MAX + 1];
     char mainPath[PATH_MAX];
     char *exec_argv[3] = {pythonPath, mainPath, NULL};
     CFBundleRef bundle = CFBundleGetMainBundle();
@@ -31,9 +32,10 @@ int main(int argc, char **argv, char **envp) {
     CFStringGetCString(string, executablePath, PATH_MAX, kCFStringEncodingUTF8);
     CFRelease(string);
     CFRelease(bundle);
-    dirname_r(executablePath, pythonPath);
-    dirname_r(pythonPath, mainPath);
-    strlcat(pythonPath, "/Python", PATH_MAX);
+    dirname_r(executablePath, contentsPath);
+    dirname_r(contentsPath, pythonPath);
+    dirname_r(contentsPath, mainPath);
+    strlcat(pythonPath, "/Frameworks/Sage.framework/Versions/Current/local/bin/python3", PATH_MAX);
     strlcat(mainPath, "/Resources/main.py", PATH_MAX);
     /*
     debugMessage(pythonPath);

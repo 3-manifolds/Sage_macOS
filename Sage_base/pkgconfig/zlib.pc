@@ -1,0 +1,11 @@
+prefix=/var/tmp/sage-10.7-current/local
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${exec_prefix}/lib
+
+Name: zlib
+Description: The macOS system version of zlib
+URL: https://zlib.net/
+Version: 1.2.12
+Cflags: -I${includedir}
+Libs: -L${libdir} -lz

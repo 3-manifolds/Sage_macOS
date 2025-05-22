@@ -11,8 +11,6 @@ file_args = ['codesign', '-v', '-s', DEV_ID, '--timestamp', '--options',
 if len(sys.argv) == 1 or sys.argv[1] != 'framework':
     with open('files_to_sign') as infile:
         for path in infile.readlines():
-            if path.find('_tkinter.cpython') >= 0:
-                continue
             signee = path.strip()
             result = subprocess.run(file_args + [signee], capture_output=True)
             if result.returncode:

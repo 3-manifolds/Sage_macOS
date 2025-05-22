@@ -25,7 +25,7 @@ def shebang_check(path):
     if os.path.islink(path):
         return False
     with open(path, 'rb') as inputfile:
-        first = inputfile.read(2)
+        first = inputfile.read(3)
     return first == b'#!'
 
 def fix_scripts(directory):
@@ -33,7 +33,10 @@ def fix_scripts(directory):
         for filename in filenames:
             fullpath = os.path.join(dirpath, filename)
             if shebang_check(fullpath):
-                ScriptFile(fullpath).fix()
+                try:
+                    ScriptFile(fullpath).fix()
+                except:
+                    print('weird shebang for', filepath)
 
 if __name__ == '__main__':
     try:

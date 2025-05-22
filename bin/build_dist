@@ -8,7 +8,7 @@ SAGE_SCORE_VERSION=$(echo $SAGE_VERSION | sed s/\\\./\\\_/g)
 DIST=SageMath-$SAGE_VERSION
 APP=$DIST/SageMath-$SAGE_DASH_VERSION.app
 PKG=Recommended_$SAGE_SCORE_VERSION.pkg
-PYTHON3=../Frameworks/Sage.framework/Versions/Current/venv/bin/python3
+PYTHON3=../Frameworks/Sage.framework/Versions/Current/local/bin/python3
 mkdir $DIST
 # Render templates and install the package
 cd package
@@ -30,15 +30,15 @@ cp icon/{Sage.icns,sage_icon_1024.png} $APP/Contents/Resources
 cp logos/{sage_logo_512.png,sage_logo_256.png} $APP/Contents/Resources
 cp main.py $APP/Contents/Resources
 # Build Tcl and Tk frameworks
-cd TclTk_frameworks
-make
-cd ..
+##cd TclTk_frameworks
+##make
+##cd ..
 # Build Sage framework
 cd Sage_framework
 bash build_sage_framework.sh
 cd ..
-# Add the frameworks
-mv TclTk_frameworks/Frameworks/{Tcl,Tk}.framework $APP/Contents/Frameworks
+# Add the framework
+#mv TclTk_frameworks/Frameworks/{Tcl,Tk}.framework $APP/Contents/Frameworks
 mv Sage_framework/build/Sage.framework $APP/Contents/Frameworks
 # Add the documentation
 cp -R Sage_framework/repo/documentation $APP/Contents/Resources
