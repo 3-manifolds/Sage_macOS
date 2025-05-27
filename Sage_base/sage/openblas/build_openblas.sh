@@ -31,10 +31,10 @@ fi
 
 pushd ${SRC_DIR}
 make clean
-if [ $ARCH == "x86_64" ]; then
-    gmake CFLAGS=-mmacosx-version-min=10.8 FFLAGS=-mmacosx-version-min=10.8 LDFLAGS='-Wl,-ld_classic' USE_TLS=1 DYNAMIC_ARCH=1 DYNAMIC_LIST='CORE2 PENRYN NEHALEM SANDYBRIDGE HASWELL SKYLAKEX' MAKE_NB_JOBS=8
-else
+if [ $ARCH == "arm64" ]; then
     gmake CFLAGS=-mmacosx-version-min=11 FFLAGS=-mmacosx-version-min=11 LDFLAGS='-L /usr/local/gcc14/lib -Wl,-ld_classic' TARGET=VORTEX USE_TLS=1 MAKE_NB_JOBS=8
+else
+    gmake CFLAGS=-mmacosx-version-min=10.8 FFLAGS=-mmacosx-version-min=10.8 LDFLAGS='-Wl,-ld_classic' USE_TLS=1 DYNAMIC_ARCH=1 DYNAMIC_LIST='CORE2 PENRYN NEHALEM SANDYBRIDGE HASWELL SKYLAKEX' MAKE_NB_JOBS=8
 fi
 gmake PREFIX=${INSTALL_PREFIX} install
 popd

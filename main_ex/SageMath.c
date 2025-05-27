@@ -5,9 +5,13 @@
 #include <CoreFoundation/CoreFoundation.h>
 
 /*
- * We expect the bundle to contain a symlink MacOS/Python to the python
- * executable within the bundle and a python script Resources/main.py
- * which will be run using the python executable.
+ * We expect the bundle to contain:
+ *    + A symlink MacOS/Python to the python
+ *      (This is needed in order for the main menu to show the app name)
+ *    + a symlink MacOS/lib to the local/lib directory in the Sage framewor k
+ *      (This is needed to allow tkinter to find init.tcl)
+ *    + a python script Resources/main.py 
+ *      (This program run the script as the main executable, using MacOS/Python.)  
  */
 
 static void debugMessage(char *msg) {
@@ -35,7 +39,7 @@ int main(int argc, char **argv, char **envp) {
     dirname_r(executablePath, contentsPath);
     dirname_r(contentsPath, pythonPath);
     dirname_r(contentsPath, mainPath);
-    strlcat(pythonPath, "/Frameworks/Sage.framework/Versions/Current/local/bin/python3", PATH_MAX);
+    strlcat(pythonPath, "/MacOS/Python", PATH_MAX);
     strlcat(mainPath, "/Resources/main.py", PATH_MAX);
     /*
     debugMessage(pythonPath);

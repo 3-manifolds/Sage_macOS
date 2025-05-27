@@ -8,7 +8,7 @@ SAGE_SCORE_VERSION=$(echo $SAGE_VERSION | sed s/\\\./\\\_/g)
 DIST=SageMath-$SAGE_VERSION
 APP=$DIST/SageMath-$SAGE_DASH_VERSION.app
 PKG=Recommended_$SAGE_SCORE_VERSION.pkg
-PYTHON3=../Frameworks/Sage.framework/Versions/Current/local/bin/python3
+LOCAL=../Frameworks/Sage.framework/Versions/Current/local/
 mkdir $DIST
 # Render templates and install the package
 cd package
@@ -23,7 +23,8 @@ make
 cd ..
 # Populate MacOS
 mv main_ex/SageMath $APP/Contents/MacOS
-ln -s $PYTHON3 $APP/Contents/MacOS/Python
+ln -s $LOCAL/bin/python $APP/Contents/MacOS/Python
+ln -s $LOCAL/lib $APP/Contents/MacOS/lib
 # Populate Resources
 cp jinja/output/Info.plist $APP/Contents
 cp icon/{Sage.icns,sage_icon_1024.png} $APP/Contents/Resources
@@ -41,6 +42,6 @@ cd ..
 #mv TclTk_frameworks/Frameworks/{Tcl,Tk}.framework $APP/Contents/Frameworks
 mv Sage_framework/build/Sage.framework $APP/Contents/Frameworks
 # Add the documentation
-cp -R Sage_framework/repo/documentation $APP/Contents/Resources
+cp -a Sage_framework/repo/documentation $APP/Contents/Resources
 # Sign the app
 bin/sign_app

@@ -8,11 +8,11 @@
 # The make program is not really designed to handle a situation where recipes
 # produce multiple files, some of which may be prerequisites for other
 # targets.  Here we borrow Sage's scheme for working around this.  Each make
-# target is an empty file in the directory ${IST} which gets created when the
+# target is an empty file in the directory ${STMP} which gets created when the
 # corresponding package is installed.  The existence of the file is meant to
 # indicate that all components of the package are installed and up-to-date as
 # of the timestamp date on the empty file.  If a package X requires any component
-# of another package Y then ${IST}/Y should be a prerequisite for ${IST}/X.
+# of another package Y then ${STMP}/Y should be a prerequisite for ${STMP}/X.
 # This forces the packages to be installed in an appropriate sequence.
 
 # For the macOS SageMath-X.Y app, the build directory should be moved to
@@ -22,68 +22,80 @@
 
 INSTALL_DIR := $(shell pwd)/local/lib
 GCC_LIB := /usr/local/gcc14/lib
-IST := install_stamps
+STMP := install_stamps
+ifeq ($(shell: uname -m), arm64)
+  GFORTRAN_DIR := gfortran_arm64
+else
+  GFORTRAN_DIR := gfortran_x86_64
+endif
 
-all: ${IST} ${IST}/gmp ${IST}/mpfr ${IST}/mpc ${IST}/openblas ${IST}/openssl ${IST}/tcltk ${IST}/python
+all: ${STMP}/setup ${STMP}/gmp ${STMP}/mpfr ${STMP}/mpc ${STMP}/openblas \
+  ${STMP}/openssl ${STMP}/tcltk ${STMP}/python ${STMP}/finish
 
-.PHONY: setup tarball
+.PHONY: tarball
 
-${IST}: notabot.cfg entitlements.plist
+${STMP}/setup: notabot.cfg entitlements.plist
+	mkdir -p ${STMP}
 	mkdir -p local/lib
-	mkdir -p ${IST}
-	cp -a gfortran/* local/lib
+	cp -a ${GFORTRAN_DIR}/* local/lib
+	touch ${STMP}/setup
 
-${IST}/openblas: ${IST}
+${STMP}/finish: ${STMP}/python
+	local/bin/python3 -m pip install setuptools
+	cp pkgconfig/* local/lib/pkgconfig
+	touch ${STMP}/finish
+
+${STMP}/openblas: ${STMP}/setup
 	bash openblas/build_openblas.sh
 	python -m notabot.sign local/lib/libopenblas.dylib
-	touch ${IST}/openblas
+	touch ${STMP}/openblas
 
-${IST}/gmp: ${IST}
+${STMP}/gmp: ${STMP}/setup
 	bash gmp/build_gmp.sh
 	python -m notabot.sign local/lib/libgmp.dylib
-	touch ${IST}/gmp
+	touch ${STMP}/gmp
 
-${IST}/mpfr: ${IST}/gmp
+${STMP}/mpfr: ${STMP}/gmp
 	bash mpfr/build_mpfr.sh
-	install_name_tool -change ${INSTALL_DIR}/libgmp.10.dylib @loader_path/libgmp.10.dylib local/lib/libmpfr.6.dylib
+	macher edit_libpath ${INSTALL_DIR}/libgmp.10.dylib @loader_path/libgmp.10.dylib local/lib/libmpfr.6.dylib
 	python -m notabot.sign local/lib/libmpfr.dylib
-	touch ${IST}/mpfr
+	touch ${STMP}/mpfr
 
-${IST}/mpc: ${IST}/mpfr ${IST}/gmp
+${STMP}/mpc: ${STMP}/mpfr ${STMP}/gmp
 	bash mpc/build_mpc.sh
-	install_name_tool -change ${INSTALL_DIR}/libmpfr.6.dylib @loader_path/libmpfr.6.dylib local/lib//libmpc.dylib 
-	install_name_tool -change ${INSTALL_DIR}/libgmp.10.dylib @loader_path/libgmp.10.dylib local/lib//libmpc.dylib
+	macher edit_libpath ${INSTALL_DIR}/libmpfr.6.dylib @loader_path/libmpfr.6.dylib local/lib//libmpc.dylib 
+	macher edit_libpath ${INSTALL_DIR}/libgmp.10.dylib @loader_path/libgmp.10.dylib local/lib//libmpc.dylib
 	python -m notabot.sign local/lib/libmpc.dylib
-	touch ${IST}/mpc
+	touch ${STMP}/mpc
 
-${IST}/openssl: ${IST}
+${STMP}/openssl: ${STMP}/setup
 	bash openssl/build_openssl.sh
-	install_name_tool -change ${INSTALL_DIR}/libcrypto.3.dylib @loader_path/libcrypto.3.dylib local/lib/libssl.dylib 
+	macher edit_libpath ${INSTALL_DIR}/libcrypto.3.dylib @loader_path/libcrypto.3.dylib local/lib/libssl.dylib 
 	python -m notabot.sign local/lib/libssl.dylib
 	python -m notabot.sign local/lib/libcrypto.dylib
 	python -m notabot.sign local/bin/openssl
 	python -m notabot.sign local/bin/c_rehash
-	touch ${IST}/openssl
+	touch ${STMP}/openssl
 
-${IST}/tcltk: ${IST}
+${STMP}/tcltk: ${STMP}/setup
 	bash tcltk/build_tcltk.sh
 	python -m notabot.sign local/lib/libtcl9.0.dylib
 	python -m notabot.sign local/lib/libtcl9tk9.0.dylib
 	python -m notabot.sign local/bin/tclsh9.0
 	python -m notabot.sign local/bin/wish9.0
-	touch ${IST}/tcltk
+	touch ${STMP}/tcltk
 
-${IST}/python: ${IST}/openssl ${IST}/tcltk
+${STMP}/python: ${STMP}/openssl ${STMP}/tcltk
 	bash python/build_python.sh
-	install_name_tool -change ${INSTALL_DIR}/libcrypto.3.dylib @loader_path/../../libcrypto.3.dylib local/lib/python3.13/lib-dynload/_hashlib.cpython-313-darwin.so
-	install_name_tool -change ${INSTALL_DIR}/libcrypto.3.dylib @loader_path/../../libcrypto.3.dylib local/lib/python3.13/lib-dynload/_ssl.cpython-313-darwin.so
-	install_name_tool -change ${INSTALL_DIR}/libssl.3.dylib @loader_path/../../libssl.3.dylib local/lib/python3.13/lib-dynload/_ssl.cpython-313-darwin.so
-	install_name_tool -change ${INSTALL_DIR}/libtcl9.0.dylib @loader_path/../../libtcl9.0.dylib local/lib/python3.13/lib-dynload/_tkinter.cpython-313-darwin.so
-	install_name_tool -change ${INSTALL_DIR}/libtcl9tk9.0.dylib @loader_path/../../libtcl9tk9.0.dylib local/lib/python3.13/lib-dynload/_tkinter.cpython-313-darwin.so
+	macher edit_libpath ${INSTALL_DIR}/libcrypto.3.dylib @loader_path/../../libcrypto.3.dylib local/lib/python3.13/lib-dynload/_hashlib.cpython-313-darwin.so
+	macher edit_libpath ${INSTALL_DIR}/libcrypto.3.dylib @loader_path/../../libcrypto.3.dylib local/lib/python3.13/lib-dynload/_ssl.cpython-313-darwin.so
+	macher edit_libpath ${INSTALL_DIR}/libssl.3.dylib @loader_path/../../libssl.3.dylib local/lib/python3.13/lib-dynload/_ssl.cpython-313-darwin.so
+	macher edit_libpath ${INSTALL_DIR}/libtcl9.0.dylib @loader_path/../../libtcl9.0.dylib local/lib/python3.13/lib-dynload/_tkinter.cpython-313-darwin.so
+	macher edit_libpath ${INSTALL_DIR}/libtcl9tk9.0.dylib @loader_path/../../libtcl9tk9.0.dylib local/lib/python3.13/lib-dynload/_tkinter.cpython-313-darwin.so
 	find local/lib/python3.13 -name '*.so' -exec python3 -m notabot.sign {} \;
 	find local/lib/python3.13/lib-dynload -name '*.dylib' -exec python3 -m notabot.sign {} \;
 	python -m notabot.sign local/bin/python3.13
-	touch ${IST}/python
+	touch ${STMP}/python
 
 tarball:
 	tar cfz sagebase.tgz local

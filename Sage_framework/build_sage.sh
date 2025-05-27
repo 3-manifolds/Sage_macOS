@@ -103,6 +103,7 @@ CONFIG_OPTIONS="--with-system-python3=no \
 ./bootstrap
 ./configure $CONFIG_OPTIONS > /tmp/configure.out
 
+exit
 # Force xz to be built first.  Otherwise it gets built after gmp even
 # though gmp lists xz as a dependency.  This causes gmp and the
 # many packages that depend on it to get rebuilt in every incremental
