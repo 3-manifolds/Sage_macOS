@@ -312,7 +312,6 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
 
     def update_environment(self):
         required_paths = [
-        '/var/tmp/sage-10.3-current/local/bin',
         '/bin',
         '/usr/bin',
         '/usr/local/bin',
