@@ -19,7 +19,7 @@ pushd src/doc
 export PATH=${SAGE_SYMLINK}/venv/bin:$PATH
 export SAGE_ROOT=${SAGE_SYMLINK}
 export MATHJAX_DIR=mathjax
-make doc-html--all
+make doc-html
 popd
 popd
 mv ${SAGE_SYMLINK} repo/sage
