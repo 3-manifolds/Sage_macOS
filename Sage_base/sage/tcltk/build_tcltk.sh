@@ -17,10 +17,10 @@ if ! [ -e ${TCL_SRC_ARCHIVE} ] ; then
 	exit 1
     fi
 fi
-rm -rf Tcl
-mkdir -p Tcl
-tar xf ${TCL_SRC_ARCHIVE} --directory=Tcl --strip-components=1
-
+if ! [ -e Tcl ]; then
+    mkdir Tcl
+    tar xf ${TCL_SRC_ARCHIVE} --directory=Tcl --strip-components=1
+fi
 if ! [ -e ${TK_SRC_ARCHIVE} ] ; then
     curl -L -O https://prdownloads.sourceforge.net/tcl/${TK_SRC_ARCHIVE}
     ACTUAL_HASH=`/usr/bin/shasum ${TK_SRC_ARCHIVE}  | cut -f 1 -d' '`
@@ -29,9 +29,10 @@ if ! [ -e ${TK_SRC_ARCHIVE} ] ; then
 	exit 1
     fi
 fi
-rm -rf Tk
-mkdir -p Tk
-tar xf ${TK_SRC_ARCHIVE} --directory=Tk --strip-components=1
+if ! [ -e Tk ]; then
+    mkdir Tk
+    tar xf ${TK_SRC_ARCHIVE} --directory=Tk --strip-components=1
+fi
 
 pushd Tcl/unix
 ./configure \

@@ -113,9 +113,9 @@ popd
 echo "Rewriting load paths ..."
 source ../IDs.sh
 mv files_to_sign files_to_sign.bak
-python3 fix_paths.py repo "${VERSION_DIR}"/local/bin >> files_to_sign
-python3 fix_paths.py repo "${VERSION_DIR}"/local/lib >> files_to_sign
-python3 fix_paths.py repo "${VERSION_DIR}"/local/libexec >> files_to_sign
+python3 fix_paths.py repo "${VERSION_DIR}"/local/bin >> files_to_sign 2> /dev/null
+python3 fix_paths.py repo "${VERSION_DIR}"/local/lib >> files_to_sign 2> /dev/null
+python3 fix_paths.py repo "${VERSION_DIR}"/local/libexec >> files_to_sign 2> /dev/null
 python3 fix_scripts.py "${VERSION_DIR}"/local/bin
 
 # Fix the absolute symlinks for the GAP packages
@@ -137,8 +137,9 @@ find ${BUILD}/Sage.framework -name '*.pyc' -delete
 echo "Signing files ..."
 python3 sign_sage.py
 
-echo "Starting Sage to create byte code files ..."
+##echo "Starting Sage to create byte code files ..."
 "${SAGE_SYMLINK}"/local/bin/sage -c "print(2 + 2) ; exit"
-echo "We need to sign the framework again:"
-rm "${SAGE_SYMLINK}"
-python3 sign_sage.py framework
+##echo "We need to sign the framework again:"
+##python3 sign_sage.py framework
+# Remove the symlink
+##rm "${SAGE_SYMLINK}"

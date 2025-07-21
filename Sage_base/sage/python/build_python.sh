@@ -41,8 +41,8 @@ if [ -e Makefile ]; then
 fi
 
 ./configure \
-    CFLAGS="-mmacosx-version-min=11" \
-    MACOSX_DEPLOYMENT_TARGET=11 \
+    CFLAGS="-mmacosx-version-min=10.13" \
+    MACOSX_DEPLOYMENT_TARGET=10.13 \
     TCLTK_CFLAGS="-I${TCLTK_HEADERS}" \
     TCLTK_LIBS="${TCL_LIB} ${TK_LIB}" \
     LDFLAGS=-L${INSTALL_PREFIX}/lib \

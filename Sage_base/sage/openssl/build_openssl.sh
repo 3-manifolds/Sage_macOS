@@ -35,7 +35,8 @@ if [ -e Makefile ]; then
     make distclean
 fi
 
-./config --prefix=${INSTALL_PREFIX} no-asm
+export MACOSX_DEPLOYMENT_TARGET=10.13
+./config --prefix=${INSTALL_PREFIX} CFLAGS="-mmacosx-version-min=10.13" no-asm
 make -j8
 make install_runtime
 make install_programs

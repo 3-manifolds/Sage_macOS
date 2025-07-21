@@ -24,7 +24,9 @@ cd ..
 # Populate MacOS
 mv main_ex/SageMath $APP/Contents/MacOS
 ln -s $LOCAL/bin/python $APP/Contents/MacOS/Python
-ln -s $LOCAL/lib $APP/Contents/MacOS/lib
+# Add a symlink so that tkinter can find init.tcl if the symlink
+# in /var/tmp is missing.
+ln -s Frameworks/Sage.framework/Versions/Current/local/lib $APP/Contents/lib
 # Populate Resources
 cp jinja/output/Info.plist $APP/Contents
 cp icon/{Sage.icns,sage_icon_1024.png} $APP/Contents/Resources
