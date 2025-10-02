@@ -5,7 +5,7 @@ if ! [ -e sage ]; then
 fi
 
 # CI can't check the version without a Sage repo.
-VERSION=10.7
+VERSION=10.8
 SAGE_SYMLINK="/var/tmp/sage-$VERSION-current"
 
 # By default, a sage build cannot be relocated.  Sage_macOS is

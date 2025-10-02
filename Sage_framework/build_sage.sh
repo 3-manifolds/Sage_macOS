@@ -1,3 +1,4 @@
+#!/bin/bash
 if ! [ -e repo/sage ]; then
     echo "The sage distribution is not where we expect to find it."
     echo "This script must be run from the Sage_framework directory."
@@ -36,26 +37,42 @@ mkdir -p local/var/lib/sage
 echo SAGE_SYMLINK=${SAGE_SYMLINK} > local/var/lib/sage/runpath.sh
 chmod +x local/var/lib/sage/runpath.sh
 
+SAGE_INC="`pwd`/local/include"
+SAGE_LIB="`pwd`/local/lib"
+
 # Set environment variables for the build.
+# CPPFLAGS are needed for the autoconf macro to find the absolute path to gmp.h
 if [ $(uname -m) == "arm64" ]; then
-    export CFLAGS="-O2 -mmacosx-version-min=11.0"
-    export CXXFLAGS="$CFLAGS -stdlib=libc++"
-    export LDFLAGS="-Wl,-platform_version,macos,11.0,11.1 -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib"
+    export CFLAGS="-O2 -mmacosx-version-min=11.0 -I$SAGE_INC"
+    export CPPFLAGS="-I$SAGE_INC"
+    export CXXFLAGS="$CFLAGS"
+    #export CXX="/usr/bin/g++ -std=gnu++11 -std=gnu++17 $CFLAGS"
+    export LDFLAGS="-Wl,-platform_version,macos,11.0,11.3  -L$SAGE_LIB"
     export MACOSX_DEPLOYMENT_TARGET="11.0"
 else
     export GMP_CONFIGURE="--enable-fat"
     export SAGE_FAT_BINARY="yes"
-    export CFLAGS="-O2 -mmacosx-version-min=10.12 -mno-avx2 -mno-bmi2"
-    export CXXFLAGS="$CFLAGS -stdlib=libc++"
-    if [ `/usr/bin/ld -ld_classic 2> >(grep -c warning)` != "0" ] ; then
-	export LDFLAGS="-ld_classic -Wl,-platform_version,macos,10.12,11.3"
-    else
-	export LDFLAGS="-Wl,-platform_version,macos,10.12,11.3"
-    fi
-    export MACOSX_DEPLOYMENT_TARGET="10.12"
+    export CFLAGS="-O2 -mmacosx-version-min=10.13 -mno-avx2 -mno-bmi2 -I$SAGE_INC"
+    export CPPFLAGS="-I$SAGE_INC"
+    export CXXFLAGS="$CFLAGS"
+    #export CXX="/usr/bin/g++ -std=gnu++11 -std=gnu++17 $CFLAGS"
+    # if [ `/usr/bin/ld -ld_classic 2> >(grep -c warning)` != "0" ] ; then
+    # 	export LDFLAGS="-ld_classic -Wl,-platform_version,macos,10.13,11.0 -L$SAGE_LIB"
+    # else
+    # 	export LDFLAGS="-Wl,-platform_version,macos,10.13,11.0 -L$SAGE_LIB"
+    # fi
+    export LDFLAGS="-Wl,-platform_version,macos,10.13,10.13 -L$SAGE_LIB"
+    export MACOSX_DEPLOYMENT_TARGET="10.13"
 fi
+export SSL_CERT_FILE=`python3 -c "import ssl; print(ssl.get_default_verify_paths().cafile)"`
+#export PKG_CONFIG_PATH=`pwd`/local/lib/pkgconfig
+       
 # Run bootstrap and configure.
-CONFIG_OPTIONS="--with-system-python3=no \
+CONFIG_OPTIONS=" \
+PKG_CONFIG_PATH=`pwd`/local/lib/pkgconfig \
+--with-sage-venv=no \
+--with-python=`pwd`/local/bin/python3 \
+--with-system-scipy=yes \
 --disable-notebook \
 --disable-editable \
 --enable-isl \
@@ -102,14 +119,6 @@ CONFIG_OPTIONS="--with-system-python3=no \
 
 ./bootstrap
 ./configure $CONFIG_OPTIONS > /tmp/configure.out
-
-exit
-# Force xz to be built first.  Otherwise it gets built after gmp even
-# though gmp lists xz as a dependency.  This causes gmp and the
-# many packages that depend on it to get rebuilt in every incremental
-# build.  That is very frustrating.
-make xz
-
 # Do the main build with 8 CPUs
 export MAKE="make -j8"
 make build

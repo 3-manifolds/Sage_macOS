@@ -384,7 +384,7 @@ fi
 # https://github.com/sagemath/sage/issues/18955.
 
 if [ -e "$SAGE_ROOT/local/bin" ]; then
-    . "$SAGE_ROOT/local/bin/sage-version.sh"
+    SAGE_VERSION=`cat $SAGE_ROOT/Resources/VERSION.txt`
     SAGE_DASH_VERSION=$(echo $SAGE_VERSION | sed s/\\\./\\\-/g)
     PYTHONUSERBASE="$HOME/Library/SageMath-$SAGE_DASH_VERSION"
     export PYTHONUSERBASE

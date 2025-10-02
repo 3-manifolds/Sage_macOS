@@ -69,9 +69,10 @@ mkdir -p ${KERNEL_DIR}/sagemath
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${KERNEL_DIR}/sagemath/kernel.json
 cp ${FILES}/osx.py ${INPUT_HOOKS}
 cp -p ${FILES}/BuildPackages.sh "${VERSION_DIR}"/local/lib/gap/bin
-cp ${FILES}/sage-notebook "${VERSION_DIR}"/local/bin
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/sage-notebook > "${VERSION_DIR}"/local/bin/sage-notebook
+chmod +x "${VERSION_DIR}"/local/bin/sage-notebook
 cp ${FILES}/sage "${VERSION_DIR}"/local/bin
+cp ${FILES}/sage-eval "${VERSION_DIR}"/local/bin
 cp ${FILES}/sage-env "${VERSION_DIR}"/local/bin
 cp ${FILES}/sagedoc.py "${VERSION_DIR}"/${PYLIB}/site-packages/sage/misc/
 cp ${FILES}/ipython_kernel/* "${VERSION_DIR}"/${PYLIB}/site-packages/sage/repl/ipython_kernel
@@ -142,4 +143,4 @@ python3 sign_sage.py
 ##echo "We need to sign the framework again:"
 ##python3 sign_sage.py framework
 # Remove the symlink
-##rm "${SAGE_SYMLINK}"
+rm "${SAGE_SYMLINK}"
