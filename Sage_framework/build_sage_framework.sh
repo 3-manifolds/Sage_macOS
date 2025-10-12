@@ -71,9 +71,12 @@ cp ${FILES}/osx.py ${INPUT_HOOKS}
 cp -p ${FILES}/BuildPackages.sh "${VERSION_DIR}"/local/lib/gap/bin
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/sage-notebook > "${VERSION_DIR}"/local/bin/sage-notebook
 chmod +x "${VERSION_DIR}"/local/bin/sage-notebook
-cp ${FILES}/sage "${VERSION_DIR}"/local/bin
+cp ${FILES}/sage-ipython "${VERSION_DIR}"/local/bin
 cp ${FILES}/sage-eval "${VERSION_DIR}"/local/bin
 cp ${FILES}/sage-env "${VERSION_DIR}"/local/bin
+cp ${FILES}/sage-run "${VERSION_DIR}"/local/bin
+cp ${FILES}/sage-preparse "${VERSION_DIR}"/local/bin
+cp ${FILES}/sage-version.sh "${VERSION_DIR}"/local/bin
 cp ${FILES}/sagedoc.py "${VERSION_DIR}"/${PYLIB}/site-packages/sage/misc/
 cp ${FILES}/ipython_kernel/* "${VERSION_DIR}"/${PYLIB}/site-packages/sage/repl/ipython_kernel
 
