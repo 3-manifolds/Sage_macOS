@@ -1,0 +1,14 @@
+{
+ "argv": [
+     "/var/tmp/sage-__VERSION__-current/local/bin/python3"
+     "-m",
+     "ipykernel_launcher",
+     "-f",
+     "{connection_file}"
+ ],
+ "display_name": "Python 3 (ipykernel)",
+ "language": "python",
+ "metadata": {
+  "debugger": true
+ }
+}

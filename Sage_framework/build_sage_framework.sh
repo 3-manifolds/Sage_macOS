@@ -63,10 +63,12 @@ chmod 755 "${VERSION_DIR}"/local/var/lib/sage/runpath.sh
 
 # Copy our modified files into the bundle
 # Install jupyter kernels, etc.
-rm -rf "${VERSION_DIR}"/local/share/jupyter/kernels/sagemath
+rm -rf "${KERNEL_DIR}"
 # See sage/repl/ipython_kernel/install.py
-mkdir -p ${KERNEL_DIR}/sagemath
-sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${KERNEL_DIR}/sagemath/kernel.json
+mkdir -p ${KERNEL_DIR}/SageMath-${VERSION}
+mkdir -p ${KERNEL_DIR}/python3
+sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${KERNEL_DIR}/SageMath-${VERSION}/kernel.json
+sed "s/__VERSION__/${VERSION}/g" "${FILES}"/python_kernel.json > ${KERNEL_DIR}/python3/kernel.json
 cp ${FILES}/osx.py ${INPUT_HOOKS}
 cp -p ${FILES}/BuildPackages.sh "${VERSION_DIR}"/local/lib/gap/bin
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/sage-notebook > "${VERSION_DIR}"/local/bin/sage-notebook
@@ -84,10 +86,6 @@ cp ${FILES}/ipython_kernel/* "${VERSION_DIR}"/${PYLIB}/site-packages/sage/repl/i
 if ! [ -e "${VERSION_DIR}/venv" ]; then
     ln -s local "${VERSION_DIR}/venv"
 fi
-
-# Update Sage's jupyter kernel directory.
-rm -rf  "${VERSION_DIR}"/local/share/jupyter/kernels
-cp -R ../package/local_share/jupyter/kernels "${VERSION_DIR}"/local/share/jupyter
 
 # # Install current versions of pip packages over the ones built by Sage
 

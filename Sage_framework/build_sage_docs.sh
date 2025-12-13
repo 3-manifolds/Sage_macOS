@@ -14,13 +14,13 @@ pushd ${SAGE_SYMLINK}
 mkdir -p local/var/lib/sage
 echo SAGE_SYMLINK=${SAGE_SYMLINK} > local/var/lib/sage/runpath.sh
 chmod +x local/var/lib/sage/runpath.sh
-make doc-clean doc-uninstall
-pushd src/doc
-export PATH=${SAGE_SYMLINK}/venv/bin:$PATH
-export SAGE_ROOT=${SAGE_SYMLINK}
-export MATHJAX_DIR=mathjax
+#make doc-clean doc-uninstall
+#pushd src/doc
+##export PATH=${SAGE_SYMLINK}/venv/bin:$PATH
+##export SAGE_ROOT=${SAGE_SYMLINK}
+##export MATHJAX_DIR=mathjax
 make doc-html
-popd
+#popd
 popd
 mv ${SAGE_SYMLINK} repo/sage
 # Copy and compress the documentation
@@ -28,7 +28,8 @@ if [ -e repo/documentation ]; then
     rm -rf repo/documentation.old
     mv repo/documentation repo/documentation.old
 fi
-cp -R repo/sage/local/share/doc/sage/html/en repo/documentation
+#cp -R repo/sage/local/share/doc/sage/html/en repo/documentation
+cp -R repo/sage/build/sage-distro/src/doc/html/en repo/documentation
 cp -R repo/sage/local/share/mathjax/mathjax repo/documentation/_static
 sed -i '' '/Documentations in other languages/d' repo/documentation/index.html
 ../bin/compress_site.py repo/documentation

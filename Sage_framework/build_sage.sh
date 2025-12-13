@@ -73,7 +73,6 @@ PKG_CONFIG_PATH=`pwd`/local/lib/pkgconfig \
 --with-sage-venv=no \
 --with-python=`pwd`/local/bin/python3 \
 --with-system-scipy=yes \
---disable-notebook \
 --disable-editable \
 --enable-isl \
 --enable-4ti2 \
@@ -84,7 +83,6 @@ PKG_CONFIG_PATH=`pwd`/local/lib/pkgconfig \
 --enable-buckygen \
 --enable-cbc \
 --enable-coxeter3 \
---enable-sagemath_coxeter3 \
 --enable-csdp \
 --enable-e_antic \
 --enable-frobby \
@@ -95,7 +93,6 @@ PKG_CONFIG_PATH=`pwd`/local/lib/pkgconfig \
 --enable-libsemigroups \
 --enable-lrslib \
 --enable-meataxe \
---enable-sagemath_meataxe \
 --enable-mcqd \
 --enable-mpfrcx \
 --enable-normaliz \
@@ -104,14 +101,12 @@ PKG_CONFIG_PATH=`pwd`/local/lib/pkgconfig \
 --enable-pari_galpol \
 --enable-pari_nftables \
 --enable-plantri \
---enable-sagemath-bliss \
 --enable-sage_numerical_backends_coin \
 --enable-pynormaliz \
 --enable-pycosat \
 --enable-pysingular \
 --enable-qepcad \
 --enable-sirocco \
---enable-sagemath_sirocco \
 --enable-symengine \
 --enable-symengine_py \
 --enable-tdlib \
@@ -119,6 +114,7 @@ PKG_CONFIG_PATH=`pwd`/local/lib/pkgconfig \
 
 ./bootstrap
 ./configure $CONFIG_OPTIONS > /tmp/configure.out
+
 # Do the main build with 8 CPUs
 export MAKE="make -j8"
 make build

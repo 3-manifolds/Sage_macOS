@@ -42,9 +42,11 @@ if [ $ARCH == "arm64" ]; then
     LDFLAGS="-Wl,-ld_classic"
 else
     ./configure \
+    --host=core2-apple-darwin \
     --prefix=${INSTALL_PREFIX} \
     --enable-cxx \
-    CFLAGS="-mmacosx-version-min=10.13 -mno-avx2 -mno-bmi2" \
+    --enable-fat \
+    CFLAGS="-mmacosx-version-min=10.13" \
     LDFLAGS="-Wl,-ld_classic"
 fi
 echo "Building gmp ..."

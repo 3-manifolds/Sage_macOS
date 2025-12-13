@@ -129,6 +129,7 @@ class Launcher:
 
     def launch_terminal(self, app):
         env = dict(self.environment)
+        env['SAGE_ROOT'] = current
         env['PYTHONUSERBASE'] = sage_userbase
         env['SSL_CERT_FILE'] = certifi.where()
         env_str = " ".join(rf"{key}='{value}'" for key, value in env.items())
@@ -150,6 +151,7 @@ class Launcher:
             return False
         notebook_dir = self.notebook_dir.get()
         environ = {
+            'SAGE_ROOT': current,
             'JUPYTER_RUNTIME_DIR': jupyter_runtime_dir,
             'JUPYTER_PATH': sage_jupyter_path,
             'PYTHONUSERBASE': sage_userbase,
@@ -169,8 +171,8 @@ class Launcher:
                 return True
         sage_executable = path_join(frameworks_dir, 'sage.framework', 'Versions',
                                     'Current', 'local', 'bin', 'sage')
-        subprocess.Popen([sage_executable, '-n', notebook_type,
-                          '--notebook-dir=%s'%notebook_dir], env=environ)
+        subprocess.Popen([sage_executable, '-n', notebook_type], env=environ,
+                             cwd=notebook_dir)
         return True
 
 class LaunchWindow(tkinter.Toplevel, Launcher):
