@@ -5,6 +5,6 @@ SAGE_VERSION=`bin/get_sage_version`
 SAGE_DASH_VERSION=$(echo $SAGE_VERSION | sed s/\\\./\\\-/g)
 DIST=SageMath-$SAGE_VERSION
 APP=$DIST/SageMath-$SAGE_DASH_VERSION.app
-OPTIONS="-v --entitlements entitlement.plist --timestamp --options runtime --force"
+OPTIONS="-v --entitlements entitlements.plist --timestamp --options runtime --force"
 codesign -s $DEV_ID $OPTIONS $APP/Contents/MacOS/SageMath
 codesign -s $DEV_ID $OPTIONS $APP

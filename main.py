@@ -38,7 +38,7 @@ app_support_dir = path_join(os.environ['HOME'], 'Library', app_name)
 settings_path = path_join(app_support_dir, 'Settings.plist')
 jupyter_runtime_dir = os.path.join(app_support_dir, 'Jupyter', 'runtime')
 sage_userbase = app_support_dir
-sage_executable =  path_join(current, 'local', 'bin', 'sage')
+sage_executable =  path_join(current, 'venv', 'bin', 'sage')
 sage_jupyter_path = path_join(current, 'local', 'share', 'jupyter')
 
 jp_pid_re = re.compile('jpserver-([0-9]*).*')
