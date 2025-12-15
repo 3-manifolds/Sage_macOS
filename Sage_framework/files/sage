@@ -123,6 +123,9 @@ if [ -L $SAGE_SYMLINK ] || ! [ -e $SAGE_SYMLINK ]; then
     fi
 fi
 
+# Add the local/bin directory to PATH.
+export PATH="$SAGE_SYMLINK/local/bin:$PATH"
+
 # Display the current version of Sage
 # usage: sage_version [-v]
 #   -v    display the full version banner including release date
@@ -895,12 +898,12 @@ fi
 
 if [ "$1" = '-fiximports' -o "$1" = '--fiximports' ]; then
     shift
-    exec sage-python -m sage.misc.replace_dot_all "$@"
+    exec python3 -m sage.misc.replace_dot_all "$@"
 fi
 
 if [ "$1" = '-fixdistributions' -o "$1" = '--fixdistributions' ]; then
     shift
-    exec sage-python -m sage.misc.package_dir "$@"
+    exec python3 -m sage.misc.package_dir "$@"
 fi
 
 if [ "$1" = '-tox' -o "$1" = '--tox' ]; then
@@ -968,7 +971,7 @@ if [ "$1" = "-docbuild" -o "$1" = "--docbuild" ]; then
     # Redirect stdin from /dev/null. This helps with running TeX which
     # tends to ask interactive questions if something goes wrong. These
     # cause the build to hang. If stdin is /dev/null, TeX just aborts.
-    exec sage-python -m sage_docbuild "$@" </dev/null
+    exec python3 -m sage_docbuild "$@" </dev/null
 fi
 
 #####################################################################
@@ -1003,7 +1006,7 @@ if [ "$1" = '-gdb' -o "$1" = "--gdb" ]; then
         gdb --eval-command "run" \
             -args python "${SELF}-ipython" "$@" -i
     else
-        sage_dir=$(sage-python -c 'import os, sage; print(os.path.dirname(sage.__file__))')
+        sage_dir=$(python3 -c 'import os, sage; print(os.path.dirname(sage.__file__))')
         cygdb "$sage_dir" "$SAGE_SRC/sage" \
             -- --eval-command "run" \
             -args python "${SELF}-ipython" "$@" -i

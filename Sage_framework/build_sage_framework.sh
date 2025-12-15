@@ -12,6 +12,7 @@ VERSION_DIR="${BUILD}/Sage.framework/Versions/${VERSION}"
 CURRENT_DIR="${BUILD}/Sage.framework/Versions/Current"
 RESOURCE_DIR="${VERSION_DIR}/Resources"
 PYLIB="local/lib/python${PYTHON_VERSION}"
+SITE_PACKAGES="${VERSION_DIR}/${PYLIB}/site-packages"
 KERNEL_DIR="${VERSION_DIR}/local/share/jupyter/kernels"
 INPUT_HOOKS="${VERSION_DIR}/${PYLIB}/site-packages/IPython/terminal/pt_inputhooks"
 
@@ -73,6 +74,9 @@ cp ${FILES}/osx.py ${INPUT_HOOKS}
 cp -p ${FILES}/BuildPackages.sh "${VERSION_DIR}"/local/lib/gap/bin
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/sage-notebook > "${VERSION_DIR}"/local/bin/sage-notebook
 chmod +x "${VERSION_DIR}"/local/bin/sage-notebook
+# This overwrites the entrypoint for the new sage extension module,
+# which is useless for actually running Sage.
+cp ${FILES}/sage "${VERSION_DIR}"/local/bin
 cp ${FILES}/sage-ipython "${VERSION_DIR}"/local/bin
 cp ${FILES}/sage-eval "${VERSION_DIR}"/local/bin
 cp ${FILES}/sage-env "${VERSION_DIR}"/local/bin
@@ -114,11 +118,18 @@ popd
 # Fix up rpaths and shebangs 
 echo "Rewriting load paths ..."
 source ../IDs.sh
-mv files_to_sign files_to_sign.bak
-python3 fix_paths.py repo "${VERSION_DIR}"/local/bin >> files_to_sign 2> /dev/null
-python3 fix_paths.py repo "${VERSION_DIR}"/local/lib >> files_to_sign 2> /dev/null
-python3 fix_paths.py repo "${VERSION_DIR}"/local/libexec >> files_to_sign 2> /dev/null
+python3 fix_paths.py repo "${VERSION_DIR}"/local/bin 2> /dev/null
+python3 fix_paths.py repo "${VERSION_DIR}"/local/lib 2> /dev/null
+python3 fix_paths.py repo "${VERSION_DIR}"/local/libexec 2> /dev/null
 python3 fix_scripts.py "${VERSION_DIR}"/local/bin
+
+# Some sagelib extension modules have bad rpaths
+ECL_SO="${SITE_PACKAGES}/sage/libs/ecl.cpython-${PY_VRSN}-darwin.so"
+macher clear_rpaths ${ECL_SO}
+macher add_rpath @loader_path/../../../../ ${ECL_SO}
+
+BLISS_SO="${SITE_PACKAGES}/sage/graphs/bliss.cpython-${PY_VRSN}-darwin.so"
+macher add_rpath @loader_path/../../../.. $BLISS_SO
 
 # Fix the absolute symlinks for the GAP packages
 pushd "${VERSION_DIR}"/local/share/gap/pkg > /dev/null
@@ -135,13 +146,13 @@ xattr -rc ${BUILD}/Sage.framework
 
 # Remove byte code
 find ${BUILD}/Sage.framework -name '*.pyc' -delete
+
+echo "Starting Sage to create byte code files ..."
+"${SAGE_SYMLINK}"/local/bin/sage -c "print(2 + 2) ; exit"
+
 # Sign the framework.
 echo "Signing files ..."
-python3 sign_sage.py
+python3 -m notabot.sign ${BUILD}/Sage.framework
 
-##echo "Starting Sage to create byte code files ..."
-"${SAGE_SYMLINK}"/local/bin/sage -c "print(2 + 2) ; exit"
-##echo "We need to sign the framework again:"
-##python3 sign_sage.py framework
 # Remove the symlink
 rm "${SAGE_SYMLINK}"
