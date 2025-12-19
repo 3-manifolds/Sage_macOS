@@ -43,7 +43,7 @@ SAGE_LIB="`pwd`/local/lib"
 # Set environment variables for the build.
 # CPPFLAGS are needed for the autoconf macro to find the absolute path to gmp.h
 if [ $(uname -m) == "arm64" ]; then
-    export CFLAGS="-O2 -mmacosx-version-min=11.0 -I$SAGE_INC"
+    export CFLAGS="-O2 -mmacosx-version-min=12.0 -I$SAGE_INC"
     export CPPFLAGS="-I$SAGE_INC"
     export CXXFLAGS="$CFLAGS"
     #export CXX="/usr/bin/g++ -std=gnu++11 -std=gnu++17 $CFLAGS"
