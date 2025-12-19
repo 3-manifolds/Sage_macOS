@@ -80,9 +80,10 @@ chmod +x "${VERSION_DIR}"/local/bin/sage-notebook
 cp ${FILES}/sage "${VERSION_DIR}"/local/bin
 cp ${FILES}/sagedoc.py "${VERSION_DIR}"/${PYLIB}/site-packages/sage/misc/
 cp ${FILES}/ipython_kernel/* "${VERSION_DIR}"/${PYLIB}/site-packages/sage/repl/ipython_kernel
-cp ${SAGE_SRC}/bin/sage-ipython "${VERSION_DIR}"/local/bin
 cp ${SAGE_SRC}/bin/sage-eval "${VERSION_DIR}"/local/bin
 cp ${SAGE_SRC}/bin/sage-env "${VERSION_DIR}"/local/bin
+cp ${SAGE_SRC}/bin/sage-ipython "${VERSION_DIR}"/local/bin
+cp ${SAGE_SRC}/bin/sage-notebook "${VERSION_DIR}"/local/bin
 cp ${SAGE_SRC}/bin/sage-run "${VERSION_DIR}"/local/bin
 cp ${SAGE_SRC}/bin/sage-preparse "${VERSION_DIR}"/local/bin
 cp ${SAGE_SRC}/bin/sage-version.sh "${VERSION_DIR}"/local/bin
