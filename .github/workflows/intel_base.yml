@@ -6,7 +6,7 @@ jobs:
   build_package:
     name: Build Sage base for Intel
 
-    runs-on: macos-13
+    runs-on: macos-15
 
     steps:
       - name: Checkout

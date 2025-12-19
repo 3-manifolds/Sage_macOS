@@ -15,6 +15,7 @@ PYLIB="local/lib/python${PYTHON_VERSION}"
 SITE_PACKAGES="${VERSION_DIR}/${PYLIB}/site-packages"
 KERNEL_DIR="${VERSION_DIR}/local/share/jupyter/kernels"
 INPUT_HOOKS="${VERSION_DIR}/${PYLIB}/site-packages/IPython/terminal/pt_inputhooks"
+SAGE_SRC="{REPO}/src
 
 echo Building framework for SageMath ${VERSION} using Python ${PYTHON_LONG_VERSION}
 
@@ -77,14 +78,14 @@ chmod +x "${VERSION_DIR}"/local/bin/sage-notebook
 # This overwrites the entrypoint for the new sage extension module,
 # which is useless for actually running Sage.
 cp ${FILES}/sage "${VERSION_DIR}"/local/bin
-cp ${FILES}/sage-ipython "${VERSION_DIR}"/local/bin
-cp ${FILES}/sage-eval "${VERSION_DIR}"/local/bin
-cp ${FILES}/sage-env "${VERSION_DIR}"/local/bin
-cp ${FILES}/sage-run "${VERSION_DIR}"/local/bin
-cp ${FILES}/sage-preparse "${VERSION_DIR}"/local/bin
-cp ${FILES}/sage-version.sh "${VERSION_DIR}"/local/bin
 cp ${FILES}/sagedoc.py "${VERSION_DIR}"/${PYLIB}/site-packages/sage/misc/
 cp ${FILES}/ipython_kernel/* "${VERSION_DIR}"/${PYLIB}/site-packages/sage/repl/ipython_kernel
+cp ${SAGE_SRC}/sage-ipython "${VERSION_DIR}"/local/bin
+cp ${SAGE_SRC}/sage-eval "${VERSION_DIR}"/local/bin
+cp ${SAGE_SRC}/sage-env "${VERSION_DIR}"/local/bin
+cp ${SAGE_SRC}/sage-run "${VERSION_DIR}"/local/bin
+cp ${SAGE_SRC}/sage-preparse "${VERSION_DIR}"/local/bin
+cp ${SAGE_SRC}/sage-version.sh "${VERSION_DIR}"/local/bin
 
 # Make sure that the venv symlink exists -- just in case ...
 if ! [ -e "${VERSION_DIR}/venv" ]; then
