@@ -15,7 +15,7 @@ PYLIB="local/lib/python${PYTHON_VERSION}"
 SITE_PACKAGES="${VERSION_DIR}/${PYLIB}/site-packages"
 KERNEL_DIR="${VERSION_DIR}/local/share/jupyter/kernels"
 INPUT_HOOKS="${VERSION_DIR}/${PYLIB}/site-packages/IPython/terminal/pt_inputhooks"
-SAGE_SRC="{REPO}/src
+SAGE_SRC="${REPO}/src"
 
 echo Building framework for SageMath ${VERSION} using Python ${PYTHON_LONG_VERSION}
 
@@ -80,12 +80,12 @@ chmod +x "${VERSION_DIR}"/local/bin/sage-notebook
 cp ${FILES}/sage "${VERSION_DIR}"/local/bin
 cp ${FILES}/sagedoc.py "${VERSION_DIR}"/${PYLIB}/site-packages/sage/misc/
 cp ${FILES}/ipython_kernel/* "${VERSION_DIR}"/${PYLIB}/site-packages/sage/repl/ipython_kernel
-cp ${SAGE_SRC}/sage-ipython "${VERSION_DIR}"/local/bin
-cp ${SAGE_SRC}/sage-eval "${VERSION_DIR}"/local/bin
-cp ${SAGE_SRC}/sage-env "${VERSION_DIR}"/local/bin
-cp ${SAGE_SRC}/sage-run "${VERSION_DIR}"/local/bin
-cp ${SAGE_SRC}/sage-preparse "${VERSION_DIR}"/local/bin
-cp ${SAGE_SRC}/sage-version.sh "${VERSION_DIR}"/local/bin
+cp ${SAGE_SRC}/bin/sage-ipython "${VERSION_DIR}"/local/bin
+cp ${SAGE_SRC}/bin/sage-eval "${VERSION_DIR}"/local/bin
+cp ${SAGE_SRC}/bin/sage-env "${VERSION_DIR}"/local/bin
+cp ${SAGE_SRC}/bin/sage-run "${VERSION_DIR}"/local/bin
+cp ${SAGE_SRC}/bin/sage-preparse "${VERSION_DIR}"/local/bin
+cp ${SAGE_SRC}/bin/sage-version.sh "${VERSION_DIR}"/local/bin
 
 # Make sure that the venv symlink exists -- just in case ...
 if ! [ -e "${VERSION_DIR}/venv" ]; then
@@ -106,10 +106,11 @@ pushd "${SAGE_SYMLINK}"
 PIP_ARGS="install --upgrade --no-user --force-reinstall --upgrade-strategy eager"
 echo "Reinstalling jupyterlab"
 local/bin/python3 -m pip $PIP_ARGS jupyterlab
-echo "Installing notebook"
+echo "Reinstalling notebook"
 PIP_ARGS="install --upgrade --no-user"
 local/bin/python3 -m pip $PIP_ARGS notebook
-echo "Renstalling pillow"
+local/bin/python3 -m pip $PIP_ARGS ipympl
+echo "Reinstalling pillow"
 local/bin/python3 -m pip $PIP_ARGS pillow
 echo "Installing cocoserver"
 PIP_ARGS="install --upgrade --no-user --no-deps"
