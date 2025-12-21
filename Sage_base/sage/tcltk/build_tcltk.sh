@@ -36,6 +36,7 @@ fi
 
 pushd Tcl/unix
 ./configure \
+    ZIPFS_BUILD=0 \
     CFLAGS=-mmacosx-version-min=10.13 \
     --prefix ${INSTALL_PREFIX}\
     --disable-zipfs
@@ -44,6 +45,7 @@ popd
 
 pushd Tk/unix
 ./configure \
+    ZIPFS_BUILD=0 \
     CFLAGS=-mmacosx-version-min=10.13 \
     MACHER_PROG=/usr/bin/true \
     --enable-aqua \
