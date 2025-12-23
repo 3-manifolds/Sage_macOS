@@ -74,8 +74,8 @@ cp ${FILES}/kernel_logos/* ${KERNEL_DIR}/SageMath-${VERSION}
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/python_kernel.json > ${KERNEL_DIR}/python3/kernel.json
 cp ${FILES}/osx.py ${INPUT_HOOKS}
 cp -p ${FILES}/BuildPackages.sh "${VERSION_DIR}"/local/lib/gap/bin
-sed "s/__VERSION__/${VERSION}/g" "${FILES}"/sage-notebook > "${VERSION_DIR}"/local/bin/sage-notebook
-chmod +x "${VERSION_DIR}"/local/bin/sage-notebook
+#sed "s/__VERSION__/${VERSION}/g" "${FILES}"/sage-notebook > "${VERSION_DIR}"/local/bin/sage-notebook
+#chmod +x "${VERSION_DIR}"/local/bin/sage-notebook
 # This overwrites the entrypoint for the new sage extension module,
 # which is useless for actually running Sage.
 cp ${FILES}/sage "${VERSION_DIR}"/local/bin
