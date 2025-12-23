@@ -70,6 +70,7 @@ rm -rf "${KERNEL_DIR}"
 mkdir -p ${KERNEL_DIR}/SageMath-${VERSION}
 mkdir -p ${KERNEL_DIR}/python3
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/kernel.json > ${KERNEL_DIR}/SageMath-${VERSION}/kernel.json
+cp ${FILES}/kernel_logos/* ${KERNEL_DIR}/SageMath-${VERSION}
 sed "s/__VERSION__/${VERSION}/g" "${FILES}"/python_kernel.json > ${KERNEL_DIR}/python3/kernel.json
 cp ${FILES}/osx.py ${INPUT_HOOKS}
 cp -p ${FILES}/BuildPackages.sh "${VERSION_DIR}"/local/lib/gap/bin
@@ -149,6 +150,9 @@ xattr -rc ${BUILD}/Sage.framework
 
 # Remove byte code
 find ${BUILD}/Sage.framework -name '*.pyc' -delete
+
+# Fix up load paths
+python3 fix_paths.py repo/sage Frameworks/Sage.framework
 
 echo "Starting Sage to create byte code files ..."
 "${SAGE_SYMLINK}"/local/bin/sage -c "print(2 + 2) ; exit"
