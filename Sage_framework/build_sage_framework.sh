@@ -122,15 +122,12 @@ popd
 # Fix up rpaths and shebangs 
 echo "Rewriting load paths ..."
 source ../IDs.sh
-python3 fix_paths.py repo "${VERSION_DIR}"/local/bin 2> /dev/null
-python3 fix_paths.py repo "${VERSION_DIR}"/local/lib 2> /dev/null
-python3 fix_paths.py repo "${VERSION_DIR}"/local/libexec 2> /dev/null
-python3 fix_scripts.py "${VERSION_DIR}"/local/bin
+python3 fix_paths.py repo "${VERSION_DIR}"/local 2> /dev/null
 
 # Some sagelib extension modules have bad rpaths
 ECL_SO="${SITE_PACKAGES}/sage/libs/ecl.cpython-${PY_VRSN}-darwin.so"
 macher clear_rpaths ${ECL_SO}
-macher add_rpath @loader_path/../../../../ ${ECL_SO}
+macher add_rpath @loader_path/../../../.. ${ECL_SO}
 
 BLISS_SO="${SITE_PACKAGES}/sage/graphs/bliss.cpython-${PY_VRSN}-darwin.so"
 macher add_rpath @loader_path/../../../.. $BLISS_SO
@@ -152,7 +149,7 @@ xattr -rc ${BUILD}/Sage.framework
 find ${BUILD}/Sage.framework -name '*.pyc' -delete
 
 # Fix up load paths
-python3 fix_paths.py repo/sage Frameworks/Sage.framework
+python3 fix_paths.py repo Frameworks/Sage.framework
 
 echo "Starting Sage to create byte code files ..."
 "${SAGE_SYMLINK}"/local/bin/sage -c "print(2 + 2) ; exit"

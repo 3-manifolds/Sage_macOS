@@ -41,7 +41,6 @@ ${STMP}/setup: notabot.cfg entitlements.plist
 	touch ${STMP}/setup
 
 ${STMP}/finish: ${STMP}/python
-	local/bin/python3 -m pip install setuptools
 	cp pkgconfig/* local/lib/pkgconfig
 	touch ${STMP}/finish
 
@@ -87,7 +86,7 @@ ${STMP}/tcltk: ${STMP}/setup
 
 ${STMP}/xz: ${STMP}/setup
 	bash xz/build_xz.sh
-	python -m notabot.sign local/lib/liblzma.dylib
+	python3 -m notabot.sign local/lib/liblzma.dylib
 	touch ${STMP}/xz
 
 ${STMP}/python: ${STMP}/xz ${STMP}/openssl ${STMP}/tcltk

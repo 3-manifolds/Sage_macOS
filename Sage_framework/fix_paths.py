@@ -201,7 +201,7 @@ if __name__ == '__main__':
     try:
         repo, directory = sys.argv[1], sys.argv[2]
     except IndexError:
-        print('Usage python3 fixpaths.py repo <directory>')
+        print('Usage python3 fixpaths.py <repo> <directory>')
     with open(os.path.join(repo, 'sage', 'VERSION.txt')) as input_file:
         sage_version = input_file.read().strip()
     LOCAL_LIB = LOCAL_LIB.replace('X.X', sage_version)
