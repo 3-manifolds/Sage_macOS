@@ -28,6 +28,7 @@ fi
 
 mv sage ${SAGE_SYMLINK}
 pushd ${SAGE_SYMLINK}
+export PKG_CONFIG_PATH=${SAGE_SYMLINK}/local/lib/pkgconfig
 gmake
 popd
 mv /var/tmp/sage-$VERSION-current sage

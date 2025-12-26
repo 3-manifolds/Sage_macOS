@@ -33,7 +33,7 @@ cd ${SRC_DIR}
 if [ -e Makefile ]; then
     make distclean
 fi
-export
+
 if [ $ARCH == "arm64" ]; then
     ./configure \
     --prefix=${INSTALL_PREFIX} \

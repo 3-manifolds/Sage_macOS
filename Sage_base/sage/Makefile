@@ -30,7 +30,7 @@ else
 endif
 
 all: ${STMP}/setup ${STMP}/gmp ${STMP}/mpfr ${STMP}/mpc ${STMP}/openblas \
-  ${STMP}/openssl ${STMP}/tcltk ${STMP}/python ${STMP}/finish
+  ${STMP}/xz ${STMP}/openssl ${STMP}/tcltk ${STMP}/python ${STMP}/finish
 
 .PHONY: tarball
 
@@ -85,7 +85,12 @@ ${STMP}/tcltk: ${STMP}/setup
 	python -m notabot.sign local/bin/wish9.0
 	touch ${STMP}/tcltk
 
-${STMP}/python: ${STMP}/openssl ${STMP}/tcltk
+${STMP}/xz: ${STMP}/setup
+	bash xz/build_xz.sh
+	python -m notabot.sign local/lib/liblzma.dylib
+	touch ${STMP}/xz
+
+${STMP}/python: ${STMP}/xz ${STMP}/openssl ${STMP}/tcltk
 	bash python/build_python.sh
 	macher edit_libpath ${INSTALL_DIR}/libcrypto.3.dylib @loader_path/../../libcrypto.3.dylib local/lib/python3.13/lib-dynload/_hashlib.cpython-313-darwin.so
 	macher edit_libpath ${INSTALL_DIR}/libcrypto.3.dylib @loader_path/../../libcrypto.3.dylib local/lib/python3.13/lib-dynload/_ssl.cpython-313-darwin.so
