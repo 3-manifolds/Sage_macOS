@@ -2,7 +2,7 @@
 VERSION=5.8.2
 SRC_DIR=xz-${VERSION}
 SRC_ARCHIVE=${SRC_DIR}.tar.gz
-URL=https://github.com/tukaani-project/xz/releases/download/v$VERSION}/${SRC_ARCHIVE}
+URL=https://github.com/tukaani-project/xz/releases/download/v${VERSION}/${SRC_ARCHIVE}
 HASH=7bf2d887bd0ad401e0a4787a9033d9235036b3bb
 INSTALL_PREFIX=`pwd`/local
 ARCH=`/usr/bin/arch`
