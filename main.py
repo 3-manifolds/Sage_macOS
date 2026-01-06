@@ -158,6 +158,8 @@ class Launcher:
             'SSL_CERT_FILE': certifi.where()
             }
         environ.update(os.environ)
+        self.update_environment()
+        environ.update(self.environment)
         json_files = [f for f in os.listdir(jupyter_runtime_dir)
                            if self.jp_json_re.match(f)]
         if json_files:
@@ -316,6 +318,7 @@ class LaunchWindow(tkinter.Toplevel, Launcher):
         required_paths = [
         '/bin',
         '/usr/bin',
+        '/var/tmp/sage-%s-current/local/bin'%sage_version,
         '/usr/local/bin',
         '/Library/TeX/texbin'
         ]
