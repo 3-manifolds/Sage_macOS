@@ -1,10 +1,9 @@
-VERSION=3.13.7
+VERSION=3.14.3
 TCLTK_VERSION=9.0
 SRC_DIR=Python-${VERSION}
 SRC_ARCHIVE=Python-${VERSION}.tgz
 URL=https://www.python.org/ftp/python/${VERSION}/${SRC_ARCHIVE}
-HASH=138c2e19c835ead10499571e0d4cf189
-#HASH=d50c851d1b9d004327237ddbf6eace10df18f726
+HASH=d7fe130d0501ae047ca318fa92aa642603ab6f217901015a1df6ce650d5470cd
 INSTALL_PREFIX=`pwd`/local
 
 TCLTK_HEADERS=${INSTALL_PREFIX}/include
@@ -17,7 +16,7 @@ cd python
 if ! [ -e ${SRC_ARCHIVE} ]; then
     echo "Downloading source archive ${SRC_ARCHIVE}..."
     curl -L -O ${URL}
-    ACTUAL_HASH=`/usr/bin/md5sum ${SRC_ARCHIVE}  | cut -f 1 -d' '`
+    ACTUAL_HASH=`/usr/bin/shasum -a256 ${SRC_ARCHIVE}  | cut -f 1 -d' '`
     if [[ ${ACTUAL_HASH} != ${HASH} ]]; then
         echo Invalid hash value for ${SRC_ARCHIVE}
         exit 1
@@ -43,7 +42,13 @@ fi
 
 ./configure \
     CFLAGS="-mmacosx-version-min=10.13" \
-    MACOSX_DEPLOYMENT_TARGET=10.13 \
+    MACOSX_DEPLOYMENT_TARGET=10.15 \
+    LIBSQLITE3_CFLAGS="-I${INSTALL_PREFIX}/include" \
+    LIBSQLITE3_LIBS="-L${INSTALL_PREFIX}/lib -lsqlite3" \
+    LIBLZMA_CFLAGS="-I${INSTALL_PREFIX}/include" \
+    LIBLZMA_LIBS="-L${INSTALL_PREFIX}/lib -llzma" \
+    LIBZSTD_CFLAGS="-I${INSTALL_PREFIX}/include" \
+    LIBZSTD_LIBS="-L${INSTALL_PREFIX}/lib -lzstd" \
     TCLTK_CFLAGS="-I${TCLTK_HEADERS}" \
     TCLTK_LIBS="${TCL_LIB} ${TK_LIB}" \
     LDFLAGS=-L${INSTALL_PREFIX}/lib \

@@ -1,5 +1,5 @@
 from jinja2 import Environment, FileSystemLoader
-import os, subprocess, stat, datetime, tempfile
+import os, subprocess, stat, time, datetime, tempfile, requests
 rwxr_xr_x = stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH
 
 class JinjaMaster:
@@ -48,13 +48,44 @@ class JinjaMaster:
         with open('output/%s'%name, 'w') as output:
             output.write(template.render(self.params))
 
+# Our github tags had major number 1 for the 9.X versions of SageMath and major
+# number 2 for the 10.X versions.  The minor numbers were the same the our
+# patch number counted releases of the same Sage version.  Starting with Sage 10.9
+# we will use the same major and minor numbers as Sage and our patch number
+# will count releases of the same version of Sage. Note that Sage does not use
+# a patch number, except for beta and release candidates.
+
 def main(sage_version='10.1', python_version='3.11.1'):
     dashed = sage_version.replace('.', '-')
+    api_url='https://api.github.com/repos/3-manifolds/Sage_macOS/releases/latest'
+    latest_tag = requests.get(api_url).json()['tag_name'][1:] # remove the letter v.
+    tag_major, tag_minor, tag_patch = latest_tag.split('.')
+    tag_major = int(tag_major)
+    tag_minor = int(tag_minor)
+    # We introduce pre-release parts of the patch component of the github tag with a dash.
+    patch_parts = tag_patch.split('-')
+    tag_patch = int(patch_parts[0])
+    pre_release = partch_parts[1] if len(patch_parts) > 1 else ''
+    if int(tag_major) <= 2:
+        tag_major += 8
+    # Sage uses the patch only for pre-releases
+    sage_major, sage_minor = [int(x) for x in sage_version.split('.')[:2]]
+    if sage_major > tag_major:
+        tag_major = sage_major
+        tag_minor = sege_minor
+    elif sage_minor > tag_minor:
+        tag_minor = sage_minor
+        tag_patch = 0
+    elif not pre_release:
+        # major and minor agree, so this is a patch release or a pre-release
+        tag_patch += 1
+    github_tag = f'{tag_major}.{tag_minor}.{tag_patch}'
     params={
         'python_version': python_version,
         'sage_version': sage_version,
         'sage_dash_version': dashed,
-        'sage_long_version': sage_version + '.0',
+        'github_tag': github_tag,
+        'timestamp': str(int(time.time())),
         'year': str(datetime.datetime.now().year),
         }
     JM = JinjaMaster('templates', params)

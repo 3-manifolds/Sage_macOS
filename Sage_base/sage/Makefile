@@ -28,9 +28,13 @@ ifeq ($(shell: uname -m), arm64)
 else
   GFORTRAN_DIR := gfortran_x86_64
 endif
+LIB_PYTHON := local/lib/python3.14
+LIB_DYNLOAD := ${LIB_PYTHON}/lib-dynload
+LIBZSTD_PATH := ${INSTALL_DIR}/libzstd.dylib
 
 all: ${STMP}/setup ${STMP}/gmp ${STMP}/mpfr ${STMP}/mpc ${STMP}/openblas \
-  ${STMP}/xz ${STMP}/openssl ${STMP}/tcltk ${STMP}/python ${STMP}/finish
+  ${STMP}/xz ${STMP}/openssl ${STMP}/sqlite3 ${STMP}/tcltk ${STMP}/zstd \
+  ${STMP}/python ${STMP}/finish
 
 .PHONY: tarball
 
@@ -89,16 +93,35 @@ ${STMP}/xz: ${STMP}/setup
 	python3 -m notabot.sign local/lib/liblzma.dylib
 	touch ${STMP}/xz
 
-${STMP}/python: ${STMP}/xz ${STMP}/openssl ${STMP}/tcltk
+${STMP}/sqlite3: ${STMP}/setup
+	bash sqlite3/build_sqlite3.sh
+	python3 -m notabot.sign local/lib/libsqlite3.dylib
+	touch ${STMP}/sqlite3
+
+# The zstd build sets the install_name of the library to
+# /usr/local/lib/libzstd.1.dylib no matter where the library
+# is being installed.  This breaks the python build since
+# the library cannot be loaded from that path.
+${STMP}/zstd: ${STMP}/setup
+	bash zstd/build_zstd.sh
+	macher set_id ${LIBZSTD_PATH} local/lib/libzstd.dylib
+	python3 -m notabot.sign local/lib/libzstd.dylib
+	touch ${STMP}/zstd
+
+${STMP}/python: ${STMP}/xz ${STMP}/openssl ${STMP}/tcltk ${STMP}/sqlite3 \
+	${STMP}/zstd
 	bash python/build_python.sh
-	macher edit_libpath ${INSTALL_DIR}/libcrypto.3.dylib @loader_path/../../libcrypto.3.dylib local/lib/python3.13/lib-dynload/_hashlib.cpython-313-darwin.so
-	macher edit_libpath ${INSTALL_DIR}/libcrypto.3.dylib @loader_path/../../libcrypto.3.dylib local/lib/python3.13/lib-dynload/_ssl.cpython-313-darwin.so
-	macher edit_libpath ${INSTALL_DIR}/libssl.3.dylib @loader_path/../../libssl.3.dylib local/lib/python3.13/lib-dynload/_ssl.cpython-313-darwin.so
-	macher edit_libpath ${INSTALL_DIR}/libtcl9.0.dylib @loader_path/../../libtcl9.0.dylib local/lib/python3.13/lib-dynload/_tkinter.cpython-313-darwin.so
-	macher edit_libpath ${INSTALL_DIR}/libtcl9tk9.0.dylib @loader_path/../../libtcl9tk9.0.dylib local/lib/python3.13/lib-dynload/_tkinter.cpython-313-darwin.so
-	find local/lib/python3.13 -name '*.so' -exec python3 -m notabot.sign {} \;
-	find local/lib/python3.13/lib-dynload -name '*.dylib' -exec python3 -m notabot.sign {} \;
-	python -m notabot.sign local/bin/python3.13
+	macher edit_libpath ${INSTALL_DIR}/libcrypto.3.dylib @loader_path/../../libcrypto.dylib ${LIB_DYNLOAD}/_hashlib.cpython-*-darwin.so
+	macher edit_libpath ${INSTALL_DIR}/libcrypto.3dylib @loader_path/../../libcrypto.dylib ${LIB_DYNLOAD}/_ssl.cpython-*-darwin.so
+	macher edit_libpath ${INSTALL_DIR}/libssl.3.dylib @loader_path/../../libssl.dylib ${LIB_DYNLOAD}/_ssl.cpython-*-darwin.so
+	macher edit_libpath ${INSTALL_DIR}/libcrypto.3.dylib @loader_path/../../libcrypto.dylib ${LIB_DYNLOAD}/_ssl.cpython-314-darwin.so
+	macher edit_libpath ${INSTALL_DIR}/liblzma.5.dylib @loader_path/../../liblzma.dylib ${LIB_DYNLOAD}/_lzma.cpython-*-darwin.so
+	macher edit_libpath ${INSTALL_DIR}/libtcl9.0.dylib @loader_path/../../libtcl9.0.dylib ${LIB_DYNLOAD}/_tkinter.cpython-*-darwin.so
+	macher edit_libpath ${INSTALL_DIR}/libtcl9tk9.0.dylib @loader_path/../../libtcl9tk9.0.dylib ${LIB_DYNLOAD}/_tkinter.cpython-*-darwin.so
+	macher edit_libpath ${INSTALL_DIR}/libsqlite3.dylib @loader_path/../../libsqlite3.dylib ${LIB_DYNLOAD}/_sqlite3.cpython-*-darwin.so
+	macher edit_libpath ${INSTALL_DIR}/libzstd.dylib @loader_path/../../libzstd.dylib ${LIB_DYNLOAD}/_zstd.cpython-*-darwin.so
+	find ${LIB_PYTHON} -name '*.so' -exec python3 -m notabot.sign {} \;
+	find ${LIB_DYNLOAD} -name '*.dylib' -exec python3 -m notabot.sign {} \;
 	touch ${STMP}/python
 
 tarball:

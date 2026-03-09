@@ -4,7 +4,6 @@ SAGE_SYMLINK="/var/tmp/sage-${VERSION}-current"
 PYTHON_LONG_VERSION=`repo/sage/local/bin/python3 --version | cut -f2 -d '-' | sed 's/Python //'`
 PYTHON_VERSION=`echo ${PYTHON_LONG_VERSION} | cut -f 1,2 -d'.'`
 PY_VRSN=`echo ${PYTHON_VERSION} | sed 's/\\.//g'`
-##TKINTER_LIB=_tkinter.cpython-${PY_VRSN}-darwin.so
 REPO="${BASE_DIR}/repo/sage"
 FILES="${BASE_DIR}/files"
 BUILD="${BASE_DIR}/build"
@@ -151,12 +150,12 @@ find ${BUILD}/Sage.framework -name '*.pyc' -delete
 # Fix up load paths
 python3 fix_paths.py repo Frameworks/Sage.framework
 
-echo "Starting Sage to create byte code files ..."
-"${SAGE_SYMLINK}"/local/bin/sage -c "print(2 + 2) ; exit"
-
 # Sign the framework.
 echo "Signing files ..."
 python3 -m notabot.sign ${BUILD}/Sage.framework
+
+echo "Starting Sage to create byte code files ..."
+"${SAGE_SYMLINK}"/local/bin/sage -c "print(2 + 2) ; exit"
 
 # Remove the symlink
 rm "${SAGE_SYMLINK}"
