@@ -16,9 +16,9 @@ echo SAGE_SYMLINK=${SAGE_SYMLINK} > local/var/lib/sage/runpath.sh
 chmod +x local/var/lib/sage/runpath.sh
 #make doc-clean doc-uninstall
 #pushd src/doc
-##export PATH=${SAGE_SYMLINK}/venv/bin:$PATH
-##export SAGE_ROOT=${SAGE_SYMLINK}
-##export MATHJAX_DIR=mathjax
+export PATH=${SAGE_SYMLINK}/local/bin:$PATH
+export SAGE_ROOT=${SAGE_SYMLINK}
+export MATHJAX_DIR=mathjax
 make doc-html
 #popd
 popd
