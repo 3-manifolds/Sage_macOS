@@ -28,6 +28,10 @@ elif [ -e ${SAGE_SYMLINK} ]; then
     echo ${SAGE_SYMLINK} is not a symlink !!!
     exit 1
 fi
+
+# Enable Sage to find local/bin/python3
+export PATH=${SAGE_SYMLINK}/local/bin:$PATH
+
 mv repo/sage ${SAGE_SYMLINK}
 pushd ${SAGE_SYMLINK}
 

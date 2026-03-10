@@ -12,7 +12,7 @@ cd zstd
 if ! [ -e ${SRC_ARCHIVE} ]; then
     echo "Downloading source archive ${SRC_ARCHIVE}..."
     curl -L -O ${URL}
-    ACTUAL_HASH=`/usr/bin/shasum -a 256${SRC_ARCHIVE}  | cut -f 1 -d' '`
+    ACTUAL_HASH=`/usr/bin/shasum -a 256 ${SRC_ARCHIVE}  | cut -f 1 -d' '`
     if [[ ${ACTUAL_HASH} != ${HASH} ]]; then
 	echo Invalid hash value for ${SRC_ARCHIVE}
 	exit 1
@@ -31,5 +31,5 @@ if [ -e Makefile ]; then
 fi
 
 echo "Building zstd ..."
-make -j8
+make CFLAGS="-mmacosx-version-min=10.13" -j8
 make install PREFIX=${INSTALL_PREFIX}

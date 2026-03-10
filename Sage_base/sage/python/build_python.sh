@@ -42,7 +42,7 @@ fi
 
 ./configure \
     CFLAGS="-mmacosx-version-min=10.13" \
-    MACOSX_DEPLOYMENT_TARGET=10.15 \
+    MACOSX_DEPLOYMENT_TARGET=10.13 \
     LIBSQLITE3_CFLAGS="-I${INSTALL_PREFIX}/include" \
     LIBSQLITE3_LIBS="-L${INSTALL_PREFIX}/lib -lsqlite3" \
     LIBLZMA_CFLAGS="-I${INSTALL_PREFIX}/include" \
