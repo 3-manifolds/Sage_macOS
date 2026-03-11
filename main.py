@@ -28,9 +28,11 @@ info_plist = path_join(contents_dir, 'Info.plist')
 current = path_join(frameworks_dir, 'Sage.framework', 'Versions', 'Current')
 
 def get_version():
+    """Return the sage version as major.minor.
+    """
     with open(info_plist, 'rb') as plist_file:
         info = plistlib.load(plist_file)
-    return info['CFBundleShortVersionString']
+    return '.'.join(info['CFBundleShortVersionString'].split('.')[:2])
 
 sagemath_version = get_version()
 app_name = 'SageMath-%s' % sagemath_version.replace('.', '-')
