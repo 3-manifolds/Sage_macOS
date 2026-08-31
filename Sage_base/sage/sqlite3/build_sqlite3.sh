@@ -1,14 +1,17 @@
 TCL_FRAMEWORK=/Library/Frameworks/Tcl.framework
 TCL_VERSION=`readlink ${TCL_FRAMEWORK}/Versions/Current`
 TCLSH=${TCL_FRAMEWORK}/Versions/Current/tclsh${TCL_VERSION}
-SQLITE_VERSION="3.52.0"
-SRC_DIR="sqlite-src-3520000"
+SQLITE_VERSION="3.53.04"
+SRC_DIR="sqlite-src-3530400"
 SRC_ARCHIVE=${SRC_DIR}.zip
 URL=https://sqlite.org/2026/${SRC_ARCHIVE}
-HASH="652a98ca833ed638809a52bec225a7f37799f71a995778f9ccb68ad03bd1fc11"
-#Reported hash ????
-#HASH="a2f0a14b6530138b0c8c096f4b5e5c9d3c1b8a5effa565c91f983e1235f9e26a"
-SQLITE_CFLAGS="-mmacosx-version-min=10.13"
+HASH="d18fa15aec74d8c17e1463f861095adc01b5ad190256acb4f91d22f0368d232b"
+ARCH=`/usr/bin/arch`
+if [ $ARCH == "arm64" ]; then
+    SQLITE_CFLAGS="-mmacosx-version-min=11.0"
+else
+    SQLITE_CFLAGS="-mmacosx-version-min=11.0"
+fi
 INSTALL_PREFIX=`pwd`/local
 
 if ! [ -e ${SRC_ARCHIVE} ]; then

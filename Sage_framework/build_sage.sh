@@ -34,6 +34,8 @@ export PATH=${SAGE_SYMLINK}/local/bin:$PATH
 
 mv repo/sage ${SAGE_SYMLINK}
 pushd ${SAGE_SYMLINK}
+export SSL_CERT_FILE=$(local/bin/python3 -m certifi)
+export DYLD_FALLBACK_LIBRARY_PATH="${SAGE_SYMLINK}/local/lib"
 
 # Make sure that runpath.sh exists, is correct, and is executable.
 # The sage bash script requires this.
@@ -51,8 +53,8 @@ if [ $(uname -m) == "arm64" ]; then
     export CPPFLAGS="-I$SAGE_INC"
     export CXXFLAGS="$CFLAGS"
     #export CXX="/usr/bin/g++ -std=gnu++11 -std=gnu++17 $CFLAGS"
-    export LDFLAGS="-Wl,-platform_version,macos,11.0,11.3  -L$SAGE_LIB"
-    export MACOSX_DEPLOYMENT_TARGET="11.0"
+    export LDFLAGS="-Wl,-platform_version,macos,12.0.0,12.0.0  -L$SAGE_LIB"
+    export MACOSX_DEPLOYMENT_TARGET="12.0"
 else
     export GMP_CONFIGURE="--enable-fat"
     export SAGE_FAT_BINARY="yes"
@@ -68,12 +70,19 @@ else
     export LDFLAGS="-Wl,-platform_version,macos,10.13,10.13 -L$SAGE_LIB"
     export MACOSX_DEPLOYMENT_TARGET="10.13"
 fi
+
+# Deal with packages like ecm whose configure script builds a test program
+# with no -rpath option, which therefore cannot load a library with
+# DYLD_ID @rpath/XXX, and then returns a misleading error message.
+
+export LDFLAGS="$LDFLAGS -Wl,-rpath,${SAGE_SYMLINK}/local/lib"
 export SSL_CERT_FILE=`python3 -c "import ssl; print(ssl.get_default_verify_paths().cafile)"`
-#export PKG_CONFIG_PATH=`pwd`/local/lib/pkgconfig
+export PKG_CONFIG_PATH=`pwd`/local/lib/pkgconfig
        
 # Run bootstrap and configure.
 CONFIG_OPTIONS=" \
 PKG_CONFIG_PATH=`pwd`/local/lib/pkgconfig \
+--disable-python-in-sage-local-check \
 --with-sage-venv=no \
 --with-python=`pwd`/local/bin/python3 \
 --with-system-scipy=yes \

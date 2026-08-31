@@ -173,8 +173,7 @@ class Launcher:
                 url = self.url_fmt.format(**info)
                 subprocess.run(['open', url], env=environ)
                 return True
-        sage_executable = path_join(frameworks_dir, 'sage.framework', 'Versions',
-                                    'Current', 'local', 'bin', 'sage')
+        sage_executable = path_join(current, 'local', 'bin', 'sage')
         subprocess.Popen([sage_executable, '-n', notebook_type], env=environ,
                              cwd=notebook_dir)
         return True

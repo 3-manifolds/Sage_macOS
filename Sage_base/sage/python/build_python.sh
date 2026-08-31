@@ -1,9 +1,9 @@
-VERSION=3.14.3
+VERSION=3.14.7
 TCLTK_VERSION=9.0
 SRC_DIR=Python-${VERSION}
 SRC_ARCHIVE=Python-${VERSION}.tgz
 URL=https://www.python.org/ftp/python/${VERSION}/${SRC_ARCHIVE}
-HASH=d7fe130d0501ae047ca318fa92aa642603ab6f217901015a1df6ce650d5470cd
+HASH=62859805f6fdf25e2bcbf3fa3217801e1996887ca33e6a2af80674bdfa2dbe07
 INSTALL_PREFIX=`pwd`/local
 
 TCLTK_HEADERS=${INSTALL_PREFIX}/include
@@ -41,8 +41,8 @@ if [ -e Makefile ]; then
 fi
 
 ./configure \
-    CFLAGS="-mmacosx-version-min=10.13" \
-    MACOSX_DEPLOYMENT_TARGET=10.13 \
+    CFLAGS="-mmacosx-version-min=12.0" \
+    MACOSX_DEPLOYMENT_TARGET=12.0 \
     LIBSQLITE3_CFLAGS="-I${INSTALL_PREFIX}/include" \
     LIBSQLITE3_LIBS="-L${INSTALL_PREFIX}/lib -lsqlite3" \
     LIBLZMA_CFLAGS="-I${INSTALL_PREFIX}/include" \
